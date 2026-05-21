@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UC001 - Quản lý CSDL nguồn | Hệ thống Tích hợp Dữ liệu</title>
+  
+  <!-- COPY toàn bộ nội dung từ assets/css/tailwind-config.html vào đây -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          primary: {
+            50: '#EFF6FF', 100: '#DBEAFE', 200: '#BFDBFE',
+            500: '#3B82F6', 600: '#2563EB', 700: '#1D4ED8',
+            800: '#1E40AF', 900: '#1E3A8A'
+          },
+          flag: { red: '#DA251D', yellow: '#FFCD00' },
+          success: { 50: '#F0FDF4', 100: '#DCFCE7', 600: '#16A34A', 700: '#15803D' },
+          warning: { 50: '#FFFBEB', 100: '#FEF3C7', 600: '#F59E0B', 700: '#B45309' },
+          error:   { 50: '#FEF2F2', 100: '#FEE2E2', 600: '#DC2626', 700: '#B91C1C' },
+          info:    { 50: '#F0F9FF', 100: '#E0F2FE', 600: '#0EA5E9', 700: '#0369A1' }
+        },
+        fontFamily: {
+          sans: ['"Be Vietnam Pro"', 'Inter', 'system-ui', 'sans-serif']
+        }
+      }
+    }
+  }
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="stylesheet" href="../../assets/css/custom.css">
+  
+  <!-- JS dùng chung -->
+  <script src="../../assets/js/common.js" defer></script>
+  <script src="../../assets/js/mock-data.js" defer></script>
+  <script src="../../assets/js/components.js" defer></script>
+</head>
+<body class="font-sans bg-gray-50 text-gray-800">
+  <div class="h-1 bg-flag-red w-full fixed top-0 z-50"></div>
+  
+  <div class="flex h-screen overflow-hidden pt-1">
+    <aside id="app-sidebar" class="w-[260px] bg-primary-900 text-white flex-shrink-0 flex flex-col transition-all duration-300 z-30"></aside>
+    
+    <div class="flex-1 flex flex-col overflow-hidden relative">
+      <div id="app-header" class="flex-shrink-0 relative z-20"></div>
+      
+      <nav class="px-6 py-3 bg-white border-b border-gray-200 flex-shrink-0 shadow-sm relative z-10">
+        <ol class="flex items-center gap-2 text-sm">
+          <li><a href="../../index.html" class="text-gray-500 hover:text-primary-600 transition-colors">Trang chủ</a></li>
+          <li class="text-gray-400"><i data-lucide="chevron-right" class="w-4 h-4"></i></li>
+          <li class="text-gray-900 font-semibold">Quản trị nguồn dữ liệu</li>
+          <li class="text-gray-400"><i data-lucide="chevron-right" class="w-4 h-4"></i></li>
+          <li class="text-gray-900 font-semibold">CSDL Nguồn</li>
+        </ol>
+      </nav>
+      
+      <main class="flex-1 overflow-auto bg-slate-50 relative p-6">
+        
+        <!-- Page Header -->
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+            <div>
+                <h1 class="text-2xl font-bold text-gray-900">Quản lý CSDL Nguồn</h1>
+                <p class="text-sm text-gray-500 mt-1">Quản lý danh sách các kết nối cơ sở dữ liệu gốc phục vụ quá trình thu thập, tích hợp.</p>
+            </div>
+            <button class="inline-flex items-center px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-sm font-semibold rounded-lg shadow-sm transition-colors gap-2">
+                <i data-lucide="plus" class="w-4 h-4"></i>
+                Thêm kết nối mới
+            </button>
+        </div>
+
+        <!-- Filter Bar -->
+        <div class="bg-gray-50 p-4 rounded-xl border border-gray-200 shadow-sm mb-6 flex flex-col lg:flex-row gap-4 items-center justify-between">
+            <div class="flex flex-wrap gap-3 w-full lg:w-auto">
+                <div class="relative w-full sm:w-64">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <i data-lucide="search" class="w-4 h-4 text-gray-400"></i>
+                    </div>
+                    <input type="text" class="block w-full pl-9 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-500 sm:text-sm" placeholder="Tìm tên CSDL, host...">
+                </div>
+                <select class="block w-full sm:w-48 pl-3 pr-8 py-2 text-sm border-gray-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500 border bg-white">
+                    <option value="">Loại CSDL (Tất cả)</option>
+                    <option value="oracle">Oracle</option>
+                    <option value="sqlserver">SQL Server</option>
+                    <option value="mysql">MySQL</option>
+                    <option value="postgres">PostgreSQL</option>
+                    <option value="mongodb">MongoDB</option>
+                </select>
+                <select class="block w-full sm:w-48 pl-3 pr-8 py-2 text-sm border-gray-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500 border bg-white">
+                    <option value="">Trạng thái (Tất cả)</option>
+                    <option value="connected">Đã kết nối</option>
+                    <option value="error">Lỗi kết nối</option>
+                    <option value="pending">Chưa cấu hình</option>
+                </select>
+            </div>
+            <button class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none transition-colors gap-2 w-full lg:w-auto justify-center">
+                <i data-lucide="download" class="w-4 h-4 text-gray-500"></i>
+                Xuất Excel
+            </button>
+        </div>
+
+        <!-- Data Table -->
+        <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden mb-4">
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm text-left">
+                    <thead class="text-sm font-medium text-gray-700 bg-gray-100 border-b border-gray-200">
+                        <tr>
+                            <th scope="col" class="px-4 py-3 w-16 text-center whitespace-nowrap">STT</th>
+                            <th scope="col" class="px-4 py-3 min-w-[200px] whitespace-nowrap">Tên cơ sở dữ liệu</th>
+                            <th scope="col" class="px-4 py-3 whitespace-nowrap">Loại CSDL / Version</th>
+                            <th scope="col" class="px-4 py-3 whitespace-nowrap">Máy chủ (Host:Port)</th>
+                            <th scope="col" class="px-4 py-3 min-w-[120px] whitespace-nowrap">Trạng thái</th>
+                            <th scope="col" class="px-4 py-3 hidden xl:table-cell whitespace-nowrap">Cập nhật lúc</th>
+                            <th scope="col" class="px-4 py-3 text-center whitespace-nowrap w-36">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody id="db-list-body" class="divide-y divide-gray-100">
+                        <!-- Sẽ được render bằng JS từ MOCK_DATA -->
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Pagination -->
+            <div class="px-4 py-4 bg-white border-t border-gray-200 flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div class="flex items-center gap-4">
+                    <select class="border border-gray-300 rounded-md text-sm py-1.5 pl-3 pr-8 focus:ring-primary-500 focus:border-primary-500">
+                        <option>10 bản ghi/trang</option>
+                        <option>20 bản ghi/trang</option>
+                        <option>50 bản ghi/trang</option>
+                    </select>
+                    <p class="text-sm text-gray-600">Hiển thị <span class="font-semibold text-gray-900">1-15</span> trong tổng <span class="font-semibold text-gray-900">15</span> bản ghi</p>
+                </div>
+                <nav class="isolate inline-flex -space-x-px rounded-md shadow-sm" aria-label="Pagination">
+                    <button class="relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0 disabled:opacity-50" disabled title="Trang đầu">
+                        <i data-lucide="chevrons-left" class="w-4 h-4"></i>
+                    </button>
+                    <button class="relative inline-flex items-center px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0 disabled:opacity-50" disabled title="Trang trước">
+                        <i data-lucide="chevron-left" class="w-4 h-4"></i>
+                    </button>
+                    <button class="relative z-10 inline-flex items-center bg-primary-600 px-4 py-2 text-sm font-semibold text-white focus:z-20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600">1</button>
+                    <button class="relative inline-flex items-center px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0" title="Trang sau">
+                        <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                    </button>
+                    <button class="relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0" title="Trang cuối">
+                        <i data-lucide="chevrons-right" class="w-4 h-4"></i>
+                    </button>
+                </nav>
+            </div>
+        </div>
+      </main>
+      
+      <div id="app-footer" class="flex-shrink-0"></div>
+    </div>
+  </div>
+  
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      loadLayout('../../').then(() => {
+        renderDbList();
+      });
+    });
+
+    function renderDbList() {
+        const tbody = document.getElementById('db-list-body');
+        if (!tbody || typeof MOCK_DATA === 'undefined') return;
+        
+        let html = '';
+        MOCK_DATA.csdlNguon.forEach((db, index) => {
+            const statusInfo = STATUS_LABELS[db.trangThai] || { label: 'Không xác định', color: 'gray' };
+            const typeInfo = DB_TYPE_COLORS[db.loai] || { bg: '#6B7280', text: 'white', icon: 'database' };
+            
+            // Badge color logic
+            let badgeBg = 'bg-gray-100';
+            let badgeText = 'text-gray-600';
+            let dotColor = 'bg-gray-400';
+            let statusBorder = 'border-gray-200';
+            
+            if (statusInfo.color === 'success') {
+                badgeBg = 'bg-success-50'; badgeText = 'text-success-700'; dotColor = 'bg-success-500'; statusBorder = 'border-success-200';
+            } else if (statusInfo.color === 'error') {
+                badgeBg = 'bg-error-50'; badgeText = 'text-error-700'; dotColor = 'bg-error-500'; statusBorder = 'border-error-200';
+            } else if (statusInfo.color === 'warning') {
+                badgeBg = 'bg-warning-50'; badgeText = 'text-warning-700'; dotColor = 'bg-warning-500'; statusBorder = 'border-warning-200';
+            }
+            
+            // Type badge color logic
+            let typeBg = 'bg-gray-500'; let typeText = 'text-white';
+            if (db.loai === 'Oracle') { typeBg = 'bg-[#F80000]'; }
+            else if (db.loai === 'SQL Server') { typeBg = 'bg-[#CC2927]'; }
+            else if (db.loai === 'MySQL') { typeBg = 'bg-[#00758F]'; }
+            else if (db.loai === 'PostgreSQL') { typeBg = 'bg-[#336791]'; }
+            else if (db.loai === 'MongoDB') { typeBg = 'bg-[#47A248]'; }
+
+            html += `
+            <tr class="hover:bg-gray-50 transition-colors cursor-pointer">
+                <td class="px-4 py-3 text-center text-gray-500">${index + 1}</td>
+                <td class="px-4 py-3 font-bold text-gray-800"><div class="truncate max-w-[250px]" title="${db.ten}">${db.ten}</div></td>
+                <td class="px-4 py-3">
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md ${typeBg} ${typeText} font-medium text-xs whitespace-nowrap">
+                        <i data-lucide="${typeInfo.icon}" class="w-3.5 h-3.5"></i> ${db.loai} ${db.version}
+                    </span>
+                </td>
+                <td class="px-4 py-3 font-mono text-xs text-gray-600">${db.host}:${db.port}</td>
+                <td class="px-4 py-3">
+                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-medium whitespace-nowrap ${badgeBg} ${badgeText} border ${statusBorder}">
+                        <span class="w-1.5 h-1.5 rounded-full ${dotColor}"></span> ${statusInfo.label}
+                    </span>
+                </td>
+                <td class="px-4 py-3 text-gray-500 hidden xl:table-cell whitespace-nowrap">${db.ngayCapNhat || '-'}</td>
+                <td class="px-4 py-3 text-center" onclick="event.stopPropagation()">
+                    <div class="flex items-center justify-center gap-1">
+                        <button class="p-1.5 text-gray-500 hover:text-primary-600 hover:bg-gray-100 rounded-md transition-colors" title="Xem chi tiết"><i data-lucide="eye" class="w-4 h-4"></i></button>
+                        <button class="p-1.5 text-gray-500 hover:text-warning-600 hover:bg-gray-100 rounded-md transition-colors" title="Chỉnh sửa"><i data-lucide="edit-3" class="w-4 h-4"></i></button>
+                        <button class="p-1.5 text-gray-500 hover:text-info-600 hover:bg-gray-100 rounded-md transition-colors" title="Kiểm tra kết nối"><i data-lucide="plug" class="w-4 h-4"></i></button>
+                        <button class="p-1.5 text-error-500 hover:text-error-600 hover:bg-error-50 rounded-md transition-colors" title="Xóa kết nối"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                    </div>
+                </td>
+            </tr>
+            `;
+        });
+        
+        tbody.innerHTML = html;
+        if(window.lucide) lucide.createIcons();
+    }
+  </script>
+</body>
+</html>

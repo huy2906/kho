@@ -1,0 +1,61 @@
+<!-- 
+Hướng dẫn sử dụng:
+Nhúng vào các trang danh sách CSDL nguồn thông qua JS loadPartial() hoặc render từ Backend.
+-->
+<div class="bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow p-5 flex flex-col h-full group relative overflow-hidden">
+    <!-- Dải màu thể hiện trạng thái -->
+    <div class="absolute top-0 left-0 w-1 h-full bg-success-500"></div>
+
+    <div class="flex justify-between items-start mb-4 pl-2">
+        <div class="flex items-center gap-3">
+            <div class="w-12 h-12 rounded-lg bg-red-50 flex items-center justify-center border border-red-100 text-red-600">
+                <i data-lucide="database" class="w-6 h-6"></i>
+            </div>
+            <div>
+                <h3 class="font-bold text-gray-800 text-lg group-hover:text-primary-600 transition-colors">Oracle_HR_DB</h3>
+                <div class="flex items-center gap-2 text-sm text-gray-500 mt-0.5">
+                    <span class="bg-gray-100 px-2 py-0.5 rounded text-xs font-medium text-gray-700">Oracle 19c</span>
+                    <span>•</span>
+                    <span class="font-mono text-xs text-gray-600">192.168.1.100:1521</span>
+                </div>
+            </div>
+        </div>
+        <div class="relative">
+            <button class="p-1 text-gray-400 hover:text-gray-700 rounded hover:bg-gray-100 transition-colors">
+                <i data-lucide="more-vertical" class="w-5 h-5"></i>
+            </button>
+        </div>
+    </div>
+    
+    <div class="mb-5 flex-1 pl-2">
+        <div class="flex flex-col gap-2.5">
+            <div class="flex justify-between text-sm">
+                <span class="text-gray-500 flex items-center gap-1.5"><i data-lucide="user" class="w-3.5 h-3.5"></i> Người tạo:</span>
+                <span class="font-medium text-gray-700">admin_tt</span>
+            </div>
+            <div class="flex justify-between text-sm">
+                <span class="text-gray-500 flex items-center gap-1.5"><i data-lucide="clock" class="w-3.5 h-3.5"></i> Cập nhật:</span>
+                <span class="font-medium text-gray-700">20/05/2026</span>
+            </div>
+            <div class="flex items-center justify-between mt-2">
+                <span class="text-gray-500 text-sm">Trạng thái:</span>
+                <div class="flex items-center gap-1.5">
+                    <span class="relative flex h-2.5 w-2.5">
+                      <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-success-600 opacity-20"></span>
+                      <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-success-600"></span>
+                    </span>
+                    <span class="text-xs font-semibold text-success-700 bg-success-50 px-2 py-1 rounded border border-success-200">Đã kết nối</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="pt-4 border-t border-gray-100 flex items-center justify-between gap-3 pl-2">
+        <button class="flex-1 py-2 px-3 bg-white border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors flex items-center justify-center gap-1.5">
+            <i data-lucide="settings-2" class="w-4 h-4 text-gray-500"></i> Cấu hình
+        </button>
+        <button class="flex-1 py-2 px-3 bg-primary-50 border border-primary-200 rounded-md text-sm font-medium text-primary-700 hover:bg-primary-100 transition-colors flex items-center justify-center gap-1.5">
+            <i data-lucide="plug" class="w-4 h-4"></i> Test kết nối
+        </button>
+    </div>
+</div>

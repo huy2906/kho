@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UC00X - [Tên UC] | Hệ thống Tích hợp Dữ liệu</title>
+  
+  <!-- COPY toàn bộ nội dung từ assets/css/tailwind-config.html vào đây -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          primary: {
+            50: '#EFF6FF', 100: '#DBEAFE', 200: '#BFDBFE',
+            500: '#3B82F6', 600: '#2563EB', 700: '#1D4ED8',
+            800: '#1E40AF', 900: '#1E3A8A'
+          },
+          flag: { red: '#DA251D', yellow: '#FFCD00' },
+          success: { 50: '#F0FDF4', 100: '#DCFCE7', 600: '#16A34A', 700: '#15803D' },
+          warning: { 50: '#FFFBEB', 100: '#FEF3C7', 600: '#F59E0B', 700: '#B45309' },
+          error:   { 50: '#FEF2F2', 100: '#FEE2E2', 600: '#DC2626', 700: '#B91C1C' },
+          info:    { 50: '#F0F9FF', 100: '#E0F2FE', 600: '#0EA5E9', 700: '#0369A1' }
+        },
+        fontFamily: {
+          sans: ['"Be Vietnam Pro"', 'Inter', 'system-ui', 'sans-serif']
+        }
+      }
+    }
+  }
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="stylesheet" href="../../assets/css/custom.css">
+  
+  <!-- JS dùng chung -->
+  <script src="../../assets/js/common.js" defer></script>
+  <script src="../../assets/js/mock-data.js" defer></script>
+  <script src="../../assets/js/components.js" defer></script>
+</head>
+<body class="font-sans bg-gray-50 text-gray-800">
+  <!-- Dải đỏ -->
+  <div class="h-1 bg-flag-red w-full fixed top-0 z-50"></div>
+  
+  <!-- Layout -->
+  <div class="flex h-screen overflow-hidden pt-1">
+    <!-- Sidebar -->
+    <aside id="app-sidebar" class="w-[260px] bg-primary-900 text-white flex-shrink-0 flex flex-col transition-all duration-300 z-30"></aside>
+    
+    <!-- Main content wrapper -->
+    <div class="flex-1 flex flex-col overflow-hidden relative">
+      <!-- Header -->
+      <div id="app-header" class="flex-shrink-0 relative z-20"></div>
+      
+      <!-- Breadcrumb -->
+      <nav class="px-6 py-3 bg-white border-b border-gray-200 flex-shrink-0 shadow-sm relative z-10">
+        <ol class="flex items-center gap-2 text-sm">
+          <li><a href="../../index.html" class="text-gray-500 hover:text-primary-600 transition-colors">Trang chủ</a></li>
+          <li class="text-gray-400"><i data-lucide="chevron-right" class="w-4 h-4"></i></li>
+          <li class="text-gray-900 font-semibold">[Tên UC]</li>
+        </ol>
+      </nav>
+      
+      <!-- Page content -->
+      <main class="flex-1 overflow-auto bg-slate-50 relative p-6">
+        <!-- TODO: Nội dung UC ở đây -->
+        <div class="bg-white rounded-xl border border-dashed border-gray-300 p-12 text-center text-gray-500 flex flex-col items-center justify-center min-h-[400px]">
+            <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                <i data-lucide="layout-template" class="w-8 h-8 text-gray-400"></i>
+            </div>
+            <h2 class="text-lg font-bold text-gray-700 mb-2">Khu vực thiết kế nội dung Use Case</h2>
+            <p class="text-sm">Hãy xóa khối div này và xây dựng giao diện của bạn tại thẻ &lt;main&gt;.</p>
+        </div>
+      </main>
+      
+      <!-- Footer -->
+      <div id="app-footer" class="flex-shrink-0"></div>
+    </div>
+  </div>
+  
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      loadLayout('../../');
+    });
+  </script>
+</body>
+</html>

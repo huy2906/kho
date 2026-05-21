@@ -1,0 +1,74 @@
+<div class="bg-white border border-gray-200 rounded-lg p-4 font-mono text-sm max-h-[500px] overflow-y-auto custom-scrollbar shadow-sm">
+    <ul class="space-y-1">
+        <!-- Database Node -->
+        <li>
+            <div class="flex items-center gap-2 py-1.5 px-2 hover:bg-gray-50 rounded-md cursor-pointer group transition-colors">
+                <i data-lucide="chevron-down" class="w-4 h-4 text-gray-400 group-hover:text-gray-600"></i>
+                <i data-lucide="database" class="w-4 h-4 text-primary-600"></i>
+                <span class="font-bold text-gray-800 tracking-tight">HR_SYSTEM_DB</span>
+            </div>
+            
+            <!-- Schema Node -->
+            <ul class="ml-5 pl-2 border-l-2 border-gray-100 space-y-1 mt-1">
+                <li>
+                    <div class="flex items-center gap-2 py-1.5 px-2 hover:bg-gray-50 rounded-md cursor-pointer group transition-colors">
+                        <i data-lucide="chevron-down" class="w-4 h-4 text-gray-400 group-hover:text-gray-600"></i>
+                        <i data-lucide="folder-tree" class="w-4 h-4 text-warning-500"></i>
+                        <span class="font-semibold text-gray-700">public</span>
+                    </div>
+                    
+                    <!-- Table Node -->
+                    <ul class="ml-5 pl-2 border-l-2 border-gray-100 space-y-1 mt-1">
+                        <li>
+                            <div class="flex items-center gap-2 py-1.5 px-2 hover:bg-primary-50 rounded-md cursor-pointer group bg-primary-50">
+                                <i data-lucide="chevron-down" class="w-4 h-4 text-gray-400 group-hover:text-gray-600"></i>
+                                <i data-lucide="table-2" class="w-4 h-4 text-info-600"></i>
+                                <span class="font-medium text-primary-700">employees</span>
+                            </div>
+                            
+                            <!-- Column Nodes -->
+                            <ul class="ml-6 pl-2 border-l-2 border-gray-100 space-y-1 mt-1">
+                                <li>
+                                    <div class="flex items-center justify-between py-1.5 px-2 hover:bg-gray-50 rounded-md group transition-colors">
+                                        <div class="flex items-center gap-2">
+                                            <i data-lucide="key" class="w-3.5 h-3.5 text-warning-500"></i>
+                                            <span class="text-gray-700 font-medium">id</span>
+                                        </div>
+                                        <span class="text-xs text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded border border-gray-200">INT4</span>
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="flex items-center justify-between py-1.5 px-2 hover:bg-gray-50 rounded-md group transition-colors">
+                                        <div class="flex items-center gap-2">
+                                            <i data-lucide="hash" class="w-3.5 h-3.5 text-gray-400"></i>
+                                            <span class="text-gray-600">full_name</span>
+                                        </div>
+                                        <span class="text-xs text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded border border-gray-200">VARCHAR(255)</span>
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="flex items-center justify-between py-1.5 px-2 hover:bg-gray-50 rounded-md group transition-colors">
+                                        <div class="flex items-center gap-2">
+                                            <i data-lucide="calendar" class="w-3.5 h-3.5 text-gray-400"></i>
+                                            <span class="text-gray-600">created_at</span>
+                                        </div>
+                                        <span class="text-xs text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded border border-gray-200">TIMESTAMP</span>
+                                    </div>
+                                </li>
+                            </ul>
+                        </li>
+                        
+                        <!-- Collapsed Table Node -->
+                        <li>
+                            <div class="flex items-center gap-2 py-1.5 px-2 hover:bg-gray-50 rounded-md cursor-pointer group transition-colors">
+                                <i data-lucide="chevron-right" class="w-4 h-4 text-gray-400 group-hover:text-gray-600"></i>
+                                <i data-lucide="table-2" class="w-4 h-4 text-info-600"></i>
+                                <span class="font-medium text-gray-600">departments</span>
+                            </div>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+        </li>
+    </ul>
+</div>
