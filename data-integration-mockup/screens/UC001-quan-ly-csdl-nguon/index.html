@@ -3,230 +3,1563 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>UC001 - Quản lý CSDL nguồn | Hệ thống Tích hợp Dữ liệu</title>
-  
-  <!-- COPY toàn bộ nội dung từ assets/css/tailwind-config.html vào đây -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-  tailwind.config = {
-    theme: {
-      extend: {
-        colors: {
-          primary: {
-            50: '#EFF6FF', 100: '#DBEAFE', 200: '#BFDBFE',
-            500: '#3B82F6', 600: '#2563EB', 700: '#1D4ED8',
-            800: '#1E40AF', 900: '#1E3A8A'
-          },
+  <title>Quản lý CSDL Nguồn | Hệ thống Quản trị Tích hợp Dữ liệu</title>
+  <meta name="description" content="Quản lý danh sách các kết nối cơ sở dữ liệu gốc phục vụ quá trình thu thập, làm sạch và tích hợp vào kho dữ liệu trung tâm.">
 
-          success: { 50: '#F0FDF4', 100: '#DCFCE7', 600: '#16A34A', 700: '#15803D' },
-          warning: { 50: '#FFFBEB', 100: '#FEF3C7', 600: '#F59E0B', 700: '#B45309' },
-          error:   { 50: '#FEF2F2', 100: '#FEE2E2', 600: '#DC2626', 700: '#B91C1C' },
-          info:    { 50: '#F0F9FF', 100: '#E0F2FE', 600: '#0EA5E9', 700: '#0369A1' }
-        },
-        fontFamily: {
-          sans: ['"Be Vietnam Pro"', 'Inter', 'system-ui', 'sans-serif']
-        }
-      }
-    }
-  }
-  </script>
+  <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <script src="https://unpkg.com/lucide@latest"></script>
-  <link rel="stylesheet" href="../../assets/css/custom.css">
-  
-  <!-- JS dùng chung -->
-  <script src="../../assets/js/common.js" defer></script>
-  <script src="../../assets/js/mock-data.js" defer></script>
-  <script src="../../assets/js/components.js" defer></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+
+  <style>
+    /* ─── Reset & Base ─── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { height: 100%; }
+    body {
+      font-family: 'Plus Jakarta Sans', Inter, system-ui, sans-serif;
+      background: #f3f4fb;
+      color: #2a2f45;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    /* ─── Design Tokens ─── */
+    :root {
+      --bg:           #f3f4fb;
+      --surface:      #ffffff;
+      --surface-2:    #fafbff;
+      --border:       #e6e7ef;
+      --border-strong:#d4d6e0;
+
+      --ink-900: #0b1020;
+      --ink-700: #2a2f45;
+      --ink-500: #5b6175;
+      --ink-400: #8087a0;
+      --ink-300: #b3b8c8;
+
+      --navy-900: #0a1442;
+      --navy-800: #14215c;
+      --navy-700: #2a4cdf;
+      --navy-600: #3b5fee;
+      --navy-500: #5b7bf5;
+      --navy-100: #dde6ff;
+      --navy-50:  #eef3ff;
+
+      --success-50:  #ecfdf5;
+      --success-500: #10b981;
+      --success-700: #047857;
+      --warning-50:  #fffbeb;
+      --warning-500: #f59e0b;
+      --warning-700: #b45309;
+      --danger-50:   #fef2f2;
+      --danger-500:  #ef4444;
+      --danger-700:  #b91c1c;
+
+      --header-grad:    linear-gradient(95deg, #0a1442 0%, #14215c 35%, #1e2d80 70%, #2a4cdf 100%);
+      --workspace-grad: linear-gradient(95deg, #2a4cdf 0%, #3b5fee 100%);
+
+      --shadow-1: 0 1px 2px rgba(15,23,42,0.04);
+      --shadow-2: 0 4px 16px rgba(15,23,42,0.06), 0 1px 2px rgba(15,23,42,0.04);
+      --shadow-pop: 0 12px 32px rgba(15,23,42,0.12);
+      --shadow-navy: 0 8px 22px rgba(19,31,92,0.28);
+    }
+
+    /* ─── App Layout ─── */
+    .app-shell {
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      grid-template-rows: 84px 1fr;
+      grid-template-areas: "header header" "sidebar main";
+      height: 100vh;
+    }
+
+    /* ─── Header ─── */
+    .topbar {
+      grid-area: header;
+      background: var(--header-grad);
+      height: 84px;
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: center;
+      gap: 16px;
+      padding: 0 28px;
+      box-shadow: 0 6px 20px rgba(10,20,66,0.25);
+      position: sticky;
+      top: 0;
+      z-index: 30;
+    }
+    .topbar-brand { display: flex; align-items: center; gap: 16px; }
+    .emblem {
+      width: 56px; height: 56px; border-radius: 50%;
+      background: radial-gradient(circle at 50% 40%, #e53935, #b71c1c 70%, #7a0f12 100%);
+      display: grid; place-items: center; flex-shrink: 0;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.25), inset 0 0 0 1.5px rgba(245,195,36,0.4);
+    }
+    .brand-title {
+      font-size: 19px; font-weight: 800; text-transform: uppercase;
+      letter-spacing: 0.04em; color: white; line-height: 1.2;
+      white-space: nowrap;
+    }
+    .brand-accent { color: #ffd84a; text-shadow: 0 0 18px rgba(255,216,74,0.35); }
+    .brand-sub { font-size: 12px; font-style: italic; color: rgba(255,255,255,0.72); margin-top: 2px; }
+
+    .user-chip {
+      display: flex; align-items: center; gap: 12px;
+      padding: 8px 18px; border-radius: 999px;
+      background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.14);
+      cursor: pointer; transition: background 0.18s;
+      color: white; text-align: left;
+    }
+    .user-chip:hover { background: rgba(255,255,255,0.14); }
+    .user-avatar {
+      width: 38px; height: 38px; border-radius: 50%;
+      background: linear-gradient(135deg, #f59e0b, #ef4444);
+      display: grid; place-items: center;
+      font-weight: 800; font-size: 13px; color: white; flex-shrink: 0;
+    }
+    .user-name { font-size: 13.5px; font-weight: 700; white-space: nowrap; }
+    .user-email { font-size: 11.5px; color: rgba(255,255,255,0.7); white-space: nowrap; }
+
+    /* ─── Sidebar ─── */
+    .sidebar {
+      grid-area: sidebar;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      position: sticky;
+      top: 84px;
+      height: calc(100vh - 84px);
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      padding: 12px 16px;
+      gap: 4px;
+    }
+    .sidebar::-webkit-scrollbar { width: 4px; }
+    .sidebar::-webkit-scrollbar-track { background: transparent; }
+    .sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+    /* Workspace pill */
+    .workspace-pill {
+      position: relative;
+      background: var(--workspace-grad);
+      border-radius: 12px;
+      padding: 11px 14px;
+      box-shadow: var(--shadow-navy);
+      display: flex; align-items: center; gap: 10px;
+      min-height: 54px;
+      margin-bottom: 8px;
+      overflow: hidden;
+      cursor: pointer;
+    }
+    .workspace-pill::before {
+      content: '';
+      position: absolute; top: -20px; right: -10px;
+      width: 70px; height: 70px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(255,255,255,0.18) 0%, transparent 70%);
+    }
+    .workspace-icon {
+      width: 30px; height: 30px; border-radius: 8px;
+      background: rgba(255,255,255,0.18);
+      display: grid; place-items: center; flex-shrink: 0;
+      color: white;
+    }
+    .workspace-name { font-size: 13px; font-weight: 700; color: white; line-height: 1.2; }
+    .workspace-role { font-size: 11px; color: rgba(255,255,255,0.75); }
+    .workspace-chevron { margin-left: auto; color: rgba(255,255,255,0.7); }
+
+    /* Nav section label */
+    .nav-section-label {
+      font-size: 10.5px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.10em; color: var(--ink-400);
+      padding: 8px 4px 4px; margin-top: 4px;
+    }
+
+    /* Nav item (parent) */
+    .nav-item {
+      display: flex; align-items: center; gap: 11px;
+      padding: 10px 12px; border-radius: 10px;
+      cursor: pointer; transition: background 0.15s, color 0.15s;
+      font-size: 13.5px; color: var(--ink-700);
+      position: relative;
+      text-decoration: none; width: 100%;
+      border: none; background: transparent; text-align: left;
+    }
+    .nav-item:hover { background: #f3f4fa; color: var(--navy-700); }
+    .nav-item.open {
+      background: var(--surface);
+      color: var(--navy-800); font-weight: 700;
+      box-shadow: 0 0 0 1.5px var(--navy-700), 0 4px 12px rgba(19,31,92,0.10);
+    }
+    .nav-item .nav-icon { color: rgba(42,76,223,0.85); flex-shrink: 0; }
+    .nav-item.open .nav-icon { color: var(--navy-700); }
+    .nav-badge {
+      margin-left: auto;
+      font-size: 10.5px; font-weight: 700;
+      padding: 1px 6px; border-radius: 999px;
+      background: var(--navy-100); color: var(--navy-700);
+    }
+    .nav-badge.danger { background: var(--danger-50); color: var(--danger-700); }
+    .nav-chevron {
+      margin-left: auto; color: var(--ink-300); transition: transform 0.2s;
+      flex-shrink: 0;
+    }
+    .nav-item.open .nav-chevron { transform: rotate(180deg); }
+
+    /* Nav children */
+    .nav-children {
+      position: relative; list-style: none;
+      margin: 2px 0 4px; padding: 0;
+      display: none;
+    }
+    .nav-children.open { display: block; }
+    .nav-guide {
+      position: absolute; left: 22px; top: 4px; bottom: 4px;
+      width: 1.5px; background: var(--border); border-radius: 2px;
+    }
+    .nav-sub {
+      display: flex; align-items: center; gap: 8px;
+      padding: 8px 14px 8px 38px;
+      font-size: 13px; color: var(--ink-500);
+      border-radius: 8px; cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+      text-decoration: none; position: relative;
+    }
+    .nav-sub:hover { background: #f3f4fa; color: var(--navy-700); }
+    .nav-sub.active {
+      background: var(--navy-50); color: var(--navy-800); font-weight: 600;
+    }
+    .nav-sub-dot {
+      position: absolute; left: 18px;
+      width: 7px; height: 7px; border-radius: 50%;
+      background: transparent;
+    }
+    .nav-sub.active .nav-sub-dot {
+      background: var(--navy-600);
+      box-shadow: 0 0 0 3px rgba(59,95,238,0.18);
+    }
+
+    /* Sidebar footer */
+    .sidebar-foot {
+      margin-top: auto;
+      padding: 12px 14px; background: var(--surface-2);
+      border-radius: 10px; display: flex; align-items: center; gap: 10px;
+    }
+    .health-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--success-500);
+      box-shadow: 0 0 0 3px rgba(16,185,129,0.15);
+      flex-shrink: 0; position: relative;
+    }
+    .health-dot::after {
+      content: '';
+      position: absolute; inset: -3px; border-radius: 50%;
+      background: rgba(16,185,129,0.35);
+      animation: pulse 2s ease-out infinite;
+    }
+    .health-text { font-size: 12px; color: var(--ink-500); line-height: 1.4; }
+    .health-text strong { color: var(--ink-700); font-weight: 600; }
+
+    /* ─── Main ─── */
+    .main-content {
+      grid-area: main;
+      overflow-y: auto;
+      padding: 20px 18px;
+    }
+    .main-content::-webkit-scrollbar { width: 6px; }
+    .main-content::-webkit-scrollbar-track { background: transparent; }
+    .main-content::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+    /* Breadcrumb */
+    .breadcrumb {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 12.5px; color: var(--ink-400);
+      margin-bottom: 14px;
+    }
+    .breadcrumb a { color: var(--ink-400); text-decoration: none; transition: color 0.15s; }
+    .breadcrumb a:hover { color: var(--navy-700); }
+    .breadcrumb .sep { color: var(--ink-300); }
+    .breadcrumb .current { color: var(--ink-900); font-weight: 600; }
+
+    /* Page header */
+    .page-header {
+      display: grid; grid-template-columns: 1fr auto;
+      align-items: flex-end; gap: 16px;
+      margin-bottom: 18px;
+    }
+    .page-title {
+      font-size: 26px; font-weight: 700; color: var(--ink-900);
+      letter-spacing: -0.01em; line-height: 1.2;
+    }
+    .page-sub {
+      font-size: 13.5px; color: var(--ink-500);
+      margin-top: 4px; max-width: 680px; line-height: 1.5;
+    }
+    .page-actions { display: flex; gap: 10px; align-items: center; flex-shrink: 0; }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 9px 14px; border-radius: 10px;
+      font-size: 13px; font-weight: 600; font-family: inherit;
+      cursor: pointer; transition: all 0.18s; border: none;
+      white-space: nowrap;
+    }
+    .btn-outline {
+      background: var(--surface); border: 1px solid var(--border);
+      color: var(--ink-700);
+    }
+    .btn-outline:hover { border-color: var(--border-strong); background: var(--surface-2); }
+    .btn-primary {
+      background: var(--workspace-grad); color: white;
+      box-shadow: 0 6px 16px rgba(19,31,92,0.28);
+    }
+    .btn-primary:hover { filter: brightness(1.08); }
+
+    /* ─── Stat Cards ─── */
+    .stats-grid {
+      display: grid; grid-template-columns: repeat(4, 1fr);
+      gap: 14px; margin-bottom: 20px;
+    }
+    .stat-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 14px; padding: 16px 18px;
+      box-shadow: var(--shadow-1);
+      transition: border-color 0.18s, box-shadow 0.18s;
+      display: flex; flex-direction: column; gap: 10px;
+    }
+    .stat-card:hover { border-color: var(--border-strong); box-shadow: var(--shadow-2); }
+    .stat-card-top { display: flex; align-items: flex-start; justify-content: space-between; }
+    .stat-icon {
+      width: 34px; height: 34px; border-radius: 10px;
+      display: grid; place-items: center; flex-shrink: 0;
+    }
+    .stat-label { font-size: 12.5px; font-weight: 600; color: var(--ink-500); }
+    .stat-value {
+      font-size: 28px; font-weight: 700; color: var(--ink-900);
+      letter-spacing: -0.01em; line-height: 1;
+    }
+    .stat-bottom { display: flex; align-items: center; justify-content: space-between; }
+    .stat-delta {
+      font-size: 11.5px; font-weight: 600; padding: 2px 7px;
+      border-radius: 999px;
+    }
+    .stat-delta.green { background: var(--success-50); color: var(--success-700); }
+    .stat-delta.amber { background: var(--warning-50); color: var(--warning-700); }
+    .stat-delta.red   { background: var(--danger-50); color: var(--danger-700); }
+
+    /* ─── Toolbar + Table Card ─── */
+    .table-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 14px; box-shadow: var(--shadow-1);
+      overflow: hidden;
+    }
+    .toolbar {
+      padding: 12px 14px; display: flex;
+      flex-wrap: wrap; gap: 10px; align-items: center;
+      border-bottom: 1px solid var(--border);
+    }
+    .search-wrap {
+      position: relative; flex: 1; min-width: 240px; max-width: 380px;
+    }
+    .search-icon {
+      position: absolute; left: 11px; top: 50%; transform: translateY(-50%);
+      color: var(--ink-300); pointer-events: none;
+    }
+    .search-input {
+      width: 100%; padding: 8px 12px 8px 34px;
+      border: 1px solid var(--border); border-radius: 10px;
+      font-size: 13px; color: var(--ink-700);
+      background: var(--surface); font-family: inherit;
+      outline: none; transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .search-input::placeholder { color: var(--ink-300); }
+    .search-input:focus {
+      border-color: var(--navy-700);
+      box-shadow: 0 0 0 3px rgba(42,76,223,0.12);
+    }
+
+    /* Chip groups */
+    .chips { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+    .chip-label {
+      font-size: 11px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.06em; color: var(--ink-400); margin-right: 2px;
+    }
+    .chip {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 5px 11px; border-radius: 999px;
+      font-size: 12px; font-weight: 500;
+      border: 1px solid var(--border); background: var(--surface);
+      color: var(--ink-500); cursor: pointer;
+      transition: all 0.15s;
+    }
+    .chip:hover { background: var(--surface-2); color: var(--ink-700); }
+    .chip.active {
+      background: var(--workspace-grad); color: white;
+      border-color: transparent;
+      box-shadow: 0 2px 8px rgba(19,31,92,0.22);
+    }
+    .chip-dot { width: 7px; height: 7px; border-radius: 50%; }
+    .chip-count {
+      font-size: 11px; font-weight: 700;
+      background: rgba(255,255,255,0.25); border-radius: 999px;
+      padding: 0 4px; min-width: 16px; text-align: center;
+    }
+    .chip:not(.active) .chip-count {
+      background: var(--border); color: var(--ink-500);
+    }
+    .chips-spacer { flex: 1; min-width: 12px; }
+
+    /* ─── Table ─── */
+    .table-wrap { overflow-x: auto; }
+    table {
+      width: 100%; border-collapse: collapse;
+      font-size: 13.5px;
+    }
+    caption { display: none; }
+    thead tr {
+      background: var(--surface-2); border-bottom: 1px solid var(--border);
+    }
+    th {
+      padding: 12px 14px;
+      font-size: 11.5px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.04em; color: var(--ink-400);
+      white-space: nowrap; text-align: left;
+      cursor: pointer; user-select: none;
+      transition: color 0.15s;
+    }
+    th:hover { color: var(--ink-700); }
+    th.center { text-align: center; }
+    th.right  { text-align: right; }
+    .th-inner { display: inline-flex; align-items: center; gap: 4px; }
+    .sort-icon { color: var(--ink-300); }
+    .sort-icon.active { color: var(--navy-700); }
+
+    tbody tr {
+      border-bottom: 1px solid var(--border);
+      transition: background 0.12s;
+      cursor: pointer;
+    }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: #fafbfd; }
+    tbody tr:hover .row-actions { opacity: 1; }
+
+    td { padding: 14px; vertical-align: middle; }
+    td.center { text-align: center; }
+
+    .stt { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--ink-400); }
+
+    /* DB name cell */
+    .db-cell { display: flex; align-items: center; gap: 10px; }
+    .db-icon-wrap {
+      width: 34px; height: 34px; border-radius: 8px;
+      display: grid; place-items: center; flex-shrink: 0;
+      font-size: 10px; font-weight: 800; letter-spacing: 0.02em;
+      color: white;
+    }
+    .db-name { font-weight: 600; color: var(--ink-900); font-size: 13.5px; }
+    .db-owner { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--ink-400); margin-top: 2px; }
+
+    /* DB Kind tag */
+    .kind-tag {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 4px 10px; border-radius: 999px;
+      font-size: 11.5px; font-weight: 600;
+    }
+    .kind-swatch { width: 8px; height: 8px; border-radius: 3px; flex-shrink: 0; }
+    .kind-version {
+      border-left: 1px solid currentColor; padding-left: 6px; margin-left: 2px;
+      font-family: 'JetBrains Mono', monospace; font-size: 10.5px; opacity: 0.7;
+    }
+
+    /* Host pill */
+    .host-pill {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 4px 9px; border-radius: 7px;
+      background: var(--surface-2); border: 1px solid var(--border);
+      font-family: 'JetBrains Mono', monospace; font-size: 11.5px;
+    }
+    .host-host { color: var(--ink-700); }
+    .host-colon { color: var(--ink-300); }
+    .host-port { color: var(--navy-700); font-weight: 600; }
+    .host-copy {
+      background: none; border: none; cursor: pointer;
+      color: var(--ink-300); padding: 1px 2px; border-radius: 4px;
+      transition: color 0.15s, background 0.15s;
+      display: inline-flex; align-items: center;
+    }
+    .host-copy:hover { color: var(--ink-700); background: var(--border); }
+    .host-pill.copied { border-color: var(--success-500); background: var(--success-50); }
+
+    /* Status badge */
+    .status-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 4px 10px; border-radius: 999px;
+      font-size: 12px; font-weight: 600; white-space: nowrap;
+    }
+    .status-badge.ok   { background: var(--success-50); color: var(--success-700); }
+    .status-badge.warn { background: var(--warning-50); color: var(--warning-700); }
+    .status-badge.err  { background: var(--danger-50);  color: var(--danger-700); }
+    .pulse {
+      width: 7px; height: 7px; border-radius: 50%; position: relative; flex-shrink: 0;
+    }
+    .pulse::after {
+      content: ''; position: absolute; inset: -3px;
+      border-radius: 50%; opacity: 0.4;
+      animation: pulse-ring 1.8s ease-out infinite;
+    }
+    .status-badge.ok   .pulse { background: var(--success-500); }
+    .status-badge.ok   .pulse::after { background: var(--success-500); }
+    .status-badge.warn .pulse { background: var(--warning-500); }
+    .status-badge.warn .pulse::after { background: var(--warning-500); }
+    .status-badge.err  .pulse { background: var(--danger-500); }
+    .status-badge.err  .pulse::after { background: var(--danger-500); }
+
+    @keyframes pulse-ring {
+      0%   { transform: scale(0.8); opacity: 0.5; }
+      100% { transform: scale(2.2); opacity: 0; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .pulse::after { animation: none; }
+    }
+
+    /* Updated at */
+    .updated-rel { font-size: 13px; color: var(--ink-700); }
+    .updated-abs { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--ink-400); margin-top: 3px; }
+
+    /* Row actions */
+    .row-actions {
+      display: flex; align-items: center; justify-content: flex-end; gap: 2px;
+      opacity: 0; transition: opacity 0.15s;
+    }
+    .action-btn {
+      width: 30px; height: 30px; border-radius: 7px;
+      display: grid; place-items: center;
+      border: none; cursor: pointer; background: transparent;
+      color: var(--ink-400); transition: background 0.15s, color 0.15s;
+    }
+    .action-btn:hover { background: var(--surface-2); color: var(--ink-700); }
+    .action-btn.danger:hover { background: var(--danger-50); color: var(--danger-700); }
+
+    /* ─── Pagination ─── */
+    .pagination {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 18px; background: var(--surface-2);
+      border-top: 1px solid var(--border); flex-wrap: wrap; gap: 12px;
+    }
+    .page-size-select {
+      padding: 5px 10px; border: 1px solid var(--border); border-radius: 8px;
+      font-size: 12.5px; color: var(--ink-700); background: var(--surface);
+      font-family: inherit; outline: none; cursor: pointer;
+    }
+    .page-size-select:focus { border-color: var(--navy-700); }
+    .page-info { font-size: 13px; color: var(--ink-500); }
+    .page-info strong { color: var(--ink-900); font-weight: 600; }
+    .pager { display: flex; gap: 4px; }
+    .page-btn {
+      min-width: 32px; height: 32px; border-radius: 8px;
+      display: grid; place-items: center;
+      border: 1px solid var(--border); background: var(--surface);
+      font-size: 13px; font-weight: 500; color: var(--ink-500);
+      cursor: pointer; transition: all 0.15s; padding: 0 8px;
+      font-family: inherit;
+    }
+    .page-btn:hover { background: var(--surface-2); color: var(--ink-700); }
+    .page-btn.active { background: var(--ink-900); color: white; border-color: var(--ink-900); }
+    .page-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    /* ─── Empty state ─── */
+    .empty-state {
+      padding: 60px 20px; text-align: center;
+      display: none; flex-direction: column; align-items: center; gap: 10px;
+    }
+    .empty-state.visible { display: flex; }
+    .empty-title { font-size: 16px; font-weight: 600; color: var(--ink-700); }
+    .empty-hint  { font-size: 13.5px; color: var(--ink-400); }
+
+    /* ─── Add Dialog ─── */
+    .dialog-overlay {
+      position: fixed; inset: 0; z-index: 50;
+      background: rgba(11,16,32,0.45); backdrop-filter: blur(3px);
+      display: none; align-items: center; justify-content: center;
+    }
+    .dialog-overlay.open { display: flex; }
+    .dialog {
+      background: var(--surface); border-radius: 16px;
+      width: min(640px, 95vw); max-height: 90vh; overflow-y: auto;
+      box-shadow: var(--shadow-pop);
+      animation: slideUp 0.22s ease;
+    }
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .dialog-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 20px 24px 14px; border-bottom: 1px solid var(--border);
+    }
+    .dialog-title { font-size: 18px; font-weight: 700; color: var(--ink-900); }
+    .dialog-close {
+      width: 30px; height: 30px; border-radius: 8px;
+      display: grid; place-items: center;
+      border: none; background: transparent; cursor: pointer;
+      color: var(--ink-400); transition: background 0.15s;
+    }
+    .dialog-close:hover { background: var(--surface-2); }
+    .dialog-body { padding: 20px 24px; display: grid; gap: 14px; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .form-group { display: flex; flex-direction: column; gap: 5px; }
+    .form-label { font-size: 12.5px; font-weight: 600; color: var(--ink-700); }
+    .form-input, .form-select, .form-textarea {
+      padding: 8px 12px; border: 1px solid var(--border); border-radius: 9px;
+      font-size: 13px; color: var(--ink-700); font-family: inherit;
+      background: var(--surface); outline: none; transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .form-input:focus, .form-select:focus, .form-textarea:focus {
+      border-color: var(--navy-700);
+      box-shadow: 0 0 0 3px rgba(42,76,223,0.12);
+    }
+    .form-textarea { min-height: 80px; resize: vertical; }
+    .toggle-row { display: flex; align-items: center; gap: 10px; }
+    .toggle { position: relative; width: 38px; height: 22px; }
+    .toggle input { opacity: 0; width: 0; height: 0; }
+    .toggle-slider {
+      position: absolute; inset: 0; border-radius: 999px;
+      background: var(--border); cursor: pointer; transition: background 0.2s;
+    }
+    .toggle-slider::before {
+      content: ''; position: absolute;
+      left: 2px; top: 2px; width: 18px; height: 18px;
+      border-radius: 50%; background: white;
+      transition: transform 0.2s;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    }
+    .toggle input:checked + .toggle-slider { background: var(--navy-700); }
+    .toggle input:checked + .toggle-slider::before { transform: translateX(16px); }
+    .dialog-footer {
+      display: flex; align-items: center; justify-content: flex-end; gap: 10px;
+      padding: 14px 24px; border-top: 1px solid var(--border);
+    }
+
+    /* ─── Toast ─── */
+    .toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 100; display: flex; flex-direction: column; gap: 8px; }
+    .toast {
+      background: var(--ink-900); color: white;
+      padding: 10px 16px; border-radius: 10px;
+      font-size: 13px; font-weight: 500;
+      box-shadow: var(--shadow-pop);
+      animation: toastIn 0.22s ease;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .toast.success { background: #064e3b; }
+    .toast.error   { background: #7f1d1d; }
+    @keyframes toastIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ─── Responsive ─── */
+    @media (max-width: 1099px) {
+      .app-shell { grid-template-columns: 220px 1fr; }
+    }
+    @media (max-width: 759px) {
+      .app-shell {
+        grid-template-columns: 1fr;
+        grid-template-areas: "header" "main";
+      }
+      .sidebar { display: none; }
+      .stats-grid { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 520px) {
+      .stats-grid { grid-template-columns: 1fr; }
+    }
+  </style>
 </head>
-<body class="font-sans bg-gray-50 text-gray-800">
+<body>
 
-  
-  <div class="flex h-screen overflow-hidden pt-1">
-    <aside id="app-sidebar" class="w-[260px] bg-primary-900 text-white flex-shrink-0 flex flex-col transition-all duration-300 z-30"></aside>
-    
-    <div class="flex-1 flex flex-col overflow-hidden relative">
-      <div id="app-header" class="flex-shrink-0 relative z-20"></div>
-      
-      <nav class="px-6 py-3 bg-white border-b border-gray-200 flex-shrink-0 shadow-sm relative z-10">
-        <ol class="flex items-center gap-2 text-sm">
-          <li><a href="../../index.html" class="text-gray-500 hover:text-primary-600 transition-colors">Trang chủ</a></li>
-          <li class="text-gray-400"><i data-lucide="chevron-right" class="w-4 h-4"></i></li>
-          <li class="text-gray-900 font-semibold">Quản trị nguồn dữ liệu</li>
-          <li class="text-gray-400"><i data-lucide="chevron-right" class="w-4 h-4"></i></li>
-          <li class="text-gray-900 font-semibold">CSDL Nguồn</li>
-        </ol>
-      </nav>
-      
-      <main class="flex-1 overflow-auto bg-slate-50 relative p-6">
-        
-        <!-- Page Header -->
-        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
-            <div>
-                <h1 class="text-2xl font-bold text-gray-900">Quản lý CSDL Nguồn</h1>
-                <p class="text-sm text-gray-500 mt-1">Quản lý danh sách các kết nối cơ sở dữ liệu gốc phục vụ quá trình thu thập, tích hợp.</p>
-            </div>
-            <button class="inline-flex items-center px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-sm font-semibold rounded-lg shadow-sm transition-colors gap-2">
-                <i data-lucide="plus" class="w-4 h-4"></i>
-                Thêm kết nối mới
-            </button>
+<div class="app-shell">
+
+  <!-- ═══════════════ HEADER ═══════════════ -->
+  <header class="topbar" role="banner">
+    <div class="topbar-brand">
+      <!-- Emblem -->
+      <div class="emblem" aria-label="Quốc huy Việt Nam">
+        <svg width="26" height="26" viewBox="0 0 26 26" fill="none" aria-hidden="true">
+          <polygon points="13,2 15.9,9.8 24.2,9.8 17.6,14.8 20.5,22.5 13,17.5 5.5,22.5 8.4,14.8 1.8,9.8 10.1,9.8"
+                   fill="#f5c324" stroke="rgba(245,195,36,0.4)" stroke-width="0.5"/>
+        </svg>
+      </div>
+      <!-- Brand text -->
+      <div>
+        <div class="brand-title">
+          HỆ THỐNG <span class="brand-accent">QUẢN TRỊ</span> TÍCH HỢP DỮ LIỆU
+        </div>
+        <div class="brand-sub">Cơ quan ABC — Phiên bản 2026</div>
+      </div>
+    </div>
+
+    <div></div><!-- spacer -->
+
+    <!-- User chip -->
+    <button class="user-chip" id="userChipBtn" aria-label="Tài khoản người dùng" aria-expanded="false">
+      <div class="user-avatar" aria-hidden="true">AD</div>
+      <div>
+        <div class="user-name">Quản trị hệ thống</div>
+        <div class="user-email">admin@abc.gov.vn</div>
+      </div>
+      <i data-lucide="chevron-down" style="width:16px;height:16px;color:rgba(255,255,255,0.7)" aria-hidden="true"></i>
+    </button>
+  </header>
+
+  <!-- ═══════════════ SIDEBAR ═══════════════ -->
+  <aside class="sidebar" aria-label="Điều hướng chính">
+
+    <!-- Workspace pill -->
+    <div class="workspace-pill" role="button" tabindex="0" aria-label="Chọn không gian làm việc">
+      <div class="workspace-icon">
+        <i data-lucide="layers" style="width:16px;height:16px" aria-hidden="true"></i>
+      </div>
+      <div>
+        <div class="workspace-name">Quản lý kho và báo cáo</div>
+        <div class="workspace-role">Workspace · Production</div>
+      </div>
+      <div class="workspace-chevron">
+        <i data-lucide="chevrons-up-down" style="width:14px;height:14px" aria-hidden="true"></i>
+      </div>
+    </div>
+
+    <!-- Dashboard -->
+    <a href="../../index.html" class="nav-item" id="nav-dashboard">
+      <i data-lucide="layout-dashboard" class="nav-icon" style="width:18px;height:18px" aria-hidden="true"></i>
+      <span>Dashboard tổng quan</span>
+    </a>
+
+    <!-- Quản lý cơ sở dữ liệu group (open) -->
+    <button class="nav-item open" id="nav-db-group" onclick="toggleNavGroup(this)" aria-expanded="true" aria-controls="nav-db-children">
+      <i data-lucide="database" class="nav-icon" style="width:18px;height:18px" aria-hidden="true"></i>
+      <span>Quản lý cơ sở dữ liệu</span>
+      <i data-lucide="chevron-down" class="nav-chevron" style="width:15px;height:15px" aria-hidden="true"></i>
+    </button>
+    <ul class="nav-children open" id="nav-db-children" role="menu">
+      <div class="nav-guide" aria-hidden="true"></div>
+      <li role="none">
+        <a href="index.html" class="nav-sub active" role="menuitem" aria-current="page">
+          <span class="nav-sub-dot" aria-hidden="true"></span>CSDL nguồn
+        </a>
+      </li>
+      <li role="none">
+        <a href="#" class="nav-sub" role="menuitem">
+          <span class="nav-sub-dot" aria-hidden="true"></span>CSDL tích hợp
+        </a>
+      </li>
+      <li role="none">
+        <a href="#" class="nav-sub" role="menuitem">
+          <span class="nav-sub-dot" aria-hidden="true"></span>Nguồn dữ liệu ngoài
+        </a>
+      </li>
+      <li role="none">
+        <a href="#" class="nav-sub" role="menuitem">
+          <span class="nav-sub-dot" aria-hidden="true"></span>Cấu trúc dữ liệu
+        </a>
+      </li>
+    </ul>
+
+    <!-- Mapping -->
+    <button class="nav-item" onclick="toggleNavGroup(this)" aria-expanded="false">
+      <i data-lucide="git-branch" class="nav-icon" style="width:18px;height:18px" aria-hidden="true"></i>
+      <span>Mapping &amp; chuyển đổi</span>
+      <i data-lucide="chevron-down" class="nav-chevron" style="width:15px;height:15px" aria-hidden="true"></i>
+    </button>
+    <ul class="nav-children" role="menu">
+      <div class="nav-guide" aria-hidden="true"></div>
+      <li><a href="#" class="nav-sub" role="menuitem"><span class="nav-sub-dot"></span>Mapping quy tắc</a></li>
+      <li><a href="#" class="nav-sub" role="menuitem"><span class="nav-sub-dot"></span>Biến đổi dữ liệu</a></li>
+    </ul>
+
+    <!-- Tác vụ -->
+    <a href="#" class="nav-item" id="nav-jobs">
+      <i data-lucide="file-spreadsheet" class="nav-icon" style="width:18px;height:18px" aria-hidden="true"></i>
+      <span>Tác vụ tích hợp</span>
+      <span class="nav-badge" aria-label="8 tác vụ">8</span>
+    </a>
+
+    <!-- Lập lịch -->
+    <a href="#" class="nav-item">
+      <i data-lucide="clock" class="nav-icon" style="width:18px;height:18px" aria-hidden="true"></i>
+      <span>Lập lịch tự động</span>
+    </a>
+
+    <!-- Theo dõi -->
+    <a href="#" class="nav-item">
+      <i data-lucide="activity" class="nav-icon" style="width:18px;height:18px" aria-hidden="true"></i>
+      <span>Theo dõi tác vụ</span>
+    </a>
+
+    <!-- Nhật ký -->
+    <a href="#" class="nav-item">
+      <i data-lucide="file-text" class="nav-icon" style="width:18px;height:18px" aria-hidden="true"></i>
+      <span>Nhật ký hệ thống</span>
+    </a>
+
+    <!-- Cảnh báo -->
+    <a href="#" class="nav-item">
+      <i data-lucide="alert-triangle" class="nav-icon" style="width:18px;height:18px" aria-hidden="true"></i>
+      <span>Cảnh báo &amp; sự cố</span>
+      <span class="nav-badge danger" aria-label="3 cảnh báo">3</span>
+    </a>
+
+    <!-- Cài đặt -->
+    <a href="#" class="nav-item">
+      <i data-lucide="settings" class="nav-icon" style="width:18px;height:18px" aria-hidden="true"></i>
+      <span>Cài đặt hệ thống</span>
+    </a>
+
+    <!-- Footer -->
+    <div class="sidebar-foot" role="status" aria-live="polite">
+      <div class="health-dot" aria-hidden="true"></div>
+      <div class="health-text">
+        <strong>Hệ thống ổn định</strong><br>
+        Uptime 99.98% · 30 ngày
+      </div>
+    </div>
+  </aside>
+
+  <!-- ═══════════════ MAIN CONTENT ═══════════════ -->
+  <main class="main-content" id="main" role="main">
+
+    <!-- Breadcrumb -->
+    <nav aria-label="Đường dẫn" class="breadcrumb">
+      <a href="../../index.html">Trang chủ</a>
+      <span class="sep" aria-hidden="true">/</span>
+      <a href="#">Quản lý cơ sở dữ liệu</a>
+      <span class="sep" aria-hidden="true">/</span>
+      <span class="current" aria-current="page">CSDL Nguồn</span>
+    </nav>
+
+    <!-- Page header -->
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">Quản lý CSDL Nguồn</h1>
+        <p class="page-sub">Quản lý danh sách các kết nối cơ sở dữ liệu gốc phục vụ quá trình thu thập, làm sạch và tích hợp vào kho dữ liệu trung tâm.</p>
+      </div>
+      <div class="page-actions">
+        <button class="btn btn-outline" onclick="exportExcel()" id="btn-export" title="Xuất dữ liệu ra file Excel">
+          <i data-lucide="download" style="width:15px;height:15px" aria-hidden="true"></i>
+          Xuất Excel
+        </button>
+        <button class="btn btn-primary" onclick="openDialog()" id="btn-add-new" title="Thêm kết nối CSDL mới (N)">
+          <i data-lucide="plus" style="width:15px;height:15px" aria-hidden="true"></i>
+          Thêm kết nối mới
+        </button>
+      </div>
+    </div>
+
+    <!-- Stat cards -->
+    <div class="stats-grid" role="region" aria-label="Thống kê tổng quan">
+      <div class="stat-card" id="stat-total">
+        <div class="stat-card-top">
+          <div>
+            <div class="stat-label">Tổng số CSDL</div>
+            <div class="stat-value" id="val-total">15</div>
+          </div>
+          <div class="stat-icon" style="background:var(--navy-50)">
+            <i data-lucide="database" style="width:18px;height:18px;color:var(--navy-700)" aria-hidden="true"></i>
+          </div>
+        </div>
+        <div class="stat-bottom">
+          <span class="stat-delta green">+2 tháng này</span>
+          <svg width="64" height="22" viewBox="0 0 64 22" fill="none" aria-hidden="true">
+            <polyline points="0,18 10,14 20,16 30,10 40,12 50,6 64,8"
+              stroke="var(--navy-600)" stroke-width="1.5" fill="none" opacity="0.7" stroke-linejoin="round"/>
+          </svg>
+        </div>
+      </div>
+      <div class="stat-card" id="stat-ok">
+        <div class="stat-card-top">
+          <div>
+            <div class="stat-label">Đã kết nối</div>
+            <div class="stat-value" id="val-ok">9</div>
+          </div>
+          <div class="stat-icon" style="background:var(--success-50)">
+            <i data-lucide="check-circle" style="width:18px;height:18px;color:var(--success-700)" aria-hidden="true"></i>
+          </div>
+        </div>
+        <div class="stat-bottom">
+          <span class="stat-delta green">99.2% uptime</span>
+          <svg width="64" height="22" viewBox="0 0 64 22" fill="none" aria-hidden="true">
+            <polyline points="0,14 12,10 24,12 36,6 48,8 64,4"
+              stroke="var(--success-500)" stroke-width="1.5" fill="none" opacity="0.7" stroke-linejoin="round"/>
+          </svg>
+        </div>
+      </div>
+      <div class="stat-card" id="stat-warn">
+        <div class="stat-card-top">
+          <div>
+            <div class="stat-label">Chờ cấu hình</div>
+            <div class="stat-value" id="val-warn">3</div>
+          </div>
+          <div class="stat-icon" style="background:var(--warning-50)">
+            <i data-lucide="clock" style="width:18px;height:18px;color:var(--warning-700)" aria-hidden="true"></i>
+          </div>
+        </div>
+        <div class="stat-bottom">
+          <span class="stat-delta amber">Cần hành động</span>
+          <svg width="64" height="22" viewBox="0 0 64 22" fill="none" aria-hidden="true">
+            <polyline points="0,10 16,14 32,8 48,16 64,12"
+              stroke="var(--warning-500)" stroke-width="1.5" fill="none" opacity="0.7" stroke-linejoin="round"/>
+          </svg>
+        </div>
+      </div>
+      <div class="stat-card" id="stat-err">
+        <div class="stat-card-top">
+          <div>
+            <div class="stat-label">Lỗi kết nối</div>
+            <div class="stat-value" id="val-err">3</div>
+          </div>
+          <div class="stat-icon" style="background:var(--danger-50)">
+            <i data-lucide="alert-circle" style="width:18px;height:18px;color:var(--danger-700)" aria-hidden="true"></i>
+          </div>
+        </div>
+        <div class="stat-bottom">
+          <span class="stat-delta red">Cần khắc phục</span>
+          <svg width="64" height="22" viewBox="0 0 64 22" fill="none" aria-hidden="true">
+            <polyline points="0,8 16,12 32,6 48,16 64,10"
+              stroke="var(--danger-500)" stroke-width="1.5" fill="none" opacity="0.7" stroke-linejoin="round"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- Table card: Toolbar + Table + Pagination -->
+    <div class="table-card">
+
+      <!-- Toolbar -->
+      <div class="toolbar" role="search">
+        <!-- Search -->
+        <div class="search-wrap">
+          <i data-lucide="search" class="search-icon" style="width:15px;height:15px" aria-hidden="true"></i>
+          <input type="search" class="search-input" id="search-input"
+                 placeholder="Tìm theo tên CSDL, host, đơn vị chủ quản…"
+                 aria-label="Tìm kiếm CSDL"
+                 oninput="onSearchChange(this.value)">
         </div>
 
-        <!-- Filter Bar -->
-        <div class="bg-gray-50 p-4 rounded-xl border border-gray-200 shadow-sm mb-6 flex flex-col lg:flex-row gap-4 items-center justify-between">
-            <div class="flex flex-wrap gap-3 w-full lg:w-auto">
-                <div class="relative w-full sm:w-64">
-                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <i data-lucide="search" class="w-4 h-4 text-gray-400"></i>
-                    </div>
-                    <input type="text" class="block w-full pl-9 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-500 sm:text-sm" placeholder="Tìm tên CSDL, host...">
-                </div>
-                <select class="block w-full sm:w-48 pl-3 pr-8 py-2 text-sm border-gray-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500 border bg-white">
-                    <option value="">Loại CSDL (Tất cả)</option>
-                    <option value="oracle">Oracle</option>
-                    <option value="sqlserver">SQL Server</option>
-                    <option value="mysql">MySQL</option>
-                    <option value="postgres">PostgreSQL</option>
-                    <option value="mongodb">MongoDB</option>
-                </select>
-                <select class="block w-full sm:w-48 pl-3 pr-8 py-2 text-sm border-gray-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500 border bg-white">
-                    <option value="">Trạng thái (Tất cả)</option>
-                    <option value="connected">Đã kết nối</option>
-                    <option value="error">Lỗi kết nối</option>
-                    <option value="pending">Chưa cấu hình</option>
-                </select>
-            </div>
-            <button class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none transition-colors gap-2 w-full lg:w-auto justify-center">
-                <i data-lucide="download" class="w-4 h-4 text-gray-500"></i>
-                Xuất Excel
-            </button>
+        <!-- Status chips -->
+        <div class="chips" role="group" aria-label="Lọc theo trạng thái">
+          <button class="chip active" id="chip-status-all" onclick="setStatusFilter('all')" data-status="all">
+            Tất cả
+            <span class="chip-count" id="chip-count-all">15</span>
+          </button>
+          <button class="chip" id="chip-status-ok" onclick="setStatusFilter('ok')" data-status="ok">
+            <span class="chip-dot" style="background:var(--success-500)"></span>
+            Đã kết nối
+            <span class="chip-count" id="chip-count-ok">9</span>
+          </button>
+          <button class="chip" id="chip-status-warn" onclick="setStatusFilter('warn')" data-status="warn">
+            <span class="chip-dot" style="background:var(--warning-500)"></span>
+            Chờ cấu hình
+            <span class="chip-count" id="chip-count-warn">3</span>
+          </button>
+          <button class="chip" id="chip-status-err" onclick="setStatusFilter('err')" data-status="err">
+            <span class="chip-dot" style="background:var(--danger-500)"></span>
+            Lỗi
+            <span class="chip-count" id="chip-count-err">3</span>
+          </button>
         </div>
 
-        <!-- Data Table -->
-        <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden mb-4">
-            <div class="overflow-x-auto">
-                <table class="w-full text-sm text-left">
-                    <thead class="text-sm font-medium text-gray-700 bg-gray-100 border-b border-gray-200">
-                        <tr>
-                            <th scope="col" class="px-4 py-3 w-16 text-center whitespace-nowrap">STT</th>
-                            <th scope="col" class="px-4 py-3 min-w-[200px] whitespace-nowrap">Tên cơ sở dữ liệu</th>
-                            <th scope="col" class="px-4 py-3 whitespace-nowrap">Loại CSDL / Version</th>
-                            <th scope="col" class="px-4 py-3 whitespace-nowrap">Máy chủ (Host:Port)</th>
-                            <th scope="col" class="px-4 py-3 min-w-[120px] whitespace-nowrap">Trạng thái</th>
-                            <th scope="col" class="px-4 py-3 hidden xl:table-cell whitespace-nowrap">Cập nhật lúc</th>
-                            <th scope="col" class="px-4 py-3 text-center whitespace-nowrap w-36">Thao tác</th>
-                        </tr>
-                    </thead>
-                    <tbody id="db-list-body" class="divide-y divide-gray-100">
-                        <!-- Sẽ được render bằng JS từ MOCK_DATA -->
-                    </tbody>
-                </table>
-            </div>
-            
-            <!-- Pagination -->
-            <div class="px-4 py-4 bg-white border-t border-gray-200 flex flex-col sm:flex-row items-center justify-between gap-4">
-                <div class="flex items-center gap-4">
-                    <select class="border border-gray-300 rounded-md text-sm py-1.5 pl-3 pr-8 focus:ring-primary-500 focus:border-primary-500">
-                        <option>10 bản ghi/trang</option>
-                        <option>20 bản ghi/trang</option>
-                        <option>50 bản ghi/trang</option>
-                    </select>
-                    <p class="text-sm text-gray-600">Hiển thị <span class="font-semibold text-gray-900">1-15</span> trong tổng <span class="font-semibold text-gray-900">15</span> bản ghi</p>
-                </div>
-                <nav class="isolate inline-flex -space-x-px rounded-md shadow-sm" aria-label="Pagination">
-                    <button class="relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0 disabled:opacity-50" disabled title="Trang đầu">
-                        <i data-lucide="chevrons-left" class="w-4 h-4"></i>
-                    </button>
-                    <button class="relative inline-flex items-center px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0 disabled:opacity-50" disabled title="Trang trước">
-                        <i data-lucide="chevron-left" class="w-4 h-4"></i>
-                    </button>
-                    <button class="relative z-10 inline-flex items-center bg-primary-600 px-4 py-2 text-sm font-semibold text-white focus:z-20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600">1</button>
-                    <button class="relative inline-flex items-center px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0" title="Trang sau">
-                        <i data-lucide="chevron-right" class="w-4 h-4"></i>
-                    </button>
-                    <button class="relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0" title="Trang cuối">
-                        <i data-lucide="chevrons-right" class="w-4 h-4"></i>
-                    </button>
-                </nav>
-            </div>
+        <div class="chips-spacer"></div>
+
+        <!-- Kind chips -->
+        <div class="chips" role="group" aria-label="Lọc theo loại CSDL">
+          <span class="chip-label">Loại CSDL:</span>
+          <button class="chip active" id="chip-kind-all" onclick="setKindFilter('all')">Mọi loại</button>
+          <button class="chip" id="chip-kind-oracle" onclick="setKindFilter('oracle')">
+            <span class="chip-dot" style="background:#ef4444"></span>Oracle
+          </button>
+          <button class="chip" id="chip-kind-sqlserver" onclick="setKindFilter('sqlserver')">
+            <span class="chip-dot" style="background:#f97316"></span>SQL Server
+          </button>
+          <button class="chip" id="chip-kind-postgres" onclick="setKindFilter('postgres')">
+            <span class="chip-dot" style="background:#3b82f6"></span>PostgreSQL
+          </button>
+          <button class="chip" id="chip-kind-mongo" onclick="setKindFilter('mongo')">
+            <span class="chip-dot" style="background:#10b981"></span>MongoDB
+          </button>
+          <button class="chip" id="chip-kind-mysql" onclick="setKindFilter('mysql')">
+            <span class="chip-dot" style="background:#6366f1"></span>MySQL
+          </button>
         </div>
-      </main>
-      
-      <div id="app-footer" class="flex-shrink-0"></div>
+      </div>
+
+      <!-- Table -->
+      <div class="table-wrap">
+        <table id="main-table" aria-label="Danh sách CSDL nguồn">
+          <caption class="sr-only">Danh sách CSDL nguồn</caption>
+          <thead>
+            <tr>
+              <th class="center" style="width:48px" onclick="sortBy('id')" aria-sort="ascending">
+                <span class="th-inner">STT <i data-lucide="chevrons-up-down" class="sort-icon active" style="width:12px;height:12px" id="sort-id" aria-hidden="true"></i></span>
+              </th>
+              <th style="min-width:220px" onclick="sortBy('name')" aria-sort="none">
+                <span class="th-inner">Tên cơ sở dữ liệu <i data-lucide="chevrons-up-down" class="sort-icon" style="width:12px;height:12px" id="sort-name" aria-hidden="true"></i></span>
+              </th>
+              <th onclick="sortBy('kind')" aria-sort="none">
+                <span class="th-inner">Loại CSDL / Version <i data-lucide="chevrons-up-down" class="sort-icon" style="width:12px;height:12px" id="sort-kind" aria-hidden="true"></i></span>
+              </th>
+              <th onclick="sortBy('host')" aria-sort="none">
+                <span class="th-inner">Máy chủ (Host:Port) <i data-lucide="chevrons-up-down" class="sort-icon" style="width:12px;height:12px" id="sort-host" aria-hidden="true"></i></span>
+              </th>
+              <th onclick="sortBy('status')" aria-sort="none">
+                <span class="th-inner">Trạng thái <i data-lucide="chevrons-up-down" class="sort-icon" style="width:12px;height:12px" id="sort-status" aria-hidden="true"></i></span>
+              </th>
+              <th onclick="sortBy('updatedAt')" aria-sort="none">
+                <span class="th-inner">Cập nhật lúc <i data-lucide="chevrons-up-down" class="sort-icon" style="width:12px;height:12px" id="sort-updatedAt" aria-hidden="true"></i></span>
+              </th>
+              <th class="right" style="width:56px">Thao tác</th>
+            </tr>
+          </thead>
+          <tbody id="table-body">
+            <!-- Rendered by JS -->
+          </tbody>
+        </table>
+
+        <!-- Empty state -->
+        <div class="empty-state" id="empty-state" role="status">
+          <i data-lucide="database-zap" style="width:48px;height:48px;color:var(--border-strong)" aria-hidden="true"></i>
+          <div class="empty-title">Không có CSDL phù hợp</div>
+          <div class="empty-hint">Thử thay đổi bộ lọc hoặc xoá từ khoá tìm kiếm.</div>
+        </div>
+      </div>
+
+      <!-- Pagination -->
+      <div class="pagination" role="navigation" aria-label="Phân trang">
+        <div style="display:flex;align-items:center;gap:12px">
+          <select class="page-size-select" id="page-size-select" onchange="setPageSize(Number(this.value))" aria-label="Số bản ghi mỗi trang">
+            <option value="10">10 bản ghi/trang</option>
+            <option value="20">20 bản ghi/trang</option>
+            <option value="50">50 bản ghi/trang</option>
+            <option value="100">100 bản ghi/trang</option>
+          </select>
+          <p class="page-info" id="page-info" aria-live="polite">
+            Hiển thị <strong id="page-from">1</strong>–<strong id="page-to">10</strong> trong tổng <strong id="page-total">15</strong> bản ghi
+          </p>
+        </div>
+        <div class="pager" id="pager" role="group" aria-label="Trang"></div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- ═══════════════ ADD DIALOG ═══════════════ -->
+<div class="dialog-overlay" id="add-dialog" role="dialog" aria-modal="true" aria-labelledby="dialog-title" onclick="closeDialogOnOverlay(event)">
+  <div class="dialog">
+    <div class="dialog-header">
+      <div class="dialog-title" id="dialog-title">Thêm kết nối CSDL mới</div>
+      <button class="dialog-close" onclick="closeDialog()" aria-label="Đóng hộp thoại">
+        <i data-lucide="x" style="width:16px;height:16px" aria-hidden="true"></i>
+      </button>
+    </div>
+    <div class="dialog-body">
+      <div class="form-row">
+        <div class="form-group" style="grid-column:1/-1">
+          <label class="form-label" for="f-name">Tên CSDL <span style="color:var(--danger-500)">*</span></label>
+          <input type="text" id="f-name" class="form-input" placeholder="VD: CSDL Dân cư Quốc gia" required minlength="3" maxlength="120">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="f-kind">Loại CSDL <span style="color:var(--danger-500)">*</span></label>
+          <select id="f-kind" class="form-select" onchange="onKindChange(this.value)" required>
+            <option value="">— Chọn loại —</option>
+            <option value="oracle">Oracle</option>
+            <option value="sqlserver">SQL Server</option>
+            <option value="postgres">PostgreSQL</option>
+            <option value="mongo">MongoDB</option>
+            <option value="mysql">MySQL</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="f-version">Phiên bản <span style="color:var(--danger-500)">*</span></label>
+          <input type="text" id="f-version" class="form-input" placeholder="VD: 19c, 2022, 15, 7.0">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="f-host">Host / IP <span style="color:var(--danger-500)">*</span></label>
+          <input type="text" id="f-host" class="form-input" placeholder="VD: 10.0.1.10">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="f-port">Port <span style="color:var(--danger-500)">*</span></label>
+          <input type="number" id="f-port" class="form-input" placeholder="1521" min="1" max="65535">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="f-username">Tên đăng nhập <span style="color:var(--danger-500)">*</span></label>
+          <input type="text" id="f-username" class="form-input" placeholder="VD: db_user">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="f-password">Mật khẩu <span style="color:var(--danger-500)">*</span></label>
+          <input type="password" id="f-password" class="form-input" placeholder="••••••••">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="f-dbname">Tên database <span style="color:var(--danger-500)">*</span></label>
+          <input type="text" id="f-dbname" class="form-input" placeholder="VD: ORCL, master, mydb">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="f-owner">Đơn vị chủ quản <span style="color:var(--danger-500)">*</span></label>
+          <select id="f-owner" class="form-select" required>
+            <option value="">— Chọn đơn vị —</option>
+            <option>Cục Dân số</option>
+            <option>Cục Tư pháp</option>
+            <option>Bộ Tài chính</option>
+            <option>Bộ Y tế</option>
+            <option>Bộ Giáo dục</option>
+            <option>Bộ GTVT</option>
+            <option>Tổng cục Thuế</option>
+            <option>Tổng cục Hải quan</option>
+            <option>BHXH Việt Nam</option>
+            <option>Bộ XDGT</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Bảo mật SSL</label>
+        <div class="toggle-row">
+          <label class="toggle" aria-label="Bật SSL">
+            <input type="checkbox" id="f-ssl">
+            <span class="toggle-slider"></span>
+          </label>
+          <span style="font-size:13px;color:var(--ink-500)">Kích hoạt kết nối SSL/TLS</span>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="f-notes">Ghi chú</label>
+        <textarea id="f-notes" class="form-textarea" placeholder="Mô tả hoặc ghi chú thêm về CSDL…"></textarea>
+      </div>
+    </div>
+    <div class="dialog-footer">
+      <button class="btn btn-outline" id="btn-test-conn" onclick="testConnection()" style="margin-right:auto">
+        <i data-lucide="zap" style="width:14px;height:14px" aria-hidden="true"></i>
+        Test kết nối
+      </button>
+      <button class="btn btn-outline" onclick="closeDialog()">Huỷ</button>
+      <button class="btn btn-primary" onclick="saveSource()">
+        <i data-lucide="save" style="width:14px;height:14px" aria-hidden="true"></i>
+        Lưu
+      </button>
     </div>
   </div>
-  
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      loadLayout('../../').then(() => {
-        renderDbList();
-      });
+</div>
+
+<!-- Toast container -->
+<div class="toast-container" id="toast-container" aria-live="assertive" aria-atomic="true"></div>
+
+<script>
+// ─── Data ───────────────────────────────────────────────────────────────
+const SOURCES = [
+  { id:1,  name:'CSDL Dân cư Quốc gia',        kind:'oracle',    version:'19c',  host:'10.0.1.10',  port:1521,  status:'ok',   owner:'Cục Dân số',         updatedAt:'2026-05-18T14:30:00' },
+  { id:2,  name:'CSDL Hộ tịch',                kind:'sqlserver', version:'2019', host:'10.0.1.20',  port:1433,  status:'ok',   owner:'Bộ Tư pháp',          updatedAt:'2026-05-19T09:15:00' },
+  { id:3,  name:'CSDL Đất đai',                kind:'postgres',  version:'15',   host:'10.0.1.30',  port:5432,  status:'err',  owner:'Bộ TNMT',             updatedAt:'2026-05-17T16:45:00' },
+  { id:4,  name:'CSDL Y tế (NoSQL)',            kind:'mongo',     version:'7.0',  host:'10.0.1.40',  port:27017, status:'ok',   owner:'Bộ Y tế',             updatedAt:'2026-05-19T11:00:00' },
+  { id:5,  name:'CSDL Giáo dục',               kind:'mysql',     version:'8.0',  host:'10.0.1.50',  port:3306,  status:'warn', owner:'Bộ GD&ĐT',            updatedAt:'2026-05-15T10:20:00' },
+  { id:6,  name:'CSDL Bảo hiểm XH',            kind:'oracle',    version:'19c',  host:'10.0.1.60',  port:1521,  status:'ok',   owner:'BHXH Việt Nam',       updatedAt:'2026-05-20T08:00:00' },
+  { id:7,  name:'CSDL Thuế',                   kind:'sqlserver', version:'2022', host:'10.0.1.70',  port:1433,  status:'ok',   owner:'Tổng cục Thuế',       updatedAt:'2026-05-20T14:00:00' },
+  { id:8,  name:'CSDL Hải quan',               kind:'oracle',    version:'12c',  host:'10.0.1.80',  port:1521,  status:'err',  owner:'Tổng cục Hải quan',   updatedAt:'2026-05-18T16:30:00' },
+  { id:9,  name:'CSDL Giao thông',             kind:'postgres',  version:'14',   host:'10.0.1.90',  port:5432,  status:'ok',   owner:'Bộ GTVT',             updatedAt:'2026-05-21T09:10:00' },
+  { id:10, name:'CSDL Doanh nghiệp',           kind:'mysql',     version:'5.7',  host:'10.0.1.100', port:3306,  status:'warn', owner:'Bộ KH&ĐT',            updatedAt:'2026-05-10T11:45:00' },
+  { id:11, name:'CSDL Lao động',               kind:'mongo',     version:'6.0',  host:'10.0.1.110', port:27017, status:'ok',   owner:'Bộ LĐTBXH',           updatedAt:'2026-05-21T10:20:00' },
+  { id:12, name:'CSDL Tư pháp',               kind:'sqlserver', version:'2017', host:'10.0.1.120', port:1433,  status:'ok',   owner:'Bộ Tư pháp',          updatedAt:'2026-05-19T15:30:00' },
+  { id:13, name:'CSDL Tài nguyên Môi trường', kind:'postgres',  version:'13',   host:'10.0.1.130', port:5432,  status:'err',  owner:'Bộ TNMT',             updatedAt:'2026-05-16T08:20:00' },
+  { id:14, name:'CSDL Xây dựng',              kind:'oracle',    version:'19c',  host:'10.0.1.140', port:1521,  status:'warn', owner:'Bộ Xây dựng',         updatedAt:'2026-05-12T14:10:00' },
+  { id:15, name:'CSDL Nông nghiệp',           kind:'mysql',     version:'8.0',  host:'10.0.1.150', port:3306,  status:'ok',   owner:'Bộ NN&PTNT',          updatedAt:'2026-05-20T16:45:00' },
+];
+
+const KIND_META = {
+  oracle:    { label:'Oracle',     short:'OR', bg:'#fef2f2', text:'#b91c1c', swatch:'#ef4444', iconBg:'#ef4444' },
+  sqlserver: { label:'SQL Server', short:'MS', bg:'#fef3ec', text:'#c2410c', swatch:'#f97316', iconBg:'#f97316' },
+  postgres:  { label:'PostgreSQL', short:'PG', bg:'#eff6ff', text:'#1d4ed8', swatch:'#3b82f6', iconBg:'#3b82f6' },
+  mongo:     { label:'MongoDB',    short:'MG', bg:'#ecfdf5', text:'#047857', swatch:'#10b981', iconBg:'#10b981' },
+  mysql:     { label:'MySQL',      short:'MY', bg:'#eef2ff', text:'#4338ca', swatch:'#6366f1', iconBg:'#6366f1' },
+};
+const DEFAULT_PORTS = { oracle:1521, sqlserver:1433, postgres:5432, mongo:27017, mysql:3306 };
+
+// ─── State ──────────────────────────────────────────────────────────────
+let state = {
+  q: '', status: 'all', kind: 'all',
+  sort: 'id', order: 'asc',
+  page: 1, pageSize: 10,
+};
+let filteredRows = [];
+let data = [...SOURCES];
+
+// ─── Filter & Sort ──────────────────────────────────────────────────────
+function applyFilters() {
+  const { q, status, kind, sort, order } = state;
+  filteredRows = data
+    .filter(r => !q || [r.name, r.host, r.owner].some(s => s.toLowerCase().includes(q.toLowerCase())))
+    .filter(r => status === 'all' || r.status === status)
+    .filter(r => kind   === 'all' || r.kind   === kind)
+    .sort((a, b) => {
+      const dir = order === 'asc' ? 1 : -1;
+      let va = sort === 'host' ? `${a.host}:${a.port}` : a[sort];
+      let vb = sort === 'host' ? `${b.host}:${b.port}` : b[sort];
+      if (typeof va === 'string') va = va.toLowerCase();
+      if (typeof vb === 'string') vb = vb.toLowerCase();
+      return va < vb ? -dir : va > vb ? dir : 0;
     });
+}
 
-    function renderDbList() {
-        const tbody = document.getElementById('db-list-body');
-        if (!tbody || typeof MOCK_DATA === 'undefined') return;
-        
-        let html = '';
-        MOCK_DATA.csdlNguon.forEach((db, index) => {
-            const statusInfo = STATUS_LABELS[db.trangThai] || { label: 'Không xác định', color: 'gray' };
-            const typeInfo = DB_TYPE_COLORS[db.loai] || { bg: '#6B7280', text: 'white', icon: 'database' };
-            
-            // Badge color logic
-            let badgeBg = 'bg-gray-100';
-            let badgeText = 'text-gray-600';
-            let dotColor = 'bg-gray-400';
-            let statusBorder = 'border-gray-200';
-            
-            if (statusInfo.color === 'success') {
-                badgeBg = 'bg-success-50'; badgeText = 'text-success-700'; dotColor = 'bg-success-500'; statusBorder = 'border-success-200';
-            } else if (statusInfo.color === 'error') {
-                badgeBg = 'bg-error-50'; badgeText = 'text-error-700'; dotColor = 'bg-error-500'; statusBorder = 'border-error-200';
-            } else if (statusInfo.color === 'warning') {
-                badgeBg = 'bg-warning-50'; badgeText = 'text-warning-700'; dotColor = 'bg-warning-500'; statusBorder = 'border-warning-200';
-            }
-            
-            // Type badge color logic
-            let typeBg = 'bg-gray-500'; let typeText = 'text-white';
-            if (db.loai === 'Oracle') { typeBg = 'bg-[#F80000]'; }
-            else if (db.loai === 'SQL Server') { typeBg = 'bg-[#CC2927]'; }
-            else if (db.loai === 'MySQL') { typeBg = 'bg-[#00758F]'; }
-            else if (db.loai === 'PostgreSQL') { typeBg = 'bg-[#336791]'; }
-            else if (db.loai === 'MongoDB') { typeBg = 'bg-[#47A248]'; }
+// ─── Relative time ──────────────────────────────────────────────────────
+function relTime(iso) {
+  const now = Date.now();
+  const t = new Date(iso).getTime();
+  const min = Math.round((now - t) / 60000);
+  if (min < 60)   return `${min} phút trước`;
+  if (min < 1440) return `${Math.round(min/60)} giờ trước`;
+  const d = Math.round(min/1440);
+  if (d < 30) return `${d} ngày trước`;
+  return iso.slice(0,10);
+}
+function absTime(iso) {
+  return iso.replace('T', ' ').slice(0,16);
+}
 
-            html += `
-            <tr class="hover:bg-gray-50 transition-colors cursor-pointer">
-                <td class="px-4 py-3 text-center text-gray-500">${index + 1}</td>
-                <td class="px-4 py-3 font-bold text-gray-800"><div class="truncate max-w-[250px]" title="${db.ten}">${db.ten}</div></td>
-                <td class="px-4 py-3">
-                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md ${typeBg} ${typeText} font-medium text-xs whitespace-nowrap">
-                        <i data-lucide="${typeInfo.icon}" class="w-3.5 h-3.5"></i> ${db.loai} ${db.version}
-                    </span>
-                </td>
-                <td class="px-4 py-3 font-mono text-xs text-gray-600">${db.host}:${db.port}</td>
-                <td class="px-4 py-3">
-                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-medium whitespace-nowrap ${badgeBg} ${badgeText} border ${statusBorder}">
-                        <span class="w-1.5 h-1.5 rounded-full ${dotColor}"></span> ${statusInfo.label}
-                    </span>
-                </td>
-                <td class="px-4 py-3 text-gray-500 hidden xl:table-cell whitespace-nowrap">${db.ngayCapNhat || '-'}</td>
-                <td class="px-4 py-3 text-center" onclick="event.stopPropagation()">
-                    <div class="flex items-center justify-center gap-1">
-                        <button class="p-1.5 text-gray-500 hover:text-primary-600 hover:bg-gray-100 rounded-md transition-colors" title="Xem chi tiết"><i data-lucide="eye" class="w-4 h-4"></i></button>
-                        <button class="p-1.5 text-gray-500 hover:text-warning-600 hover:bg-gray-100 rounded-md transition-colors" title="Chỉnh sửa"><i data-lucide="edit-3" class="w-4 h-4"></i></button>
-                        <button class="p-1.5 text-gray-500 hover:text-info-600 hover:bg-gray-100 rounded-md transition-colors" title="Kiểm tra kết nối"><i data-lucide="plug" class="w-4 h-4"></i></button>
-                        <button class="p-1.5 text-error-500 hover:text-error-600 hover:bg-error-50 rounded-md transition-colors" title="Xóa kết nối"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
-                    </div>
-                </td>
-            </tr>
-            `;
-        });
-        
-        tbody.innerHTML = html;
-        if(window.lucide) lucide.createIcons();
+// ─── Render ─────────────────────────────────────────────────────────────
+function render() {
+  applyFilters();
+  updateStats();
+  renderTable();
+  renderPagination();
+  updateChips();
+  if (window.lucide) lucide.createIcons();
+}
+
+function updateStats() {
+  const counts = { ok:0, warn:0, err:0 };
+  data.forEach(r => { if (counts[r.status] !== undefined) counts[r.status]++; });
+  document.getElementById('val-total').textContent = data.length;
+  document.getElementById('val-ok').textContent   = counts.ok;
+  document.getElementById('val-warn').textContent = counts.warn;
+  document.getElementById('val-err').textContent  = counts.err;
+
+  // Chip counts (from filtered by all but status)
+  const countByStatus = { all:0, ok:0, warn:0, err:0 };
+  data.filter(r =>
+    (!state.q || [r.name, r.host, r.owner].some(s => s.toLowerCase().includes(state.q.toLowerCase()))) &&
+    (state.kind === 'all' || r.kind === state.kind)
+  ).forEach(r => { countByStatus.all++; countByStatus[r.status]++; });
+  document.getElementById('chip-count-all').textContent  = countByStatus.all;
+  document.getElementById('chip-count-ok').textContent   = countByStatus.ok;
+  document.getElementById('chip-count-warn').textContent = countByStatus.warn;
+  document.getElementById('chip-count-err').textContent  = countByStatus.err;
+}
+
+function renderTable() {
+  const tbody = document.getElementById('table-body');
+  const empty = document.getElementById('empty-state');
+  const { page, pageSize } = state;
+  const start = (page - 1) * pageSize;
+  const slice = filteredRows.slice(start, start + pageSize);
+
+  if (filteredRows.length === 0) {
+    tbody.innerHTML = '';
+    empty.classList.add('visible');
+    return;
+  }
+  empty.classList.remove('visible');
+
+  const km = KIND_META;
+  tbody.innerHTML = slice.map((r, idx) => {
+    const k = km[r.kind] || { label:r.kind, short:r.kind.slice(0,2).toUpperCase(), bg:'#f3f4fb', text:'#5b6175', swatch:'#b3b8c8', iconBg:'#b3b8c8' };
+    const sttNum = String(start + idx + 1).padStart(2, '0');
+    const statusCls = r.status;
+    const statusLabel = r.status === 'ok' ? 'Đã kết nối' : r.status === 'warn' ? 'Chờ cấu hình' : 'Lỗi kết nối';
+    return `
+      <tr tabindex="0" role="row" onclick="viewDetail(${r.id})" onkeydown="if(event.key==='Enter')viewDetail(${r.id})">
+        <td class="center"><span class="stt">${sttNum}</span></td>
+        <td>
+          <div class="db-cell">
+            <div class="db-icon-wrap" style="background:${k.iconBg}" aria-hidden="true">${k.short}</div>
+            <div>
+              <div class="db-name">${r.name}</div>
+              <div class="db-owner">${r.owner}</div>
+            </div>
+          </div>
+        </td>
+        <td>
+          <span class="kind-tag" style="background:${k.bg};color:${k.text};border:1px solid ${k.text}28">
+            <span class="kind-swatch" style="background:${k.swatch}" aria-hidden="true"></span>
+            ${k.label}
+            <span class="kind-version">${r.version}</span>
+          </span>
+        </td>
+        <td>
+          <span class="host-pill" id="host-${r.id}">
+            <span class="host-host">${r.host}</span>
+            <span class="host-colon">:</span>
+            <span class="host-port">${r.port}</span>
+            <button class="host-copy" onclick="copyHost(event, '${r.host}:${r.port}', ${r.id})"
+                    aria-label="Sao chép ${r.host}:${r.port}" title="Sao chép host:port">
+              <i data-lucide="copy" style="width:11px;height:11px" aria-hidden="true"></i>
+            </button>
+          </span>
+        </td>
+        <td>
+          <span class="status-badge ${statusCls}" role="status" aria-label="${statusLabel}">
+            <span class="pulse" aria-hidden="true"></span>
+            ${statusLabel}
+          </span>
+        </td>
+        <td>
+          <div class="updated-rel">${relTime(r.updatedAt)}</div>
+          <div class="updated-abs">${absTime(r.updatedAt)}</div>
+        </td>
+        <td onclick="event.stopPropagation()">
+          <div class="row-actions">
+            <button class="action-btn" onclick="viewDetail(${r.id})" aria-label="Xem chi tiết ${r.name}" title="Xem chi tiết">
+              <i data-lucide="eye" style="width:15px;height:15px" aria-hidden="true"></i>
+            </button>
+            <button class="action-btn" onclick="editSource(${r.id})" aria-label="Chỉnh sửa ${r.name}" title="Chỉnh sửa">
+              <i data-lucide="edit-3" style="width:15px;height:15px" aria-hidden="true"></i>
+            </button>
+            <button class="action-btn" onclick="testSingleConn(${r.id})" aria-label="Test kết nối ${r.name}" title="Kiểm tra kết nối">
+              <i data-lucide="zap" style="width:15px;height:15px" aria-hidden="true"></i>
+            </button>
+            <button class="action-btn danger" onclick="deleteSource(${r.id})" aria-label="Xoá ${r.name}" title="Xoá">
+              <i data-lucide="trash-2" style="width:15px;height:15px" aria-hidden="true"></i>
+            </button>
+          </div>
+        </td>
+      </tr>`;
+  }).join('');
+}
+
+function renderPagination() {
+  const { page, pageSize } = state;
+  const total = filteredRows.length;
+  const totalPages = Math.max(1, Math.ceil(total / pageSize));
+  const from = total === 0 ? 0 : (page - 1) * pageSize + 1;
+  const to   = Math.min(page * pageSize, total);
+
+  document.getElementById('page-from').textContent  = from;
+  document.getElementById('page-to').textContent    = to;
+  document.getElementById('page-total').textContent = total;
+
+  const pager = document.getElementById('pager');
+  let html = `<button class="page-btn" onclick="goPage(${page-1})" ${page<=1?'disabled':''} aria-label="Trang trước">
+    <i data-lucide="chevron-left" style="width:14px;height:14px"></i>
+  </button>`;
+  const maxVisible = 5;
+  let startP = Math.max(1, page - 2), endP = Math.min(totalPages, startP + maxVisible - 1);
+  if (endP - startP < maxVisible - 1) startP = Math.max(1, endP - maxVisible + 1);
+  for (let p = startP; p <= endP; p++) {
+    html += `<button class="page-btn${p===page?' active':''}" onclick="goPage(${p})" aria-label="Trang ${p}" ${p===page?'aria-current="page"':''}>${p}</button>`;
+  }
+  html += `<button class="page-btn" onclick="goPage(${page+1})" ${page>=totalPages?'disabled':''} aria-label="Trang sau">
+    <i data-lucide="chevron-right" style="width:14px;height:14px"></i>
+  </button>`;
+  pager.innerHTML = html;
+}
+
+function updateChips() {
+  const statuses = ['all','ok','warn','err'];
+  statuses.forEach(s => {
+    const el = document.getElementById(`chip-status-${s}`);
+    if (el) el.classList.toggle('active', state.status === s);
+  });
+  const kinds = ['all','oracle','sqlserver','postgres','mongo','mysql'];
+  kinds.forEach(k => {
+    const el = document.getElementById(`chip-kind-${k}`);
+    if (el) el.classList.toggle('active', state.kind === k);
+  });
+  // Sort icon highlights
+  const sortCols = ['id','name','kind','host','status','updatedAt'];
+  sortCols.forEach(col => {
+    const el = document.getElementById(`sort-${col}`);
+    if (el) el.classList.toggle('active', state.sort === col);
+  });
+  // aria-sort
+  const thMap = { id:0, name:1, kind:2, host:3, status:4, updatedAt:5 };
+  const ths = document.querySelectorAll('#main-table thead th');
+  sortCols.forEach((col, i) => {
+    const th = ths[i];
+    if (!th) return;
+    if (state.sort === col) {
+      th.setAttribute('aria-sort', state.order === 'asc' ? 'ascending' : 'descending');
+    } else {
+      th.setAttribute('aria-sort', 'none');
     }
-  </script>
+  });
+}
+
+// ─── Event handlers ─────────────────────────────────────────────────────
+function onSearchChange(v) {
+  state.q = v; state.page = 1; render();
+}
+function setStatusFilter(s) {
+  state.status = s; state.page = 1; render();
+}
+function setKindFilter(k) {
+  state.kind = k; state.page = 1; render();
+}
+function sortBy(col) {
+  if (state.sort === col) {
+    state.order = state.order === 'asc' ? 'desc' : 'asc';
+  } else {
+    state.sort = col; state.order = 'asc';
+  }
+  state.page = 1; render();
+}
+function goPage(p) {
+  const total = filteredRows.length;
+  const maxP = Math.max(1, Math.ceil(total / state.pageSize));
+  if (p < 1 || p > maxP) return;
+  state.page = p; render();
+}
+function setPageSize(n) {
+  state.pageSize = n; state.page = 1; render();
+}
+
+// ─── Copy host ──────────────────────────────────────────────────────────
+function copyHost(event, text, id) {
+  event.stopPropagation();
+  navigator.clipboard.writeText(text).then(() => {
+    const pill = document.getElementById(`host-${id}`);
+    if (pill) { pill.classList.add('copied'); setTimeout(() => pill.classList.remove('copied'), 1200); }
+    showToast('Đã sao chép: ' + text, 'success');
+  }).catch(() => showToast('Không thể sao chép', 'error'));
+}
+
+// ─── Row actions ─────────────────────────────────────────────────────────
+function viewDetail(id) {
+  window.location.href = 'chi-tiet.html';
+}
+function editSource(id) {
+  showToast('Đang mở form chỉnh sửa CSDL #' + id);
+}
+function testSingleConn(id) {
+  const src = data.find(r => r.id === id);
+  if (!src) return;
+  showToast(`Đang kiểm tra kết nối ${src.host}:${src.port}…`);
+  setTimeout(() => {
+    const ok = src.status === 'ok';
+    showToast(ok ? `Kết nối thành công (${src.name}) — 42ms` : `Kết nối thất bại (${src.name})`, ok ? 'success' : 'error');
+  }, 1400);
+}
+function deleteSource(id) {
+  const src = data.find(r => r.id === id);
+  if (!src) return;
+  if (confirm(`Xác nhận xoá kết nối "${src.name}"?`)) {
+    data = data.filter(r => r.id !== id);
+    render();
+    showToast(`Đã xoá kết nối "${src.name}"`, 'success');
+  }
+}
+
+// ─── Dialog ─────────────────────────────────────────────────────────────
+function openDialog() {
+  document.getElementById('add-dialog').classList.add('open');
+  document.getElementById('f-name').focus();
+}
+function closeDialog() {
+  document.getElementById('add-dialog').classList.remove('open');
+}
+function closeDialogOnOverlay(e) {
+  if (e.target === document.getElementById('add-dialog')) closeDialog();
+}
+function onKindChange(kind) {
+  if (DEFAULT_PORTS[kind]) {
+    document.getElementById('f-port').value = DEFAULT_PORTS[kind];
+  }
+}
+function testConnection() {
+  const host = document.getElementById('f-host').value;
+  const port = document.getElementById('f-port').value;
+  if (!host || !port) { showToast('Vui lòng nhập host và port trước', 'error'); return; }
+  const btn = document.getElementById('btn-test-conn');
+  btn.disabled = true;
+  btn.textContent = 'Đang test…';
+  setTimeout(() => {
+    btn.disabled = false;
+    btn.innerHTML = '<i data-lucide="zap" style="width:14px;height:14px"></i> Test kết nối';
+    if (window.lucide) lucide.createIcons();
+    showToast(`Kết nối thành công ${host}:${port} — 38ms`, 'success');
+  }, 1600);
+}
+function saveSource() {
+  const name = document.getElementById('f-name').value.trim();
+  const kind = document.getElementById('f-kind').value;
+  const version = document.getElementById('f-version').value.trim();
+  const host = document.getElementById('f-host').value.trim();
+  const port = parseInt(document.getElementById('f-port').value);
+  const owner = document.getElementById('f-owner').value;
+
+  if (!name || !kind || !version || !host || !port || !owner) {
+    showToast('Vui lòng điền đầy đủ các trường bắt buộc', 'error');
+    return;
+  }
+  const newId = Math.max(...data.map(r => r.id)) + 1;
+  data.push({ id:newId, name, kind, version, host, port, status:'warn', owner, updatedAt: new Date().toISOString() });
+  closeDialog();
+  render();
+  showToast(`Đã thêm kết nối "${name}"`, 'success');
+}
+
+// ─── Export ─────────────────────────────────────────────────────────────
+function exportExcel() {
+  showToast('Đang xuất file Excel…');
+  setTimeout(() => showToast('Xuất Excel thành công (15 bản ghi)', 'success'), 1200);
+}
+
+// ─── Nav group toggle ────────────────────────────────────────────────────
+function toggleNavGroup(btn) {
+  const childId = btn.getAttribute('aria-controls');
+  const children = childId ? document.getElementById(childId) : btn.nextElementSibling;
+  if (!children) return;
+  const isOpen = children.classList.contains('open');
+  children.classList.toggle('open');
+  btn.classList.toggle('open', !isOpen);
+  btn.setAttribute('aria-expanded', String(!isOpen));
+}
+
+// ─── Toast ───────────────────────────────────────────────────────────────
+function showToast(msg, type = '') {
+  const container = document.getElementById('toast-container');
+  const toast = document.createElement('div');
+  toast.className = `toast${type ? ' '+type : ''}`;
+  const icons = { success:'✓', error:'✗', '':'ℹ' };
+  toast.innerHTML = `<span>${icons[type] || 'ℹ'}</span> ${msg}`;
+  container.appendChild(toast);
+  setTimeout(() => { toast.style.opacity = '0'; toast.style.transition = 'opacity 0.3s'; setTimeout(() => toast.remove(), 300); }, 3000);
+}
+
+// ─── Keyboard shortcuts ──────────────────────────────────────────────────
+document.addEventListener('keydown', e => {
+  if ((e.ctrlKey || e.metaKey) && e.key === 'k') { e.preventDefault(); document.getElementById('search-input').focus(); }
+  if (e.key === '/' && document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') {
+    e.preventDefault(); document.getElementById('search-input').focus();
+  }
+  if (e.key === 'n' && document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') {
+    openDialog();
+  }
+  if (e.key === 'Escape') {
+    closeDialog();
+    const si = document.getElementById('search-input');
+    if (document.activeElement === si && si.value) { si.value = ''; onSearchChange(''); }
+  }
+});
+
+// ─── Init ────────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  render();
+  if (window.lucide) lucide.createIcons();
+});
+</script>
 </body>
 </html>

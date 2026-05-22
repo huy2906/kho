@@ -16,14 +16,20 @@
             500: '#3B82F6', 600: '#2563EB', 700: '#1D4ED8',
             800: '#1E40AF', 900: '#1E3A8A'
           },
-
           success: { 50: '#F0FDF4', 100: '#DCFCE7', 600: '#16A34A', 700: '#15803D' },
           warning: { 50: '#FFFBEB', 100: '#FEF3C7', 600: '#F59E0B', 700: '#B45309' },
           error:   { 50: '#FEF2F2', 100: '#FEE2E2', 600: '#DC2626', 700: '#B91C1C' },
-          info:    { 50: '#F0F9FF', 100: '#E0F2FE', 600: '#0EA5E9', 700: '#0369A1' }
+          info:    { 50: '#F0F9FF', 100: '#E0F2FE', 600: '#0EA5E9', 700: '#0369A1' },
+          'gov-header': '#7C1F2C',
+          'gov-header-dark': '#5D1620',
+          'gov-blue': { 50:'#E3F2FD', 100:'#BBDEFB', 500:'#2196F3', 600:'#1E88E5', 700:'#1976D2', 800:'#1565C0' },
+          'gov-red': '#DA251D',
+          'gov-yellow': '#FFCD00'
         },
         fontFamily: {
-          sans: ['"Be Vietnam Pro"', 'Inter', 'system-ui', 'sans-serif']
+          sans: ['"Be Vietnam Pro"', '"Plus Jakarta Sans"', 'Inter', 'system-ui', 'sans-serif'],
+          gov:  ['"Be Vietnam Pro"', '"Plus Jakarta Sans"', 'Inter', 'sans-serif'],
+          mono: ['"JetBrains Mono"', 'ui-monospace', 'monospace']
         }
       }
     }
@@ -31,7 +37,7 @@
   </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <script src="https://unpkg.com/lucide@latest"></script>
   <link rel="stylesheet" href="../../assets/css/custom.css">
   
@@ -42,13 +48,17 @@
 <body class="font-sans bg-gray-50 text-gray-800">
 
   
-  <div class="flex h-screen overflow-hidden pt-1">
-    <aside id="app-sidebar" class="w-[260px] bg-primary-900 text-white flex-shrink-0 flex flex-col transition-all duration-300 z-30"></aside>
+  <div class="flex flex-col min-h-screen">
+    <!-- Header full-width (màu đỏ tía gov VN - managed by component) -->
+    <div id="app-header" class="flex-shrink-0 sticky top-0 z-30"></div>
     
-    <div class="flex-1 flex flex-col overflow-hidden relative">
-      <div id="app-header" class="flex-shrink-0 relative z-20"></div>
+    <!-- Content area: sidebar trắng + main -->
+    <div class="flex flex-1 min-h-0">
+      <aside id="app-sidebar" class="flex-shrink-0 overflow-y-auto"></aside>
       
-      <nav class="px-6 py-3 bg-white border-b border-gray-200 flex-shrink-0 shadow-sm relative z-10">
+      <div class="flex-1 flex flex-col bg-gray-50">
+        <!-- Breadcrumb -->
+        <nav class="px-6 py-3 bg-white border-b border-gray-200 flex-shrink-0 shadow-sm relative z-10">
         <ol class="flex items-center gap-2 text-sm">
           <li><a href="../../index.html" class="text-gray-500 hover:text-primary-600 transition-colors">Trang chủ</a></li>
           <li class="text-gray-400"><i data-lucide="chevron-right" class="w-4 h-4"></i></li>
@@ -173,6 +183,7 @@
       <div id="app-footer" class="flex-shrink-0"></div>
     </div>
   </div>
+</div>
   
   <script>
     document.addEventListener('DOMContentLoaded', () => {

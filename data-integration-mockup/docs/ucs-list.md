@@ -1,38 +1,79 @@
-# Danh sách Use Case Dự án Hệ thống Tích hợp Dữ liệu
+# Danh sách Use Case — Hệ thống Tích hợp Dữ liệu
 
-Bảng dưới đây thống kê 42 Use Case thuộc 2 phân hệ cốt lõi của dự án. 
-Vui lòng cập nhật trạng thái "Đã có mẫu" khi thiết kế xong HTML mockup.
+Thống kê Use Case cốt lõi, tổ chức theo **luồng xử lý nghiệp vụ** và menu sidebar.
 
-| Mã | Tên UC | Phân hệ | Menu | Người phụ trách | Trạng thái |
-|----|--------|---------|------|-----------------|------------|
-| **Phân hệ I.1: Quản lý cấu trúc dữ liệu (CTDL) của CSDL tích hợp** | | | | | |
-| UC001 | Lấy CTDL từ CSDL gốc trên Oracle | I.1 | CSDL nguồn | BA_Team | ✅ Đã có mẫu |
-| UC002 | Lấy CTDL từ CSDL gốc trên SQL Server, MySQL | I.1 | CSDL nguồn | (chưa giao) | Chưa làm |
-| UC003 | Lấy CTDL từ CSDL gốc trên PostgreSQL, MongoDB | I.1 | CSDL nguồn | (chưa giao) | Chưa làm |
-| UC004 | Lấy CTDL từ API/Web Service (REST/SOAP) | I.1 | Nguồn ngoài > API | (chưa giao) | Chưa làm |
-| UC005 | Thiết lập cấu trúc dữ liệu tích hợp (Map Schema) | I.1 | Cấu trúc dữ liệu (CTDL) | BA_Team | ✅ Đã có mẫu |
-| UC006 | Chỉnh sửa kiểu dữ liệu (Data Type Transformation) | I.1 | Cấu trúc dữ liệu (CTDL) | (chưa giao) | Chưa làm |
-| UC007 | Xóa/Vô hiệu hóa cấu trúc dữ liệu | I.1 | Cấu trúc dữ liệu (CTDL) | (chưa giao) | Chưa làm |
-| UC008 | Kiểm tra (Validate) tính nhất quán của cấu trúc | I.1 | Cấu trúc dữ liệu (CTDL) | (chưa giao) | Chưa làm |
-| **Phân hệ II.1: Tích hợp dữ liệu từ CSDL gốc về Hệ thống** | | | | | |
-| UC016 | Quản lý luồng Tích hợp (Batch Jobs) | II.1 | Tích hợp từ CSDL | (chưa giao) | Chưa làm |
-| UC017 | Tích hợp dữ liệu Full-load | II.1 | Tích hợp từ CSDL | (chưa giao) | Chưa làm |
-| UC018 | Tích hợp dữ liệu Incremental-load | II.1 | Tích hợp từ CSDL | (chưa giao) | Chưa làm |
-| UC019 | Tích hợp theo tham số vòng lặp (Pagination) | II.1 | Tích hợp từ CSDL | (chưa giao) | Chưa làm |
-| UC020 | Giao diện kéo thả workflow ETL | II.1 | Tích hợp từ CSDL | (chưa giao) | Chưa làm |
-| UC021 | Chuyển đổi dữ liệu chuẩn hóa (Cleansing) | II.1 | Nguồn ngoài > API | (chưa giao) | Chưa làm |
-| UC022 | Map giá trị từ điển ngữ cảnh (Dictionary Lookup) | II.1 | Nguồn ngoài > API | (chưa giao) | Chưa làm |
-| UC023 | Lập lịch chạy tự động (Cron-based Scheduler) | II.1 | Lập lịch & Tự động hóa | (chưa giao) | Chưa làm |
-| ... | *(Các UC khác từ 24-26)* | II.1 | N/A | (chưa giao) | Chưa làm |
-| UC027 | Quản lý tệp dữ liệu | I.2 | Nguồn ngoài > Tệp | (chưa giao) | Chưa làm |
-| ... | *(Các UC khác từ 28-31)* | II.1 | N/A | (chưa giao) | Chưa làm |
-| **Phân hệ II.2: Cập nhật dữ liệu thay đổi (CDC)** | | | | | |
-| UC032 | Cấu hình nguồn dữ liệu CDC Streaming | II.2 | Cập nhật thay đổi (CDC) | (chưa giao) | Chưa làm |
-| UC033 | Theo dõi tiến trình Real-time | II.2 | Cập nhật thay đổi (CDC) | (chưa giao) | Chưa làm |
-| ... | *(Các UC khác từ 34-39)* | II.2 | Cập nhật thay đổi (CDC) | (chưa giao) | Chưa làm |
-| **Phân hệ II.3: Quản lý dữ liệu phi cấu trúc** | | | | | |
-| UC040 | Quản trị Object Storage (MinIO/S3) | II.3 | Quản lý tệp | (chưa giao) | Chưa làm |
-| ... | *(Các UC khác từ 41-46)* | II.3 | Quản lý tệp | (chưa giao) | Chưa làm |
-| UC047 | Tích hợp các tệp dữ liệu trên CSDL MySQL | II.3 | Quản lý tệp | (chưa giao) | Chưa làm |
+---
 
-*Ghi chú: File này cần được BAs cập nhật liên tục mỗi khi một template UC hoàn thiện ở thư mục `screens/` và được đưa lên file `index.html` gốc.*
+## Phân hệ I: Quản lý Nguồn dữ liệu
+
+| Mã UC | Tên màn hình | Menu Sidebar | Loại | File | Trạng thái |
+|---|---|---|---|---|---|
+| UC001 | Quản lý CSDL Nguồn — Danh sách | Quản lý DB > CSDL nguồn | List/CRUD | `UC001/index.html` | ✅ Chuẩn mới |
+| UC001b | Quản lý CSDL Nguồn — Chi tiết | CSDL nguồn > Chi tiết | Detail+Tab | `UC001/chi-tiet.html` | ✅ Chuẩn mới |
+| UC002 | Chi tiết CSDL Oracle (tab Cấu trúc) | CSDL nguồn > Chi tiết | Tab | — | Chưa làm |
+| UC003 | Chi tiết CSDL SQL Server / MySQL | CSDL nguồn > Chi tiết | Tab | — | Chưa làm |
+| UC004 | Chi tiết CSDL PostgreSQL | CSDL nguồn > Chi tiết | Tab | — | Chưa làm |
+| UC005 | Chi tiết CSDL MongoDB | CSDL nguồn > Chi tiết | Tab | — | Chưa làm |
+| UC027 | Quản lý API endpoint | Quản lý DB > Nguồn dữ liệu ngoài | List | — | Chưa làm |
+| UC042 | Quản lý tệp dữ liệu | Quản lý DB > Nguồn dữ liệu ngoài | List | — | Chưa làm |
+
+> **Lưu ý**: Schema/cấu trúc nguồn được nhúng vào **Tab "Cấu trúc"** trong trang chi tiết — KHÔNG có menu riêng.
+
+---
+
+## Phân hệ II: Thiết kế Kho Tích hợp
+
+| Mã UC | Tên màn hình | Menu Sidebar | Loại | File | Trạng thái |
+|---|---|---|---|---|---|
+| UC010 | Quản lý CSDL Tích hợp — Danh sách | Quản lý DB > CSDL tích hợp | List | — | Chưa làm |
+| UC011 | CSDL Tích hợp — Chi tiết + Tab Schema | CSDL tích hợp > Chi tiết | Detail+Tab | — | Chưa làm |
+| UC015 | Cấu hình Mapping Schema | Mapping & chuyển đổi | Mapping | — | Chưa làm |
+| UC016 | Quản lý quy tắc biến đổi | Mapping & chuyển đổi | List | — | Chưa làm |
+| UC005 | Thiết lập CTDL tích hợp | Quản lý DB > Cấu trúc dữ liệu | Form+Schema | `UC005/index.html` | ✅ (legacy) |
+
+---
+
+## Phân hệ III: Vận hành Tích hợp
+
+| Mã UC | Tên màn hình | Menu Sidebar | Loại | File | Trạng thái |
+|---|---|---|---|---|---|
+| UC020 | Quản lý Tác vụ ETL — Danh sách | Tác vụ tích hợp | List | — | Chưa làm |
+| UC021 | Tạo Tác vụ ETL mới | Tác vụ tích hợp > Tạo | Form | — | Chưa làm |
+| UC025 | Lập lịch chạy Job | Lập lịch tự động | Calendar/Form | — | Chưa làm |
+| UC030 | Quản lý CDC Stream | Tác vụ tích hợp | List | — | Chưa làm |
+
+---
+
+## Phân hệ IV: Giám sát & Quản trị
+
+| Mã UC | Tên màn hình | Menu Sidebar | Loại | File | Trạng thái |
+|---|---|---|---|---|---|
+| UC033 | Dashboard Theo dõi tác vụ | Theo dõi tác vụ | Dashboard | — | Chưa làm |
+| UC034 | Xem Log chi tiết Job | Theo dõi tác vụ | Detail | — | Chưa làm |
+| UC038 | Nhật ký hệ thống | Nhật ký hệ thống | Log Table | — | Chưa làm |
+| UC040 | Quản lý Cảnh báo & Sự cố | Cảnh báo & sự cố | List+Detail | — | Chưa làm |
+| UC045 | Cài đặt hệ thống | Cài đặt hệ thống | Settings | — | Chưa làm |
+
+---
+
+## Sidebar navigation mapping
+
+```
+Dashboard tổng quan
+Quản lý cơ sở dữ liệu [▼]
+  ├── CSDL nguồn           ← UC001 (active chuẩn)
+  ├── CSDL tích hợp        ← UC010
+  ├── Nguồn dữ liệu ngoài  ← UC027, UC042
+  └── Cấu trúc dữ liệu     ← UC005 (legacy)
+Mapping & chuyển đổi [▼]   ← UC015, UC016
+Tác vụ tích hợp        [8] ← UC020, UC021, UC030
+Lập lịch tự động           ← UC025
+Theo dõi tác vụ            ← UC033, UC034
+Nhật ký hệ thống           ← UC038
+Cảnh báo & sự cố       [3] ← UC040
+Cài đặt hệ thống           ← UC045
+```
+
+---
+
+*Cập nhật: 2026-05-23 — Phản ánh thiết kế navy gradient (UC001 v2).*

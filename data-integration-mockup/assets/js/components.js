@@ -19,96 +19,117 @@ async function loadLayout(basePath = '../../') {
   // Re-render Lucide icons sau khi inject HTML
   if (window.lucide) lucide.createIcons();
   
-  // Highlight active menu
+  // Highlight active menu (Gov VN pill style)
   autoExpandActiveSubmenu();
 }
 
 // Toggle sidebar collapsed/expanded
 function toggleSidebar() {
-  document.getElementById('app-sidebar').classList.toggle('collapsed');
+  const sidebar = document.getElementById('app-sidebar');
+  const inner   = document.getElementById('app-sidebar-inner');
+  if (sidebar) sidebar.classList.toggle('collapsed');
+  if (inner)   inner.classList.toggle('collapsed');
 }
 
 function toggleSubmenu(buttonEl) {
   const submenu = buttonEl.nextElementSibling;
+  if (!submenu) return;
   const chevron = buttonEl.querySelector('.chevron');
-  const isOpen = !submenu.classList.contains('hidden');
-  
+  const isOpen  = !submenu.classList.contains('hidden');
+
   submenu.classList.toggle('hidden');
-  chevron.style.transform = isOpen ? 'rotate(0deg)' : 'rotate(90deg)';
-  buttonEl.setAttribute('aria-expanded', !isOpen);
+  if (chevron) chevron.style.transform = isOpen ? 'rotate(0deg)' : 'rotate(90deg)';
+  buttonEl.setAttribute('aria-expanded', String(!isOpen));
 }
 
-// Auto-expand submenu chứa trang hiện tại và highlight các nav-link thông thường
+// Auto-expand submenu chứa trang hiện tại và highlight nav items theo Gov VN pill style
 function autoExpandActiveSubmenu() {
   let currentPath = window.location.pathname;
   if (currentPath.endsWith('/')) currentPath += 'index.html';
-  
+
   let foundActive = false;
-  
+
+  // --- Active class cho Gov VN style ---
+  const ACTIVE_PILL    = ['bg-gov-blue-700', 'text-white', 'font-semibold'];
+  const INACTIVE_PILL  = ['text-gray-700', 'text-gray-600'];
+  const ACTIVE_PARENT  = ['bg-blue-50', 'text-gov-blue-700', 'font-semibold'];
+
   // Xử lý các link trong submenu
-  document.querySelectorAll('.submenu a').forEach(link => {
+  document.querySelectorAll('.submenu a.nav-sub-item, .submenu a').forEach(link => {
     let linkPath = link.getAttribute('href');
-    if (linkPath === '#') return;
-    
-    // Normalize path for comparison
+    if (!linkPath || linkPath === '#') return;
+
     const normalizedLinkPath = linkPath.replace(/\.\.\//g, '');
-    
-    if (currentPath.includes(normalizedLinkPath) || 
-        (normalizedLinkPath.includes('index.html') && currentPath.endsWith('data-integration-mockup/') && linkPath.includes('../../index.html'))) {
-      link.closest('.submenu').classList.remove('hidden');
-      const btn = link.closest('.submenu').previousElementSibling;
-      const chevron = btn.querySelector('.chevron');
-      if (chevron) chevron.style.transform = 'rotate(90deg)';
-      btn.setAttribute('aria-expanded', 'true');
-      
-      // Highlight active sub-item
-      link.classList.add('bg-primary-700', 'text-white', 'font-medium');
-      link.classList.remove('text-primary-100');
-      
-      // Highlight parent
-      btn.classList.add('bg-primary-800', 'border-white');
-      btn.classList.remove('border-transparent');
-      
+
+    if (currentPath.includes(normalizedLinkPath)) {
+      // Mở submenu chứa link này
+      const submenu = link.closest('.submenu');
+      if (submenu) {
+        submenu.classList.remove('hidden');
+        const btn = submenu.previousElementSibling;
+        if (btn) {
+          const chevron = btn.querySelector('.chevron');
+          if (chevron) chevron.style.transform = 'rotate(90deg)';
+          btn.setAttribute('aria-expanded', 'true');
+          // Highlight parent button
+          INACTIVE_PILL.forEach(c => btn.classList.remove(c));
+          ACTIVE_PARENT.forEach(c => btn.classList.add(c));
+        }
+        // Nếu còn submenu cha ở trên nữa
+        const grandSubmenu = submenu.closest('.submenu');
+        if (grandSubmenu && grandSubmenu !== submenu) {
+          grandSubmenu.classList.remove('hidden');
+          const grandBtn = grandSubmenu.previousElementSibling;
+          if (grandBtn) {
+            const gc = grandBtn.querySelector('.chevron');
+            if (gc) gc.style.transform = 'rotate(90deg)';
+            grandBtn.setAttribute('aria-expanded', 'true');
+          }
+        }
+      }
+
+      // Highlight active sub-item với pill xanh
+      INACTIVE_PILL.forEach(c => link.classList.remove(c));
+      ACTIVE_PILL.forEach(c => link.classList.add(c));
+      // Override tailwind bg
+      link.style.backgroundColor = '#1976D2';
+      link.style.color = '#ffffff';
+
       foundActive = true;
     }
   });
-  
-  // Xử lý các link thường bên ngoài submenu
-  document.querySelectorAll('#app-sidebar .nav-link').forEach(link => {
+
+  // Xử lý các link thường bên ngoài submenu (.nav-item)
+  document.querySelectorAll('#app-sidebar .nav-item').forEach(link => {
     let linkPath = link.getAttribute('href');
-    if (linkPath === '#') return;
-    
+    if (!linkPath || linkPath === '#') return;
+
     const normalizedLinkPath = linkPath.replace(/\.\.\//g, '');
-    const isRootIndex = normalizedLinkPath === 'index.html';
-    const isCurrentRoot = currentPath.endsWith('data-integration-mockup/') || currentPath.endsWith('data-integration-mockup/index.html');
-    
+    const isRootIndex    = normalizedLinkPath === 'index.html';
+    const isCurrentRoot  = currentPath.endsWith('data-integration-mockup/') || currentPath.endsWith('data-integration-mockup/index.html');
+
     if (currentPath.includes(normalizedLinkPath) && !(isRootIndex && !isCurrentRoot)) {
-        link.classList.add('bg-primary-700', 'text-white', 'border-white');
-        link.classList.remove('text-primary-100', 'border-transparent', 'hover:border-primary-400');
-        
-        // Cập nhật màu icon bên trong nếu có
-        const icon = link.querySelector('i');
-        if (icon) {
-            icon.classList.add('text-white');
-            icon.classList.remove('text-primary-300');
-        }
-        
-        foundActive = true;
+      INACTIVE_PILL.forEach(c => link.classList.remove(c));
+      ACTIVE_PILL.forEach(c => link.classList.add(c));
+      link.style.backgroundColor = '#1976D2';
+      link.style.color = '#ffffff';
+      const icon = link.querySelector('i');
+      if (icon) { icon.style.color = '#ffffff'; }
+      foundActive = true;
     }
   });
-  
-  // Nếu đang ở root index, highlight Dashboard explicitly
+
+  // Nếu ở root dashboard
   if (!foundActive && (currentPath.endsWith('data-integration-mockup/') || currentPath.endsWith('data-integration-mockup/index.html'))) {
-     const dashboardLink = document.querySelector('#app-sidebar .nav-link[href="../../index.html"]') || document.querySelector('#app-sidebar .nav-link[href="index.html"]');
-     if (dashboardLink) {
-         dashboardLink.classList.add('bg-primary-700', 'text-white', 'border-white');
-         dashboardLink.classList.remove('text-primary-100', 'border-transparent', 'hover:border-primary-400');
-         const icon = dashboardLink.querySelector('i');
-         if (icon) {
-             icon.classList.add('text-white');
-             icon.classList.remove('text-primary-300');
-         }
-     }
+    const dashboardLink = document.querySelector('#app-sidebar a.nav-item[href*="index.html"]');
+    if (dashboardLink) {
+      INACTIVE_PILL.forEach(c => dashboardLink.classList.remove(c));
+      ACTIVE_PILL.forEach(c => dashboardLink.classList.add(c));
+      dashboardLink.style.backgroundColor = '#1976D2';
+      dashboardLink.style.color = '#ffffff';
+      const icon = dashboardLink.querySelector('i');
+      if (icon) icon.style.color = '#ffffff';
+    }
   }
 }
 

@@ -1,0 +1,881 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chi tiết CSDL Nguồn | Hệ thống Tích hợp Dữ liệu</title>
+  
+  <!-- Tailwind CSS via CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          primary: {
+            50: '#EFF6FF', 100: '#DBEAFE', 200: '#BFDBFE',
+            500: '#3B82F6', 600: '#2563EB', 700: '#1D4ED8',
+            800: '#1E40AF', 900: '#1E3A8A'
+          },
+          success: { 50: '#F0FDF4', 100: '#DCFCE7', 600: '#16A34A', 700: '#15803D' },
+          warning: { 50: '#FFFBEB', 100: '#FEF3C7', 600: '#F59E0B', 700: '#B45309' },
+          error:   { 50: '#FEF2F2', 100: '#FEE2E2', 600: '#DC2626', 700: '#B91C1C' },
+          info:    { 50: '#F0F9FF', 100: '#E0F2FE', 600: '#0EA5E9', 700: '#0369A1' },
+          'gov-header': '#7C1F2C',
+          'gov-header-dark': '#5D1620',
+          'gov-blue': { 50:'#E3F2FD', 100:'#BBDEFB', 500:'#2196F3', 600:'#1E88E5', 700:'#1976D2', 800:'#1565C0' },
+          'gov-red': '#DA251D',
+          'gov-yellow': '#FFCD00'
+        },
+        fontFamily: {
+          sans: ['"Be Vietnam Pro"', '"Plus Jakarta Sans"', 'Inter', 'system-ui', 'sans-serif'],
+          gov:  ['"Be Vietnam Pro"', '"Plus Jakarta Sans"', 'Inter', 'sans-serif'],
+          mono: ['"JetBrains Mono"', 'ui-monospace', 'monospace']
+        }
+      }
+    }
+  }
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="stylesheet" href="../../assets/css/custom.css">
+  
+  <!-- JS dùng chung -->
+  <script src="../../assets/js/common.js" defer></script>
+  <script src="../../assets/js/mock-data.js" defer></script>
+  <script src="../../assets/js/components.js" defer></script>
+</head>
+<body class="font-sans bg-gray-50 text-gray-800">
+
+  <div class="flex flex-col min-h-screen">
+    <!-- Header full-width (màu đỏ tía gov VN - managed by component) -->
+    <div id="app-header" class="flex-shrink-0 sticky top-0 z-30"></div>
+    
+    <!-- Content area: sidebar trắng + main -->
+    <div class="flex flex-1 min-h-0">
+      <aside id="app-sidebar" class="flex-shrink-0 overflow-y-auto"></aside>
+      
+      <div class="flex-1 flex flex-col bg-gray-50">
+        <!-- Breadcrumb -->
+        <nav class="px-6 py-3 bg-white border-b border-gray-200 flex-shrink-0 shadow-sm relative z-10">
+        <ol class="flex items-center gap-2 text-sm">
+          <li><a href="../../index.html" class="text-gray-500 hover:text-primary-600 transition-colors">Trang chủ</a></li>
+          <li class="text-gray-400"><i data-lucide="chevron-right" class="w-4 h-4"></i></li>
+          <li><a href="index.html" class="text-gray-500 hover:text-primary-600 transition-colors">Nguồn dữ liệu</a></li>
+          <li class="text-gray-400"><i data-lucide="chevron-right" class="w-4 h-4"></i></li>
+          <li><a href="index.html" class="text-gray-500 hover:text-primary-600 transition-colors">CSDL Nguồn</a></li>
+          <li class="text-gray-400"><i data-lucide="chevron-right" class="w-4 h-4"></i></li>
+          <li class="text-gray-900 font-semibold">Chi tiết CSDL</li>
+        </ol>
+      </nav>
+      
+      <!-- Page content -->
+      <main class="flex-1 overflow-auto bg-slate-50 relative p-6 space-y-6">
+        
+        <!-- Navigation Back -->
+        <div>
+          <a href="index.html" class="inline-flex items-center text-sm text-primary-600 hover:text-primary-700 font-semibold gap-1.5 transition-colors group">
+            <i data-lucide="arrow-left" class="w-4 h-4 transition-transform group-hover:-translate-x-0.5"></i> 
+            Quay lại danh sách
+          </a>
+        </div>
+
+        <!-- Detail Header Card -->
+        <div class="bg-white rounded-xl border border-gray-200 p-6 shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+          <div class="flex items-center gap-4">
+            <div class="w-14 h-14 bg-red-50 text-red-600 border border-red-100 rounded-xl flex items-center justify-center shadow-inner relative flex-shrink-0">
+              <i data-lucide="database" class="w-8 h-8"></i>
+              <span class="absolute bottom-0 right-0 w-3 h-3 bg-success-500 border-2 border-white rounded-full animate-pulse"></span>
+            </div>
+            <div>
+              <div class="flex items-center gap-3 flex-wrap">
+                <h1 class="text-2xl font-bold text-gray-900">CSDL Dân cư Quốc gia</h1>
+                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-semibold whitespace-nowrap bg-success-50 text-success-700 border border-success-200">
+                  <span class="w-1.5 h-1.5 rounded-full bg-success-500"></span> Đã kết nối
+                </span>
+              </div>
+              <p class="text-sm text-gray-500 mt-1 font-medium flex items-center gap-2">
+                <span class="bg-red-100 text-red-700 px-1.5 py-0.5 rounded text-xs font-bold uppercase">Oracle 19c</span>
+                <span class="text-gray-300">|</span>
+                <span class="font-mono">10.0.1.10:1521</span>
+                <span class="text-gray-300">|</span>
+                <span class="text-gray-400">Service: <strong class="font-mono text-gray-600">ORCL</strong></span>
+              </p>
+            </div>
+          </div>
+          
+          <div class="flex items-center gap-2.5 w-full md:w-auto">
+            <button class="flex-1 md:flex-initial inline-flex items-center justify-center px-4 py-2 border border-gray-300 text-gray-700 text-sm font-semibold rounded-lg hover:bg-gray-50 transition-colors gap-2">
+              <i data-lucide="edit-3" class="w-4 h-4"></i>
+              Chỉnh sửa
+            </button>
+            <button class="flex-1 md:flex-initial inline-flex items-center justify-center px-4 py-2 border border-error-200 hover:border-error-300 text-error-600 hover:bg-error-50 text-sm font-semibold rounded-lg transition-colors gap-2">
+              <i data-lucide="trash-2" class="w-4 h-4"></i>
+              Xóa kết nối
+            </button>
+          </div>
+        </div>
+
+        <!-- Tabbed Container -->
+        <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden flex flex-col">
+          <!-- Tab Headers -->
+          <div class="border-b border-gray-200 bg-gray-50/50 px-6">
+            <nav class="flex gap-6" role="tablist">
+              <button onclick="switchTab('tong-quan')" id="tab-btn-tong-quan" class="tab-btn py-4 px-1 text-sm font-semibold border-b-2 transition-all flex items-center gap-2 text-primary-700 border-primary-700" data-tab="tong-quan">
+                <i data-lucide="layout-grid" class="w-4.5 h-4.5"></i> Tổng quan
+              </button>
+              <button onclick="switchTab('cau-truc')" id="tab-btn-cau-truc" class="tab-btn py-4 px-1 text-sm font-medium text-gray-500 hover:text-gray-900 border-b-2 border-transparent transition-all flex items-center gap-2" data-tab="cau-truc">
+                <i data-lucide="folder-tree" class="w-4.5 h-4.5"></i> Cấu trúc dữ liệu
+              </button>
+              <button onclick="switchTab('lich-su')" id="tab-btn-lich-su" class="tab-btn py-4 px-1 text-sm font-medium text-gray-500 hover:text-gray-900 border-b-2 border-transparent transition-all flex items-center gap-2" data-tab="lich-su">
+                <i data-lucide="history" class="w-4.5 h-4.5"></i> Lịch sử kết nối
+              </button>
+            </nav>
+          </div>
+
+          <!-- Tab Contents -->
+          <div class="p-6">
+            
+            <!-- TAB 1: TỔNG QUAN -->
+            <div id="tab-pane-tong-quan" class="tab-pane space-y-6 block">
+              <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Thông tin cấu hình -->
+                <div class="bg-white rounded-xl border border-gray-100 p-5 shadow-sm space-y-4">
+                  <h3 class="text-base font-bold text-gray-900 border-b border-gray-100 pb-2 flex items-center gap-2">
+                    <i data-lucide="settings" class="w-4.5 h-4.5 text-primary-500"></i> Thông tin CSDL & Cấu hình
+                  </h3>
+                  <div class="grid grid-cols-2 gap-y-3.5 gap-x-4 text-sm">
+                    <div>
+                      <p class="text-xs text-gray-500">Loại cơ sở dữ liệu</p>
+                      <p class="font-semibold text-gray-800 mt-0.5">Oracle Database</p>
+                    </div>
+                    <div>
+                      <p class="text-xs text-gray-500">Phiên bản (Version)</p>
+                      <p class="font-semibold text-gray-800 mt-0.5">19c Enterprise Edition</p>
+                    </div>
+                    <div class="col-span-2">
+                      <p class="text-xs text-gray-500">Driver kết nối</p>
+                      <p class="font-mono text-xs text-gray-700 bg-slate-50 px-2 py-1 rounded border border-gray-150 mt-1 break-all">Oracle JDBC Thin Driver (ojdbc8.jar v19.3)</p>
+                    </div>
+                    <div>
+                      <p class="text-xs text-gray-500">Địa chỉ Host IP</p>
+                      <p class="font-mono text-gray-800 mt-0.5">10.0.1.10</p>
+                    </div>
+                    <div>
+                      <p class="text-xs text-gray-500">Cổng Port</p>
+                      <p class="font-mono text-gray-800 mt-0.5">1521</p>
+                    </div>
+                    <div>
+                      <p class="text-xs text-gray-500">SID / Service Name</p>
+                      <p class="font-mono text-gray-800 mt-0.5 font-bold">ORCL</p>
+                    </div>
+                    <div>
+                      <p class="text-xs text-gray-500">Bảng mã hóa (Encoding)</p>
+                      <p class="font-semibold text-gray-800 mt-0.5">AL32UTF8 (UTF-8)</p>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Thông tin kết nối & Metadata -->
+                <div class="bg-white rounded-xl border border-gray-100 p-5 shadow-sm space-y-4">
+                  <h3 class="text-base font-bold text-gray-900 border-b border-gray-100 pb-2 flex items-center gap-2">
+                    <i data-lucide="shield-check" class="w-4.5 h-4.5 text-primary-500"></i> Bảo mật & Tài khoản kết nối
+                  </h3>
+                  <div class="grid grid-cols-2 gap-y-3.5 gap-x-4 text-sm">
+                    <div>
+                      <p class="text-xs text-gray-500">Tên người dùng kết nối</p>
+                      <p class="font-mono text-gray-800 mt-0.5 font-semibold">db_sync_user</p>
+                    </div>
+                    <div>
+                      <p class="text-xs text-gray-500">Kiểu xác thực</p>
+                      <p class="font-semibold text-gray-800 mt-0.5">SQL Standard Authentication</p>
+                    </div>
+                    <div>
+                      <p class="text-xs text-gray-500">Múi giờ hệ thống</p>
+                      <p class="font-semibold text-gray-800 mt-0.5">GMT+7 (Asia/Ho_Chi_Minh)</p>
+                    </div>
+                    <div>
+                      <p class="text-xs text-gray-500">Lần kiểm tra cuối cùng</p>
+                      <p class="font-semibold text-success-600 mt-0.5 flex items-center gap-1">
+                        <i data-lucide="check" class="w-4 h-4"></i> 18/05/2026 14:30:00
+                      </p>
+                    </div>
+                    <div>
+                      <p class="text-xs text-gray-500">Ngày khởi tạo cấu hình</p>
+                      <p class="font-semibold text-gray-800 mt-0.5">15/01/2026 08:30:00</p>
+                    </div>
+                    <div>
+                      <p class="text-xs text-gray-500">Người thực hiện</p>
+                      <p class="font-semibold text-gray-800 mt-0.5 flex items-center gap-1.5">
+                        <span class="w-5 h-5 rounded-full bg-primary-100 text-primary-700 text-[10px] font-bold flex items-center justify-center">AH</span>
+                        admin_hethong
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Thao tác kiểm thử -->
+              <div class="bg-primary-50/50 rounded-xl border border-primary-100 p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div class="space-y-1">
+                  <h4 class="font-bold text-primary-900 text-base">Kiểm tra kết nối & Đồng bộ hóa</h4>
+                  <p class="text-sm text-primary-700">Thực hiện kiểm tra nhanh ping đến máy chủ Oracle hoặc chuyển hướng sang công cụ xem chi tiết cấu trúc schema.</p>
+                </div>
+                <div class="flex flex-wrap gap-2.5 flex-shrink-0">
+                  <button id="btn-test-connection" onclick="simulateTestConnection()" class="inline-flex items-center px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-sm font-semibold rounded-lg shadow-sm transition-all gap-2">
+                    <i id="icon-test-conn" data-lucide="plug" class="w-4 h-4"></i>
+                    <span id="text-test-conn">Test lại kết nối</span>
+                  </button>
+                  <button onclick="switchTab('cau-truc')" class="inline-flex items-center px-4 py-2 bg-white border border-gray-300 text-gray-700 text-sm font-semibold rounded-lg hover:bg-gray-50 transition-colors gap-2">
+                    <i data-lucide="folder-tree" class="w-4 h-4 text-gray-500"></i>
+                    Khám phá cấu trúc
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- TAB 2: CẤU TRÚC -->
+            <div id="tab-pane-cau-truc" class="tab-pane space-y-6 hidden">
+              
+              <!-- Toolbar -->
+              <div class="bg-gray-50 p-4 rounded-xl border border-gray-200 flex flex-col md:flex-row gap-4 items-center justify-between shadow-inner">
+                <div class="flex flex-wrap items-center gap-3 w-full md:w-auto">
+                  <!-- Search input -->
+                  <div class="relative w-full sm:w-64">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <i data-lucide="search" class="w-4 h-4 text-gray-400"></i>
+                    </div>
+                    <input type="text" id="schema-search" oninput="filterSchemaTree()" class="block w-full pl-9 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-500 sm:text-sm" placeholder="Tìm bảng hoặc cột...">
+                  </div>
+                  <!-- Filter object -->
+                  <select id="object-type-filter" onchange="filterSchemaTree()" class="block w-full sm:w-44 pl-3 pr-8 py-2 text-sm border-gray-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500 border bg-white">
+                    <option value="all">Tất cả đối tượng</option>
+                    <option value="table">Bảng (Table)</option>
+                    <option value="view">Khung nhìn (View)</option>
+                    <option value="procedure">Thủ tục (Procedure)</option>
+                  </select>
+                </div>
+
+                <div class="flex items-center gap-2.5 w-full md:w-auto flex-shrink-0">
+                  <button id="btn-sync-schema" onclick="simulateSyncSchema()" class="flex-1 md:flex-initial inline-flex items-center justify-center px-3.5 py-2 bg-primary-600 hover:bg-primary-700 text-white text-sm font-semibold rounded-lg shadow-sm transition-all gap-2">
+                    <i id="icon-sync-schema" data-lucide="refresh-cw" class="w-4 h-4"></i>
+                    <span id="text-sync-schema">Đồng bộ lại cấu trúc</span>
+                  </button>
+                  
+                  <!-- Export Dropdown -->
+                  <div class="relative flex-1 md:flex-initial">
+                    <button onclick="toggleExportMenu()" id="btn-export-schema" class="w-full inline-flex items-center justify-center px-3.5 py-2 border border-gray-300 text-gray-700 text-sm font-semibold rounded-lg hover:bg-gray-50 transition-colors gap-2">
+                      <i data-lucide="download" class="w-4 h-4 text-gray-500"></i>
+                      Xuất Schema
+                      <i data-lucide="chevron-down" class="w-3.5 h-3.5 text-gray-400"></i>
+                    </button>
+                    <!-- Dropdown Content -->
+                    <div id="export-dropdown" class="hidden absolute right-0 mt-1.5 w-44 bg-white border border-gray-200 rounded-lg shadow-lg py-1 z-20">
+                      <button onclick="triggerExport('JSON')" class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2">
+                        <i data-lucide="file-json" class="w-4 h-4 text-yellow-600"></i> Xuất file JSON
+                      </button>
+                      <button onclick="triggerExport('SQL')" class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2">
+                        <i data-lucide="file-code" class="w-4 h-4 text-primary-600"></i> Xuất file SQL DDL
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Schema Tree Container -->
+              <div class="border border-gray-200 rounded-xl overflow-hidden bg-slate-50 shadow-sm">
+                <!-- Tree Root -->
+                <div class="p-4 bg-white border-b border-gray-200 flex items-center justify-between">
+                  <div class="flex items-center gap-2.5 font-bold text-gray-900">
+                    <i data-lucide="folder" class="w-5 h-5 text-yellow-500"></i>
+                    <span>Tên Schema: <strong class="text-primary-700 font-mono text-base">public</strong></span>
+                  </div>
+                  <div class="text-xs font-semibold text-gray-500 bg-gray-100 px-2 py-0.5 rounded">
+                    3 Tables · 0 Views · 0 Procedures
+                  </div>
+                </div>
+
+                <!-- Tree Body -->
+                <div class="p-6 space-y-4 max-h-[600px] overflow-y-auto">
+                  
+                  <!-- TABLE 1: cong_dan -->
+                  <div class="schema-node table-node border border-gray-200 rounded-lg bg-white overflow-hidden shadow-inner" data-node-name="cong_dan" data-node-type="table">
+                    <!-- Table Header -->
+                    <div onclick="toggleTreeNode('tree-table-cong-dan')" class="flex items-center justify-between p-3.5 bg-gray-50 hover:bg-gray-100 transition-colors cursor-pointer select-none">
+                      <div class="flex items-center gap-3">
+                        <i id="chevron-tree-table-cong-dan" data-lucide="chevron-right" class="w-4 h-4 text-gray-400 transition-transform"></i>
+                        <div class="w-7 h-7 bg-primary-100 text-primary-700 rounded flex items-center justify-center">
+                          <i data-lucide="table" class="w-4 h-4"></i>
+                        </div>
+                        <div>
+                          <span class="font-bold text-gray-900 font-mono text-sm">cong_dan</span>
+                          <span class="text-xs text-gray-500 ml-2 font-normal">(Bảng dữ liệu hành chính)</span>
+                        </div>
+                      </div>
+                      <div class="flex items-center gap-2 font-semibold">
+                        <span class="text-[10px] bg-slate-200 text-slate-700 px-2 py-0.5 rounded uppercase">15 Cột</span>
+                        <span class="text-[10px] bg-success-100 text-success-800 px-2 py-0.5 rounded uppercase">8.5M Dòng</span>
+                      </div>
+                    </div>
+
+                    <!-- Table Columns (Hidden by default) -->
+                    <div id="tree-table-cong-dan" class="hidden border-t border-gray-150 bg-slate-50/50 p-4">
+                      <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs font-mono">
+                          <thead>
+                            <tr class="text-gray-500 border-b border-gray-200 pb-2">
+                              <th class="pb-2 font-semibold w-1/3">Tên trường dữ liệu</th>
+                              <th class="pb-2 font-semibold w-1/4">Kiểu dữ liệu</th>
+                              <th class="pb-2 font-semibold w-1/6">Cho phép NULL</th>
+                              <th class="pb-2 font-semibold text-right">Ràng buộc</th>
+                            </tr>
+                          </thead>
+                          <tbody class="divide-y divide-gray-100 text-gray-700">
+                            <tr>
+                              <td class="py-2.5 font-bold text-primary-700 flex items-center gap-1.5">
+                                <i data-lucide="key" class="w-3.5 h-3.5 text-yellow-500"></i> id
+                              </td>
+                              <td class="py-2.5 font-semibold text-gray-600">BIGINT</td>
+                              <td class="py-2.5 text-gray-400">NOT NULL</td>
+                              <td class="py-2.5 text-right"><span class="bg-primary-100 text-primary-800 font-bold px-1.5 py-0.5 rounded text-[9px] uppercase border border-primary-200">PK</span></td>
+                            </tr>
+                            <tr>
+                              <td class="py-2.5 font-bold text-gray-800 pl-5">so_cccd</td>
+                              <td class="py-2.5 text-gray-600">VARCHAR(12)</td>
+                              <td class="py-2.5 text-gray-400">NOT NULL</td>
+                              <td class="py-2.5 text-right"><span class="bg-purple-100 text-purple-800 font-bold px-1.5 py-0.5 rounded text-[9px] uppercase border border-purple-200">Unique</span></td>
+                            </tr>
+                            <tr>
+                              <td class="py-2.5 font-bold text-gray-800 pl-5">ho_ten</td>
+                              <td class="py-2.5 text-gray-600">NVARCHAR(255)</td>
+                              <td class="py-2.5 text-gray-400">NOT NULL</td>
+                              <td class="py-2.5 text-right">-</td>
+                            </tr>
+                            <tr>
+                              <td class="py-2.5 font-bold text-gray-800 pl-5">ngay_sinh</td>
+                              <td class="py-2.5 text-gray-600">DATE</td>
+                              <td class="py-2.5 text-gray-400">NOT NULL</td>
+                              <td class="py-2.5 text-right">-</td>
+                            </tr>
+                            <tr>
+                              <td class="py-2.5 font-bold text-gray-800 pl-5">gioi_tinh</td>
+                              <td class="py-2.5 text-gray-600">SMALLINT</td>
+                              <td class="py-2.5 text-gray-500">NULL</td>
+                              <td class="py-2.5 text-right">-</td>
+                            </tr>
+                            <tr>
+                              <td class="py-2.5 font-bold text-gray-800 pl-5">que_quan</td>
+                              <td class="py-2.5 text-gray-600">NVARCHAR(500)</td>
+                              <td class="py-2.5 text-gray-500">NULL</td>
+                              <td class="py-2.5 text-right">-</td>
+                            </tr>
+                            <tr>
+                              <td class="py-2.5 font-bold text-gray-800 pl-5">thuong_tru</td>
+                              <td class="py-2.5 text-gray-600">NVARCHAR(500)</td>
+                              <td class="py-2.5 text-gray-500">NULL</td>
+                              <td class="py-2.5 text-right">-</td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- TABLE 2: ho_so -->
+                  <div class="schema-node table-node border border-gray-200 rounded-lg bg-white overflow-hidden shadow-inner" data-node-name="ho_so" data-node-type="table">
+                    <!-- Table Header -->
+                    <div onclick="toggleTreeNode('tree-table-ho-so')" class="flex items-center justify-between p-3.5 bg-gray-50 hover:bg-gray-100 transition-colors cursor-pointer select-none">
+                      <div class="flex items-center gap-3">
+                        <i id="chevron-tree-table-ho-so" data-lucide="chevron-right" class="w-4 h-4 text-gray-400 transition-transform"></i>
+                        <div class="w-7 h-7 bg-primary-100 text-primary-700 rounded flex items-center justify-center">
+                          <i data-lucide="table" class="w-4 h-4"></i>
+                        </div>
+                        <div>
+                          <span class="font-bold text-gray-900 font-mono text-sm">ho_so</span>
+                          <span class="text-xs text-gray-500 ml-2 font-normal">(Bảng hồ sơ trực tuyến)</span>
+                        </div>
+                      </div>
+                      <div class="flex items-center gap-2 font-semibold">
+                        <span class="text-[10px] bg-slate-200 text-slate-700 px-2 py-0.5 rounded uppercase">12 Cột</span>
+                        <span class="text-[10px] bg-success-100 text-success-800 px-2 py-0.5 rounded uppercase">2.1M Dòng</span>
+                      </div>
+                    </div>
+
+                    <!-- Table Columns (Hidden by default) -->
+                    <div id="tree-table-ho-so" class="hidden border-t border-gray-150 bg-slate-50/50 p-4">
+                      <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs font-mono">
+                          <thead>
+                            <tr class="text-gray-500 border-b border-gray-200 pb-2">
+                              <th class="pb-2 font-semibold w-1/3">Tên trường dữ liệu</th>
+                              <th class="pb-2 font-semibold w-1/4">Kiểu dữ liệu</th>
+                              <th class="pb-2 font-semibold w-1/6">Cho phép NULL</th>
+                              <th class="pb-2 font-semibold text-right">Ràng buộc</th>
+                            </tr>
+                          </thead>
+                          <tbody class="divide-y divide-gray-100 text-gray-700">
+                            <tr>
+                              <td class="py-2.5 font-bold text-primary-700 flex items-center gap-1.5">
+                                <i data-lucide="key" class="w-3.5 h-3.5 text-yellow-500"></i> id
+                              </td>
+                              <td class="py-2.5 font-semibold text-gray-600">BIGINT</td>
+                              <td class="py-2.5 text-gray-400">NOT NULL</td>
+                              <td class="py-2.5 text-right"><span class="bg-primary-100 text-primary-800 font-bold px-1.5 py-0.5 rounded text-[9px] uppercase border border-primary-200">PK</span></td>
+                            </tr>
+                            <tr>
+                              <td class="py-2.5 font-bold text-gray-800 pl-5">ma_ho_so</td>
+                              <td class="py-2.5 text-gray-600">VARCHAR(50)</td>
+                              <td class="py-2.5 text-gray-400">NOT NULL</td>
+                              <td class="py-2.5 text-right"><span class="bg-purple-100 text-purple-800 font-bold px-1.5 py-0.5 rounded text-[9px] uppercase border border-purple-200">Unique</span></td>
+                            </tr>
+                            <tr>
+                              <td class="py-2.5 font-bold text-gray-800 pl-5">nguoi_nop</td>
+                              <td class="py-2.5 text-gray-600">NVARCHAR(255)</td>
+                              <td class="py-2.5 text-gray-400">NOT NULL</td>
+                              <td class="py-2.5 text-right">-</td>
+                            </tr>
+                            <tr>
+                              <td class="py-2.5 font-bold text-gray-800 pl-5">ngay_tiep_nhan</td>
+                              <td class="py-2.5 text-gray-600">DATE</td>
+                              <td class="py-2.5 text-gray-400">NOT NULL</td>
+                              <td class="py-2.5 text-right">-</td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- TABLE 3: ho_tich -->
+                  <div class="schema-node table-node border border-gray-200 rounded-lg bg-white overflow-hidden shadow-inner" data-node-name="ho_tich" data-node-type="table">
+                    <!-- Table Header -->
+                    <div onclick="toggleTreeNode('tree-table-ho-tich')" class="flex items-center justify-between p-3.5 bg-gray-50 hover:bg-gray-100 transition-colors cursor-pointer select-none">
+                      <div class="flex items-center gap-3">
+                        <i id="chevron-tree-table-ho-tich" data-lucide="chevron-right" class="w-4 h-4 text-gray-400 transition-transform"></i>
+                        <div class="w-7 h-7 bg-primary-100 text-primary-700 rounded flex items-center justify-center">
+                          <i data-lucide="table" class="w-4 h-4"></i>
+                        </div>
+                        <div>
+                          <span class="font-bold text-gray-900 font-mono text-sm">ho_tich</span>
+                          <span class="text-xs text-gray-500 ml-2 font-normal">(Bảng đăng ký hộ tịch)</span>
+                        </div>
+                      </div>
+                      <div class="flex items-center gap-2 font-semibold">
+                        <span class="text-[10px] bg-slate-200 text-slate-700 px-2 py-0.5 rounded uppercase">8 Cột</span>
+                        <span class="text-[10px] bg-success-100 text-success-800 px-2 py-0.5 rounded uppercase">5.4M Dòng</span>
+                      </div>
+                    </div>
+
+                    <!-- Table Columns (Hidden by default) -->
+                    <div id="tree-table-ho-tich" class="hidden border-t border-gray-150 bg-slate-50/50 p-4">
+                      <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs font-mono">
+                          <thead>
+                            <tr class="text-gray-500 border-b border-gray-200 pb-2">
+                              <th class="pb-2 font-semibold w-1/3">Tên trường dữ liệu</th>
+                              <th class="pb-2 font-semibold w-1/4">Kiểu dữ liệu</th>
+                              <th class="pb-2 font-semibold w-1/6">Cho phép NULL</th>
+                              <th class="pb-2 font-semibold text-right">Ràng buộc</th>
+                            </tr>
+                          </thead>
+                          <tbody class="divide-y divide-gray-100 text-gray-700">
+                            <tr>
+                              <td class="py-2.5 font-bold text-primary-700 flex items-center gap-1.5">
+                                <i data-lucide="key" class="w-3.5 h-3.5 text-yellow-500"></i> id
+                              </td>
+                              <td class="py-2.5 font-semibold text-gray-600">BIGINT</td>
+                              <td class="py-2.5 text-gray-400">NOT NULL</td>
+                              <td class="py-2.5 text-right"><span class="bg-primary-100 text-primary-800 font-bold px-1.5 py-0.5 rounded text-[9px] uppercase border border-primary-200">PK</span></td>
+                            </tr>
+                            <tr>
+                              <td class="py-2.5 font-bold text-gray-800 pl-5">ma_dang_ky</td>
+                              <td class="py-2.5 text-gray-600">VARCHAR(50)</td>
+                              <td class="py-2.5 text-gray-400">NOT NULL</td>
+                              <td class="py-2.5 text-right">-</td>
+                            </tr>
+                            <tr>
+                              <td class="py-2.5 font-bold text-gray-800 pl-5">ten_su_kien</td>
+                              <td class="py-2.5 text-gray-600">NVARCHAR(255)</td>
+                              <td class="py-2.5 text-gray-400">NOT NULL</td>
+                              <td class="py-2.5 text-right">-</td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Empty state for search -->
+                  <div id="tree-empty-state" class="hidden bg-white border border-gray-200 border-dashed rounded-lg p-12 text-center text-gray-500 flex flex-col items-center justify-center">
+                    <i data-lucide="search-code" class="w-10 h-10 text-gray-300 mb-2"></i>
+                    <p class="font-bold text-gray-700">Không tìm thấy đối tượng dữ liệu phù hợp</p>
+                    <p class="text-xs text-gray-450 mt-1">Vui lòng thử tìm kiếm với từ khóa khác.</p>
+                  </div>
+
+                </div>
+              </div>
+            </div>
+
+            <!-- TAB 3: LỊCH SỬ KẾT NỐI -->
+            <div id="tab-pane-lich-su" class="tab-pane space-y-6 hidden">
+              <div class="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm">
+                <div class="overflow-x-auto">
+                  <table class="w-full text-sm text-left">
+                    <thead class="text-xs font-semibold text-gray-700 bg-gray-50 border-b border-gray-200 uppercase tracking-wider">
+                      <tr>
+                        <th scope="col" class="px-5 py-3.5 text-center w-16">STT</th>
+                        <th scope="col" class="px-5 py-3.5 whitespace-nowrap w-48">Thời gian ghi nhận</th>
+                        <th scope="col" class="px-5 py-3.5 whitespace-nowrap">Loại sự kiện</th>
+                        <th scope="col" class="px-5 py-3.5 whitespace-nowrap">Người thực hiện</th>
+                        <th scope="col" class="px-5 py-3.5 whitespace-nowrap w-36">Trạng thái</th>
+                        <th scope="col" class="px-5 py-3.5 whitespace-nowrap">Chi tiết lỗi / Log</th>
+                      </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-150">
+                      
+                      <!-- Row 1 -->
+                      <tr class="hover:bg-slate-50 transition-colors">
+                        <td class="px-5 py-4 text-center text-gray-500">1</td>
+                        <td class="px-5 py-4 font-mono text-xs text-gray-600 font-semibold">22/05/2026 15:45:12</td>
+                        <td class="px-5 py-4"><span class="font-semibold text-gray-800">Kiểm tra kết nối (Ping)</span></td>
+                        <td class="px-5 py-4 text-gray-600">admin_hethong</td>
+                        <td class="px-5 py-4">
+                          <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-success-50 text-success-700 border border-success-200">
+                            <span class="w-1.5 h-1.5 rounded-full bg-success-500 animate-ping"></span> Thành công
+                          </span>
+                        </td>
+                        <td class="px-5 py-4 text-gray-400 text-xs italic">-</td>
+                      </tr>
+
+                      <!-- Row 2 -->
+                      <tr class="hover:bg-slate-50 transition-colors">
+                        <td class="px-5 py-4 text-center text-gray-500">2</td>
+                        <td class="px-5 py-4 font-mono text-xs text-gray-600">20/05/2026 09:30:00</td>
+                        <td class="px-5 py-4"><span class="font-semibold text-gray-800">Kiểm tra kết nối (Ping)</span></td>
+                        <td class="px-5 py-4 text-gray-600">admin_hethong</td>
+                        <td class="px-5 py-4">
+                          <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-success-50 text-success-700 border border-success-200">
+                            <span class="w-1.5 h-1.5 rounded-full bg-success-500"></span> Thành công
+                          </span>
+                        </td>
+                        <td class="px-5 py-4 text-gray-400 text-xs italic">-</td>
+                      </tr>
+
+                      <!-- Row 3 -->
+                      <tr class="hover:bg-slate-50 transition-colors">
+                        <td class="px-5 py-4 text-center text-gray-500">3</td>
+                        <td class="px-5 py-4 font-mono text-xs text-gray-600">18/05/2026 14:30:00</td>
+                        <td class="px-5 py-4"><span class="font-semibold text-gray-800">Đồng bộ định kỳ (Cronjob)</span></td>
+                        <td class="px-5 py-4 text-gray-600 font-bold text-indigo-600">SYSTEM_JOB</td>
+                        <td class="px-5 py-4">
+                          <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-success-50 text-success-700 border border-success-200">
+                            <span class="w-1.5 h-1.5 rounded-full bg-success-500"></span> Thành công
+                          </span>
+                        </td>
+                        <td class="px-5 py-4 text-gray-400 text-xs italic">Đã scan 3 Tables, cập nhật 5,421 dòng mới</td>
+                      </tr>
+
+                      <!-- Row 4 (FAILED LOG WITH EXPANDABLE CODEBLOCK) -->
+                      <tr class="hover:bg-slate-50 transition-colors">
+                        <td class="px-5 py-4 text-center text-gray-500">4</td>
+                        <td class="px-5 py-4 font-mono text-xs text-gray-600">17/05/2026 02:00:15</td>
+                        <td class="px-5 py-4"><span class="font-semibold text-gray-800">Đồng bộ định kỳ (Cronjob)</span></td>
+                        <td class="px-5 py-4 text-gray-600 font-bold text-indigo-600">SYSTEM_JOB</td>
+                        <td class="px-5 py-4">
+                          <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-error-50 text-error-700 border border-error-200">
+                            <span class="w-1.5 h-1.5 rounded-full bg-error-500"></span> Thất bại
+                          </span>
+                        </td>
+                        <td class="px-5 py-4">
+                          <button onclick="toggleErrorDetails('err-detail-log')" class="text-xs text-red-600 hover:text-red-700 font-semibold flex items-center gap-1 hover:underline">
+                            <i data-lucide="chevron-down" class="w-3.5 h-3.5"></i>
+                            Xem vết lỗi hệ thống
+                          </button>
+                        </td>
+                      </tr>
+                      
+                      <!-- Hidden expandable error log row -->
+                      <tr id="err-detail-log" class="hidden bg-red-50/30">
+                        <td colspan="6" class="px-8 py-4">
+                          <div class="bg-slate-900 text-red-400 rounded-lg p-4 font-mono text-xs space-y-1 shadow-inner border border-slate-800">
+                            <p class="text-white font-bold mb-1">--- ERROR TRACEBACK ---</p>
+                            <p class="text-gray-500">[2026-05-17 02:00:15] ERROR connecting to Oracle instance 10.0.1.10:1521/ORCL</p>
+                            <p class="text-red-500">java.sql.SQLException: ORA-01017: invalid username/password; logon denied</p>
+                            <p class="pl-4">at oracle.jdbc.driver.T4CTTIoer11.processError(T4CTTIoer11.java:494)</p>
+                            <p class="pl-4">at oracle.jdbc.driver.T4CTTIoer11.processError(T4CTTIoer11.java:446)</p>
+                            <p class="pl-4">at oracle.jdbc.driver.T4C8Oall.processError(T4C8Oall.java:1054)</p>
+                            <p class="pl-4">at oracle.jdbc.driver.T4C8Oall.receive(T4C8Oall.java:763)</p>
+                            <p class="text-yellow-500 font-bold mt-2">=> Khắc phục: Đã thực hiện cập nhật lại mật khẩu xác thực mới trong cấu hình lúc 09:30 ngày 20/05/2026.</p>
+                          </div>
+                        </td>
+                      </tr>
+
+                      <!-- Row 5 -->
+                      <tr class="hover:bg-slate-50 transition-colors">
+                        <td class="px-5 py-4 text-center text-gray-500">5</td>
+                        <td class="px-5 py-4 font-mono text-xs text-gray-600">15/05/2026 10:15:00</td>
+                        <td class="px-5 py-4"><span class="font-semibold text-gray-800">Kiểm tra kết nối (Ping)</span></td>
+                        <td class="px-5 py-4 text-gray-600">admin_hethong</td>
+                        <td class="px-5 py-4">
+                          <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-success-50 text-success-700 border border-success-200">
+                            <span class="w-1.5 h-1.5 rounded-full bg-success-500"></span> Thành công
+                          </span>
+                        </td>
+                        <td class="px-5 py-4 text-gray-400 text-xs italic">-</td>
+                      </tr>
+
+                      <!-- Row 6 -->
+                      <tr class="hover:bg-slate-50 transition-colors">
+                        <td class="px-5 py-4 text-center text-gray-500">6</td>
+                        <td class="px-5 py-4 font-mono text-xs text-gray-600">15/01/2026 08:35:42</td>
+                        <td class="px-5 py-4"><span class="font-semibold text-gray-800">Khởi tạo kết nối nguồn</span></td>
+                        <td class="px-5 py-4 text-gray-600">admin_hethong</td>
+                        <td class="px-5 py-4">
+                          <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-success-50 text-success-700 border border-success-200">
+                            <span class="w-1.5 h-1.5 rounded-full bg-success-500"></span> Thành công
+                          </span>
+                        </td>
+                        <td class="px-5 py-4 text-gray-400 text-xs italic">Tạo kết nối ban đầu đến Oracle Database thành công</td>
+                      </tr>
+
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+      </main>
+      
+      <!-- Footer -->
+      <div id="app-footer" class="flex-shrink-0"></div>
+    </div>
+  </div>
+</div>
+
+  <!-- Real-time dynamic toast notifications -->
+  <div id="toast-container" class="fixed bottom-6 right-6 z-50 flex flex-col gap-2"></div>
+
+  <!-- JS Logic -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      loadLayout('../../').then(() => {
+        // Highlight active sidebar item
+        highlightActiveMenu();
+      });
+    });
+
+    function highlightActiveMenu() {
+      // Vì đang ở trang chi tiết của CSDL nguồn, nên highlight CSDL nguồn trong sidebar
+      const links = document.querySelectorAll('#app-sidebar a');
+      links.forEach(link => {
+        if (link.getAttribute('href') && link.getAttribute('href').includes('UC001')) {
+          link.classList.add('bg-primary-700', 'text-white', 'border-white');
+          link.classList.remove('text-primary-100', 'border-transparent', 'hover:border-primary-400');
+          const icon = link.querySelector('i');
+          if (icon) {
+            icon.classList.add('text-white');
+            icon.classList.remove('text-primary-300');
+          }
+        }
+      });
+    }
+
+    // 1. Switch Tabs Navigation
+    function switchTab(tabName) {
+      // Sửa active tab header styles
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        if (btn.getAttribute('data-tab') === tabName) {
+          btn.classList.add('text-primary-700', 'border-primary-700', 'font-semibold');
+          btn.classList.remove('text-gray-500', 'hover:text-gray-900', 'border-transparent', 'font-medium');
+        } else {
+          btn.classList.remove('text-primary-700', 'border-primary-700', 'font-semibold');
+          btn.classList.add('text-gray-500', 'hover:text-gray-900', 'border-transparent', 'font-medium');
+        }
+      });
+
+      // Ẩn/hiện panel
+      document.querySelectorAll('.tab-pane').forEach(pane => {
+        if (pane.id === `tab-pane-${tabName}`) {
+          pane.classList.remove('hidden');
+          pane.classList.add('block');
+        } else {
+          pane.classList.remove('block');
+          pane.classList.add('hidden');
+        }
+      });
+    }
+
+    // 2. Expand/Collapse Schema Nodes
+    function toggleTreeNode(elementId) {
+      const panel = document.getElementById(elementId);
+      const chevron = document.getElementById(`chevron-${elementId}`);
+      if (!panel) return;
+      
+      const isHidden = panel.classList.contains('hidden');
+      if (isHidden) {
+        panel.classList.remove('hidden');
+        chevron.style.transform = 'rotate(90deg)';
+      } else {
+        panel.classList.add('hidden');
+        chevron.style.transform = 'rotate(0deg)';
+      }
+    }
+
+    // 3. Search and filter tree objects
+    function filterSchemaTree() {
+      const query = document.getElementById('schema-search').value.toLowerCase().trim();
+      const filterType = document.getElementById('object-type-filter').value;
+      const nodes = document.querySelectorAll('.schema-node');
+      let visibleCount = 0;
+
+      nodes.forEach(node => {
+        const name = node.getAttribute('data-node-name').toLowerCase();
+        const type = node.getAttribute('data-node-type');
+        
+        const matchesQuery = query === '' || name.includes(query) || node.innerText.toLowerCase().includes(query);
+        const matchesType = filterType === 'all' || type === filterType;
+
+        if (matchesQuery && matchesType) {
+          node.classList.remove('hidden');
+          visibleCount++;
+        } else {
+          node.classList.add('hidden');
+        }
+      });
+
+      const emptyState = document.getElementById('tree-empty-state');
+      if (visibleCount === 0) {
+        emptyState.classList.remove('hidden');
+      } else {
+        emptyState.classList.add('hidden');
+      }
+    }
+
+    // 4. Export Menu Dropdown Toggle
+    function toggleExportMenu() {
+      const menu = document.getElementById('export-dropdown');
+      menu.classList.toggle('hidden');
+      
+      // Close dropdown on click outside
+      const handler = (e) => {
+        if (!e.target.closest('#btn-export-schema') && !e.target.closest('#export-dropdown')) {
+          menu.classList.add('hidden');
+          document.removeEventListener('click', handler);
+        }
+      };
+      document.addEventListener('click', handler);
+    }
+
+    function triggerExport(format) {
+      document.getElementById('export-dropdown').classList.add('hidden');
+      showToast(`Đang kết xuất và tạo file cấu trúc schema dạng ${format}...`, 'info');
+      
+      setTimeout(() => {
+        showToast(`Xuất cấu trúc CSDL thành công! Tải về tệp: <strong class="underline cursor-pointer">oracle_dancu_schema.${format.toLowerCase()}</strong>`, 'success');
+      }, 1500);
+    }
+
+    // 5. Expand error details log
+    function toggleErrorDetails(elementId) {
+      const panel = document.getElementById(elementId);
+      panel.classList.toggle('hidden');
+    }
+
+    // 6. Simulate test connection button click
+    function simulateTestConnection() {
+      const btn = document.getElementById('btn-test-connection');
+      const text = document.getElementById('text-test-conn');
+      const icon = document.getElementById('icon-test-conn');
+      
+      // Disable & Loading
+      btn.disabled = true;
+      btn.classList.add('opacity-75', 'cursor-not-allowed');
+      text.innerText = 'Đang kiểm tra...';
+      icon.setAttribute('data-lucide', 'loader-2');
+      icon.classList.add('animate-spin');
+      if(window.lucide) lucide.createIcons();
+
+      showToast('Đang kết nối lại tới máy chủ Oracle 10.0.1.10:1521...', 'info');
+
+      setTimeout(() => {
+        // Done
+        btn.disabled = false;
+        btn.classList.remove('opacity-75', 'cursor-not-allowed');
+        text.innerText = 'Test lại kết nối';
+        icon.setAttribute('data-lucide', 'plug');
+        icon.classList.remove('animate-spin');
+        if(window.lucide) lucide.createIcons();
+        
+        showToast('Kết nối thành công! Ping phản hồi: 8ms.', 'success');
+      }, 1800);
+    }
+
+    // 7. Simulate re-discover schema button click
+    function simulateSyncSchema() {
+      const btn = document.getElementById('btn-sync-schema');
+      const text = document.getElementById('text-sync-schema');
+      const icon = document.getElementById('icon-sync-schema');
+      
+      // Disable & Loading
+      btn.disabled = true;
+      btn.classList.add('opacity-75', 'cursor-not-allowed');
+      text.innerText = 'Đang đồng bộ...';
+      icon.classList.add('animate-spin');
+
+      showToast('Đang quét và tái phân tích (re-discover) schema "public"...', 'info');
+
+      setTimeout(() => {
+        // Done
+        btn.disabled = false;
+        btn.classList.remove('opacity-75', 'cursor-not-allowed');
+        text.innerText = 'Đang đồng bộ lại cấu trúc';
+        icon.classList.remove('animate-spin');
+        
+        showToast('Đồng bộ cấu trúc schema hoàn tất! Phát hiện 3 Tables (không có thay đổi mới).', 'success');
+      }, 2200);
+    }
+
+    // Utility toast notice
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      
+      let bg = 'bg-slate-900 text-white';
+      let icon = 'info';
+      if (type === 'success') {
+        bg = 'bg-success-600 text-white'; icon = 'check-circle';
+      } else if (type === 'info') {
+        bg = 'bg-primary-700 text-white'; icon = 'info';
+      } else if (type === 'error') {
+        bg = 'bg-error-600 text-white'; icon = 'alert-triangle';
+      }
+
+      toast.className = `${bg} px-4 py-3 rounded-lg shadow-lg flex items-center gap-2.5 text-sm min-w-[280px] max-w-[400px] border border-white/10 transform translate-y-2 opacity-0 transition-all duration-300 z-50`;
+      toast.innerHTML = `
+        <i data-lucide="${icon}" class="w-4 h-4 flex-shrink-0"></i>
+        <div class="flex-1">${message}</div>
+        <button onclick="this.parentElement.remove()" class="text-white/70 hover:text-white ml-2"><i data-lucide="x" class="w-3.5 h-3.5"></i></button>
+      `;
+
+      container.appendChild(toast);
+      if(window.lucide) lucide.createIcons({ root: toast });
+      
+      // Animate entry
+      setTimeout(() => {
+        toast.classList.remove('translate-y-2', 'opacity-0');
+      }, 50);
+
+      // Auto remove
+      setTimeout(() => {
+        toast.classList.add('opacity-0', 'translate-y-2');
+        setTimeout(() => toast.remove(), 300);
+      }, 4000);
+    }
+  </script>
+</body>
+</html>
