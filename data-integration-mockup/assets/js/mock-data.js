@@ -46,25 +46,25 @@ const MOCK_DATA = {
     { id: 'JOB010', ten: 'Sync Lao động', loai: 'Incremental', nguon: 'CSDL Lao động', dich: 'CSDL Tích hợp An sinh XH', tanSuat: 'Mỗi ngày 23:00', lanChayCuoi: '2026-05-20 23:00:00', trangThai: 'thanh-cong', thoiGianChay: 320 }
   ],
   
-  // Danh sách API endpoints
-  apis: [
-    { id: 'API001', ten: 'API Bảo hiểm xã hội', url: 'https://api.baohiemxh.gov.vn/v1', method: 'GET', auth: 'Bearer Token', trangThai: 'hoat-dong', lanGoi: '2026-05-21 10:30:00' },
-    { id: 'API002', ten: 'API Tra cứu Thuế', url: 'https://api.gdt.gov.vn/tracuu', method: 'POST', auth: 'API Key', trangThai: 'hoat-dong', lanGoi: '2026-05-21 14:15:00' },
-    { id: 'API003', ten: 'API Dịch vụ Công', url: 'https://dichvucong.gov.vn/api/v2', method: 'GET', auth: 'OAuth2', trangThai: 'loi-ket-noi', lanGoi: '2026-05-21 08:45:00' },
-    { id: 'API004', ten: 'API Đăng ký Kinh doanh', url: 'https://dangkykinhdoanh.gov.vn/api', method: 'GET', auth: 'Basic Auth', trangThai: 'hoat-dong', lanGoi: '2026-05-21 15:10:00' },
-    { id: 'API005', ten: 'API Hải quan Điện tử', url: 'https://customs.gov.vn/api/v1/sync', method: 'POST', auth: 'Bearer Token', trangThai: 'tam-dung', lanGoi: '2026-05-19 16:20:00' }
-  ],
-  
-  // Tệp dữ liệu phi cấu trúc
-  tepDuLieu: [
-    { id: 1, ten: 'bao_cao_q1_2026.pdf', loai: 'PDF', kichThuoc: 5242880, ngayTaiLen: '2026-05-10', csdlChua: 'CSDL Tích hợp Công dân' },
-    { id: 2, ten: 'thong_ke_thue_2025.xlsx', loai: 'Excel', kichThuoc: 12582912, ngayTaiLen: '2026-05-15', csdlChua: 'CSDL Tích hợp Doanh nghiệp' },
-    { id: 3, ten: 'ban_do_quy_hoach_hn.json', loai: 'JSON', kichThuoc: 45088768, ngayTaiLen: '2026-05-12', csdlChua: 'CSDL Tích hợp Tài nguyên' },
-    { id: 4, ten: 'danh_sach_benh_vien.csv', loai: 'CSV', kichThuoc: 1048576, ngayTaiLen: '2026-05-18', csdlChua: 'CSDL Tích hợp Công dân' },
-    { id: 5, ten: 'ho_so_xay_dung_cau.zip', loai: 'ZIP', kichThuoc: 268435456, ngayTaiLen: '2026-05-20', csdlChua: 'CSDL Tích hợp Hạ tầng' },
-    { id: 6, ten: 'anh_chup_ve_tinh_2026.png', loai: 'Image', kichThuoc: 8388608, ngayTaiLen: '2026-05-14', csdlChua: 'CSDL Tích hợp Tài nguyên' },
-    { id: 7, ten: 'huong_dan_su_dung_he_thong.docx', loai: 'Word', kichThuoc: 3145728, ngayTaiLen: '2026-05-01', csdlChua: 'Hệ thống' }
-  ],
+  // Nguồn dữ liệu ngoài
+  nguonNgoai: {
+    api: [
+      { id: 'API001', ten: 'API Bảo hiểm xã hội', url: 'https://api.baohiemxh.gov.vn/v1', method: 'GET', auth: 'Bearer Token', trangThai: 'hoat-dong', lanGoi: '2026-05-21 10:30:00' },
+      { id: 'API002', ten: 'API Tra cứu Thuế', url: 'https://api.gdt.gov.vn/tracuu', method: 'POST', auth: 'API Key', trangThai: 'hoat-dong', lanGoi: '2026-05-21 14:15:00' },
+      { id: 'API003', ten: 'API Dịch vụ Công', url: 'https://dichvucong.gov.vn/api/v2', method: 'GET', auth: 'OAuth2', trangThai: 'loi-ket-noi', lanGoi: '2026-05-21 08:45:00' },
+      { id: 'API004', ten: 'API Đăng ký Kinh doanh', url: 'https://dangkykinhdoanh.gov.vn/api', method: 'GET', auth: 'Basic Auth', trangThai: 'hoat-dong', lanGoi: '2026-05-21 15:10:00' },
+      { id: 'API005', ten: 'API Hải quan Điện tử', url: 'https://customs.gov.vn/api/v1/sync', method: 'POST', auth: 'Bearer Token', trangThai: 'tam-dung', lanGoi: '2026-05-19 16:20:00' }
+    ],
+    tep: [
+      { id: 1, ten: 'bao_cao_q1_2026.pdf', loai: 'PDF', kichThuoc: 5242880, ngayTaiLen: '2026-05-10', csdlChua: 'CSDL Tích hợp Công dân' },
+      { id: 2, ten: 'thong_ke_thue_2025.xlsx', loai: 'Excel', kichThuoc: 12582912, ngayTaiLen: '2026-05-15', csdlChua: 'CSDL Tích hợp Doanh nghiệp' },
+      { id: 3, ten: 'ban_do_quy_hoach_hn.json', loai: 'JSON', kichThuoc: 45088768, ngayTaiLen: '2026-05-12', csdlChua: 'CSDL Tích hợp Tài nguyên' },
+      { id: 4, ten: 'danh_sach_benh_vien.csv', loai: 'CSV', kichThuoc: 1048576, ngayTaiLen: '2026-05-18', csdlChua: 'CSDL Tích hợp Công dân' },
+      { id: 5, ten: 'ho_so_xay_dung_cau.zip', loai: 'ZIP', kichThuoc: 268435456, ngayTaiLen: '2026-05-20', csdlChua: 'CSDL Tích hợp Hạ tầng' },
+      { id: 6, ten: 'anh_chup_ve_tinh_2026.png', loai: 'Image', kichThuoc: 8388608, ngayTaiLen: '2026-05-14', csdlChua: 'CSDL Tích hợp Tài nguyên' },
+      { id: 7, ten: 'huong_dan_su_dung_he_thong.docx', loai: 'Word', kichThuoc: 3145728, ngayTaiLen: '2026-05-01', csdlChua: 'Hệ thống' }
+    ]
+  },
   
   // Cấu trúc dữ liệu (schema)
   schemas: [
@@ -101,6 +101,10 @@ const MOCK_DATA = {
     }
   ]
 };
+
+// Backward compatibility alias
+MOCK_DATA.apis = MOCK_DATA.nguonNgoai.api;
+MOCK_DATA.tepDuLieu = MOCK_DATA.nguonNgoai.tep;
 
 const STATUS_LABELS = {
   'da-ket-noi':   { label: 'Đã kết nối',     color: 'success' },

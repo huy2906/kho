@@ -9,9 +9,7 @@ Hệ thống màu sắc tuân thủ thiết kế hiện đại, chuyên nghiệp
 - **Primary (Xanh dương)**: Màu chủ đạo cho button, link, background active.
   - Tailwind variables: `primary-50` đến `primary-900`
   - VD: `bg-primary-600` (Button), `text-primary-700` (Text nhấn), `bg-primary-900` (Sidebar).
-- **Flag (Đỏ/Vàng Quốc kỳ)**: Điểm nhấn.
-  - Đỏ (`flag-red`: `#DA251D`): Dùng cho dải phân cách trên cùng của trang.
-  - Vàng (`flag-yellow`: `#FFCD00`): Dùng cho border-left của item đang active trong sidebar.
+
 - **Trạng thái (Status)**:
   - Success (`success` / Green): Thành công, Đã kết nối, Đã hoàn thành.
   - Error (`error` / Red): Lỗi, Ngắt kết nối, Xóa, Thất bại.
@@ -57,3 +55,27 @@ Hệ thống màu sắc tuân thủ thiết kế hiện đại, chuyên nghiệp
 - **Schema Tree (`schema-tree.html`)**: Cây cấu trúc dữ liệu nhiều cấp (DB > Schema > Table > Col). Dùng `margin-left` hoặc `border-left` để giật cấp. Bắt buộc có icon khác nhau cho từng loại node.
 - **Mapping Table (`mapping-table.html`)**: Bảng chia 3 phần: [Nguồn] -> [Transform] -> [Đích]. Có nút nối/chọn kiểu ánh xạ.
 - **Job Status (`job-status.html`)**: Có progress bar giả lập ở trên đỉnh card, huy hiệu loại Job (CDC/Full), biểu đồ cột nhỏ mini-chart mô phỏng lịch sử chạy tuần.
+
+## 8. Layout & Structure
+
+### 8.7 Header & Sidebar
+
+#### 8.7.1 Sidebar với Submenu (Collapsible)
+
+Khi menu có nhiều mục con cùng nhóm, dùng cấu trúc submenu collapsible:
+- Parent item: có icon chevron-right bên phải, click để toggle
+- Sub-items: indent (pl-12), text-sm, background hơi tối hơn parent (bg-primary-950)
+- Active state cho sub-item: bg-primary-700, text-white, font-medium
+- Auto-expand khi user đang ở 1 trong các trang con
+- Animation: chevron xoay 90 độ khi expand (transition-transform)
+
+Class chuẩn cho submenu container:
+- hidden (default state)
+- bg-primary-950 (nền tối hơn parent một chút)
+
+Class chuẩn cho sub-item link:
+- flex items-center gap-3
+- pl-12 pr-4 py-2 (indent 12 đơn vị để thụt vào)
+- text-sm
+- text-primary-100 (default), text-white (active)
+- hover:bg-primary-800

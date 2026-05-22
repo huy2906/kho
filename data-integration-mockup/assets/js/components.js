@@ -18,11 +18,98 @@ async function loadLayout(basePath = '../../') {
   ]);
   // Re-render Lucide icons sau khi inject HTML
   if (window.lucide) lucide.createIcons();
+  
+  // Highlight active menu
+  autoExpandActiveSubmenu();
 }
 
 // Toggle sidebar collapsed/expanded
 function toggleSidebar() {
   document.getElementById('app-sidebar').classList.toggle('collapsed');
+}
+
+function toggleSubmenu(buttonEl) {
+  const submenu = buttonEl.nextElementSibling;
+  const chevron = buttonEl.querySelector('.chevron');
+  const isOpen = !submenu.classList.contains('hidden');
+  
+  submenu.classList.toggle('hidden');
+  chevron.style.transform = isOpen ? 'rotate(0deg)' : 'rotate(90deg)';
+  buttonEl.setAttribute('aria-expanded', !isOpen);
+}
+
+// Auto-expand submenu chứa trang hiện tại và highlight các nav-link thông thường
+function autoExpandActiveSubmenu() {
+  let currentPath = window.location.pathname;
+  if (currentPath.endsWith('/')) currentPath += 'index.html';
+  
+  let foundActive = false;
+  
+  // Xử lý các link trong submenu
+  document.querySelectorAll('.submenu a').forEach(link => {
+    let linkPath = link.getAttribute('href');
+    if (linkPath === '#') return;
+    
+    // Normalize path for comparison
+    const normalizedLinkPath = linkPath.replace(/\.\.\//g, '');
+    
+    if (currentPath.includes(normalizedLinkPath) || 
+        (normalizedLinkPath.includes('index.html') && currentPath.endsWith('data-integration-mockup/') && linkPath.includes('../../index.html'))) {
+      link.closest('.submenu').classList.remove('hidden');
+      const btn = link.closest('.submenu').previousElementSibling;
+      const chevron = btn.querySelector('.chevron');
+      if (chevron) chevron.style.transform = 'rotate(90deg)';
+      btn.setAttribute('aria-expanded', 'true');
+      
+      // Highlight active sub-item
+      link.classList.add('bg-primary-700', 'text-white', 'font-medium');
+      link.classList.remove('text-primary-100');
+      
+      // Highlight parent
+      btn.classList.add('bg-primary-800', 'border-white');
+      btn.classList.remove('border-transparent');
+      
+      foundActive = true;
+    }
+  });
+  
+  // Xử lý các link thường bên ngoài submenu
+  document.querySelectorAll('#app-sidebar .nav-link').forEach(link => {
+    let linkPath = link.getAttribute('href');
+    if (linkPath === '#') return;
+    
+    const normalizedLinkPath = linkPath.replace(/\.\.\//g, '');
+    const isRootIndex = normalizedLinkPath === 'index.html';
+    const isCurrentRoot = currentPath.endsWith('data-integration-mockup/') || currentPath.endsWith('data-integration-mockup/index.html');
+    
+    if (currentPath.includes(normalizedLinkPath) && !(isRootIndex && !isCurrentRoot)) {
+        link.classList.add('bg-primary-700', 'text-white', 'border-white');
+        link.classList.remove('text-primary-100', 'border-transparent', 'hover:border-primary-400');
+        
+        // Cập nhật màu icon bên trong nếu có
+        const icon = link.querySelector('i');
+        if (icon) {
+            icon.classList.add('text-white');
+            icon.classList.remove('text-primary-300');
+        }
+        
+        foundActive = true;
+    }
+  });
+  
+  // Nếu đang ở root index, highlight Dashboard explicitly
+  if (!foundActive && (currentPath.endsWith('data-integration-mockup/') || currentPath.endsWith('data-integration-mockup/index.html'))) {
+     const dashboardLink = document.querySelector('#app-sidebar .nav-link[href="../../index.html"]') || document.querySelector('#app-sidebar .nav-link[href="index.html"]');
+     if (dashboardLink) {
+         dashboardLink.classList.add('bg-primary-700', 'text-white', 'border-white');
+         dashboardLink.classList.remove('text-primary-100', 'border-transparent', 'hover:border-primary-400');
+         const icon = dashboardLink.querySelector('i');
+         if (icon) {
+             icon.classList.add('text-white');
+             icon.classList.remove('text-primary-300');
+         }
+     }
+  }
 }
 
 // Format ngày DD/MM/YYYY

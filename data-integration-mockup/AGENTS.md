@@ -27,6 +27,10 @@ Mỗi khi user yêu cầu "Tạo màn hình cho UCxxx":
 - **Không Inline Style**: Tuyệt đối không dùng thẻ `<style>` hay thuộc tính `style=""`. Mọi styling đều phải dùng class của Tailwind.
 - **Tái sử dụng Component**: Khi nhận thấy một khối UI lặp lại (ví dụ bảng mapping, thẻ CSDL), hãy tìm trong thư mục `components/data-integration/` xem đã có chưa.
 - **Accessibility (WCAG 2.1 AA)**: Phải có đủ thuộc tính `aria-label`, `alt` cho image. Hỗ trợ hiển thị tốt trạng thái focus (`focus:ring-2`, `focus:outline-none`).
+- **Quy tắc Component**:
+  - Khi nhóm menu có > 1 mục con liên quan (ví dụ: API + File cùng thuộc Nguồn dữ liệu ngoài), PHẢI dùng submenu collapsible thay vì để các mục con ngang hàng với mục chính.
+  - Submenu phải auto-expand khi user đang ở trang con.
+  - Indent sub-items rõ ràng (pl-12) để phân biệt cấp bậc.
 
 ## 5. QUY ƯỚC HIỂN THỊ DỮ LIỆU ĐẶC THÙ VIỆT NAM
 - **Ngày tháng**: Phải luôn format theo chuẩn `DD/MM/YYYY` hoặc `DD/MM/YYYY HH:mm:ss`. (Tuyệt đối không dùng MM/DD/YYYY).
