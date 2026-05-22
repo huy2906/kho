@@ -3,205 +3,571 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Hệ thống Quản trị Tích hợp Dữ liệu - Dashboard Mockup</title>
-  
-  <!-- Tailwind CSS via CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            primary: {
-              50: '#EFF6FF', 100: '#DBEAFE', 200: '#BFDBFE',
-              500: '#3B82F6', 600: '#2563EB', 700: '#1D4ED8',
-              800: '#1E40AF', 900: '#1E3A8A'
-            },
-            success: { 50: '#F0FDF4', 100: '#DCFCE7', 600: '#16A34A', 700: '#15803D' },
-            warning: { 50: '#FFFBEB', 100: '#FEF3C7', 600: '#F59E0B', 700: '#B45309' },
-            error:   { 50: '#FEF2F2', 100: '#FEE2E2', 600: '#DC2626', 700: '#B91C1C' },
-            info:    { 50: '#F0F9FF', 100: '#E0F2FE', 600: '#0EA5E9', 700: '#0369A1' },
-            'gov-blue': { 50:'#E3F2FD', 100:'#BBDEFB', 500:'#2196F3', 600:'#1E88E5', 700:'#1976D2', 800:'#1565C0' },
-            'gov-red': '#DA251D',
-            'gov-yellow': '#FFCD00'
-          },
-          fontFamily: {
-            sans: ['"Be Vietnam Pro"', '"Plus Jakarta Sans"', 'Inter', 'system-ui', 'sans-serif'],
-            gov:  ['"Be Vietnam Pro"', '"Plus Jakarta Sans"', 'Inter', 'sans-serif'],
-            mono: ['"JetBrains Mono"', 'ui-monospace', 'monospace']
-          }
-        }
-      }
-    }
-  </script>
+  <title>Thiết kế Giao diện Mockup | Hệ thống Quản trị Tích hợp Dữ liệu</title>
+  <meta name="description" content="Tổng hợp toàn bộ HTML mockup cho các luồng Use Case của dự án Hệ thống Tích hợp Dữ liệu.">
+
+  <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-  <script src="https://unpkg.com/lucide@latest"></script>
-  <link rel="stylesheet" href="assets/css/custom.css">
-  
-  <!-- JS dùng chung -->
-  <script src="assets/js/common.js" defer></script>
-  <script src="assets/js/mock-data.js" defer></script>
-  <script src="assets/js/components.js" defer></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Plus Jakarta Sans', Inter, system-ui, sans-serif;
+      background: #f3f4fb;
+      color: #2a2f45;
+      min-height: 100vh;
+    }
+
+    /* ─── Header ─── */
+    .topbar {
+      background: linear-gradient(95deg, #0a1442 0%, #14215c 35%, #1e2d80 70%, #2a4cdf 100%);
+      height: 84px;
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: center;
+      gap: 16px;
+      padding: 0 28px;
+      box-shadow: 0 6px 20px rgba(10,20,66,0.25);
+      position: sticky;
+      top: 0;
+      z-index: 30;
+    }
+    .topbar-brand { display: flex; align-items: center; gap: 16px; }
+    .emblem {
+      width: 56px; height: 56px; border-radius: 50%;
+      background: radial-gradient(circle at 50% 40%, #e53935, #b71c1c 70%, #7a0f12 100%);
+      display: grid; place-items: center; flex-shrink: 0;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.25), inset 0 0 0 1.5px rgba(245,195,36,0.4);
+    }
+    .brand-title {
+      font-size: 19px; font-weight: 800; text-transform: uppercase;
+      letter-spacing: 0.04em; color: white; line-height: 1.2; white-space: nowrap;
+    }
+    .brand-accent { color: #ffd84a; text-shadow: 0 0 18px rgba(255,216,74,0.35); }
+    .brand-sub { font-size: 12px; font-style: italic; color: rgba(255,255,255,0.72); margin-top: 2px; }
+
+    .user-chip {
+      display: flex; align-items: center; gap: 12px;
+      padding: 8px 18px; border-radius: 999px;
+      background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.14);
+      cursor: pointer; transition: background 0.18s; color: white;
+    }
+    .user-chip:hover { background: rgba(255,255,255,0.14); }
+    .user-avatar {
+      width: 38px; height: 38px; border-radius: 50%;
+      background: linear-gradient(135deg, #f59e0b, #ef4444);
+      display: grid; place-items: center;
+      font-weight: 800; font-size: 13px; color: white; flex-shrink: 0;
+    }
+    .user-name  { font-size: 13.5px; font-weight: 700; white-space: nowrap; }
+    .user-email { font-size: 11.5px; color: rgba(255,255,255,0.7); white-space: nowrap; }
+
+    /* ─── Main ─── */
+    .page-wrap {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 32px 24px 60px;
+    }
+
+    /* ─── Hero banner ─── */
+    .hero {
+      background: white;
+      border: 1px solid #e6e7ef;
+      border-radius: 16px;
+      padding: 28px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+      margin-bottom: 32px;
+      box-shadow: 0 1px 2px rgba(15,23,42,0.04);
+    }
+    .hero-title {
+      font-size: 24px; font-weight: 700; color: #0b1020;
+      letter-spacing: -0.01em; margin-bottom: 6px;
+    }
+    .hero-sub { font-size: 13.5px; color: #5b6175; line-height: 1.5; }
+    .hero-stats { display: flex; gap: 16px; flex-shrink: 0; }
+    .hero-stat {
+      text-align: center; padding: 12px 20px;
+      border-radius: 12px; border: 1px solid #e6e7ef;
+    }
+    .hero-stat-num { font-size: 26px; font-weight: 700; line-height: 1; margin-bottom: 4px; }
+    .hero-stat-lbl { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; }
+    .hero-stat.total { background: #eef3ff; }
+    .hero-stat.total .hero-stat-num { color: #2a4cdf; }
+    .hero-stat.total .hero-stat-lbl { color: #5b7bf5; }
+    .hero-stat.done  { background: #ecfdf5; }
+    .hero-stat.done  .hero-stat-num { color: #047857; }
+    .hero-stat.done  .hero-stat-lbl { color: #10b981; }
+
+    /* ─── Section ─── */
+    .section { margin-bottom: 40px; }
+    .section-header {
+      display: flex; align-items: center; gap: 10px;
+      padding-bottom: 12px;
+      border-bottom: 2px solid #e6e7ef;
+      margin-bottom: 20px;
+    }
+    .section-header-icon {
+      width: 32px; height: 32px; border-radius: 9px;
+      display: grid; place-items: center; flex-shrink: 0;
+      background: #eef3ff;
+    }
+    .section-title { font-size: 17px; font-weight: 700; color: #0b1020; }
+
+    .subsection { margin-bottom: 24px; }
+    .subsection-title {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 13px; font-weight: 700; color: #5b6175;
+      text-transform: uppercase; letter-spacing: 0.06em;
+      margin-bottom: 14px;
+    }
+    .subsection-tag {
+      background: #f3f4fb; color: #8087a0;
+      border: 1px solid #e6e7ef;
+      padding: 2px 8px; border-radius: 6px;
+      font-size: 11.5px; font-weight: 700;
+    }
+
+    /* ─── UC Card Grid ─── */
+    .uc-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 16px;
+    }
+
+    .uc-card {
+      background: white;
+      border: 1px solid #e6e7ef;
+      border-radius: 14px;
+      padding: 18px 20px;
+      position: relative;
+      overflow: hidden;
+      transition: box-shadow 0.18s, border-color 0.18s, transform 0.15s;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .uc-card::before {
+      content: '';
+      position: absolute; left: 0; top: 0; bottom: 0;
+      width: 3px; border-radius: 2px 0 0 2px;
+    }
+    .uc-card.done::before    { background: #10b981; }
+    .uc-card.pending::before { background: #d4d6e0; }
+
+    .uc-card:hover {
+      box-shadow: 0 8px 24px rgba(15,23,42,0.10);
+      border-color: #d4d6e0;
+      transform: translateY(-1px);
+    }
+    .uc-card.pending { opacity: 0.7; }
+    .uc-card.pending:hover { opacity: 1; }
+
+    .uc-card-top {
+      display: flex; justify-content: space-between; align-items: flex-start;
+      padding-left: 8px;
+    }
+    .uc-code {
+      font-size: 11px; font-weight: 700;
+      background: #eef3ff; color: #2a4cdf;
+      padding: 2px 8px; border-radius: 6px; border: 1px solid #dde6ff;
+    }
+    .uc-status-badge {
+      display: inline-flex; align-items: center; gap: 4px;
+      font-size: 11px; font-weight: 600;
+      padding: 2px 8px; border-radius: 6px;
+    }
+    .uc-status-badge.done    { background: #ecfdf5; color: #047857; }
+    .uc-status-badge.pending { background: #f3f4fb; color: #8087a0; }
+
+    .uc-name {
+      font-size: 14px; font-weight: 700; color: #0b1020;
+      padding-left: 8px; line-height: 1.4;
+    }
+    .uc-desc {
+      font-size: 13px; color: #5b6175; padding-left: 8px;
+      line-height: 1.5;
+      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .uc-link {
+      display: inline-flex; align-items: center; gap: 6px;
+      margin-left: 8px; margin-top: 4px;
+      font-size: 13px; font-weight: 600; color: #2a4cdf;
+      text-decoration: none;
+      padding: 6px 12px; border-radius: 8px;
+      border: 1px solid #dde6ff; background: #eef3ff;
+      transition: background 0.15s, border-color 0.15s;
+      align-self: flex-start;
+    }
+    .uc-link:hover { background: #dde6ff; border-color: #2a4cdf; }
+
+    .uc-disabled {
+      display: inline-flex; align-items: center; gap: 6px;
+      margin-left: 8px; margin-top: 4px;
+      font-size: 13px; font-weight: 500; color: #b3b8c8;
+      padding: 6px 12px; border-radius: 8px;
+      border: 1px solid #e6e7ef; background: #fafbff;
+      cursor: not-allowed; align-self: flex-start;
+    }
+
+    /* ─── Footer ─── */
+    .page-footer {
+      text-align: center;
+      font-size: 12px; color: #b3b8c8;
+      padding: 24px;
+      border-top: 1px solid #e6e7ef;
+    }
+  </style>
 </head>
-<body class="font-sans bg-gray-50 text-gray-800">
+<body>
 
-  <div class="flex flex-col min-h-screen">
-    <!-- Header full-width (dark navy modern - managed by component) -->
-    <div id="app-header" class="flex-shrink-0 sticky top-0 z-30"></div>
-    
-    <!-- Content area: sidebar trắng + main -->
-    <div class="flex flex-1 min-h-0">
-      <aside id="app-sidebar" class="flex-shrink-0 overflow-y-auto"></aside>
-      
-      <div class="flex-1 flex flex-col bg-gray-50">
-        <!-- Breadcrumb -->
-        <nav class="px-6 py-3 bg-white border-b border-gray-200 flex-shrink-0 shadow-sm relative z-10">
-          <ol class="flex items-center gap-2 text-sm">
-            <li class="text-gray-900 font-semibold">Trang chủ</li>
-            <li class="text-gray-400"><i data-lucide="chevron-right" class="w-4 h-4"></i></li>
-            <li class="text-gray-500">Danh mục Mockups</li>
-          </ol>
-        </nav>
-        
-        <!-- Main content -->
-        <main class="flex-1 overflow-auto bg-slate-50 relative p-6">
-    <div class="mb-8 bg-white p-6 rounded-xl border border-gray-200 shadow-sm flex items-center justify-between">
-      <div>
-        <h1 class="text-2xl font-bold text-gray-900 mb-1">Thiết kế Giao diện (Mockup)</h1>
-        <p class="text-gray-500 text-sm">Tổng hợp toàn bộ HTML mockup cho các luồng Use Case của dự án.</p>
-      </div>
-      <div class="flex gap-4 text-center">
-        <div class="px-4 py-2 bg-gray-50 rounded-lg border border-gray-100">
-            <div class="text-2xl font-bold text-primary-600">42</div>
-            <div class="text-xs text-gray-500 uppercase font-semibold mt-1">Tổng UC</div>
-        </div>
-        <div class="px-4 py-2 bg-success-50 rounded-lg border border-success-100">
-            <div class="text-2xl font-bold text-success-600">2</div>
-            <div class="text-xs text-success-700 uppercase font-semibold mt-1">Đã hoàn thành</div>
-        </div>
-      </div>
+<!-- Header -->
+<header class="topbar" role="banner">
+  <div class="topbar-brand">
+    <div class="emblem" aria-label="Quốc huy Việt Nam">
+      <svg width="26" height="26" viewBox="0 0 26 26" fill="none" aria-hidden="true">
+        <polygon points="13,2 15.9,9.8 24.2,9.8 17.6,14.8 20.5,22.5 13,17.5 5.5,22.5 8.4,14.8 1.8,9.8 10.1,9.8"
+                 fill="#f5c324" stroke="rgba(245,195,36,0.4)" stroke-width="0.5"/>
+      </svg>
     </div>
-    
-    <!-- Phân hệ I -->
-    <section class="mb-12">
-      <div class="flex items-center gap-2 mb-6 border-b border-gray-200 pb-2">
-        <i data-lucide="database" class="w-6 h-6 text-primary-600"></i>
-        <h2 class="text-xl font-bold text-gray-800">Phân hệ I: Quản trị nguồn dữ liệu</h2>
+    <div>
+      <div class="brand-title">
+        HỆ THỐNG <span class="brand-accent">QUẢN TRỊ</span> TÍCH HỢP DỮ LIỆU
       </div>
-      
-      <h3 class="text-md font-bold text-gray-700 mb-4 flex items-center gap-2">
-        <span class="bg-gray-200 text-gray-700 px-2.5 py-0.5 rounded text-sm font-semibold">I.1</span>
-        Quản lý cấu trúc dữ liệu (CTDL) của CSDL tích hợp
-      </h3>
-      
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mb-8">
-        <!-- UC001 (Đã làm) -->
-        <div class="bg-white rounded-xl p-5 border border-gray-200 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group">
-            <div class="absolute top-0 left-0 w-1 h-full bg-success-500"></div>
-            <div class="flex justify-between items-start mb-2 pl-2">
-                <span class="bg-primary-100 text-primary-700 font-bold px-2 py-0.5 rounded text-xs">UC001 - UC004</span>
-                <span class="bg-success-100 text-success-700 font-semibold px-2 py-0.5 rounded text-xs flex items-center gap-1"><i data-lucide="check-circle" class="w-3 h-3"></i> Đã có mẫu</span>
-            </div>
-            <h4 class="font-bold text-gray-900 mb-1 pl-2 line-clamp-2">Quản lý CSDL nguồn</h4>
-            <p class="text-sm text-gray-500 mb-4 pl-2 line-clamp-2">Màn hình quản trị kết nối đa dạng RDBMS (Oracle, SQL, MySQL...).</p>
-            <a href="screens/UC001-quan-ly-csdl-nguon/index.html" class="ml-2 inline-flex items-center gap-1.5 text-sm font-semibold text-primary-600 hover:text-primary-700 hover:bg-primary-50 px-3 py-1.5 rounded transition-colors border border-primary-200 w-fit">
-                Xem màn hình <i data-lucide="arrow-right" class="w-4 h-4"></i>
-            </a>
-        </div>
+      <div class="brand-sub">Cơ quan ABC — Phiên bản 2026</div>
+    </div>
+  </div>
 
-        <!-- UC005 (Đã làm) -->
-        <div class="bg-white rounded-xl p-5 border border-gray-200 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group">
-            <div class="absolute top-0 left-0 w-1 h-full bg-success-500"></div>
-            <div class="flex justify-between items-start mb-2 pl-2">
-                <span class="bg-primary-100 text-primary-700 font-bold px-2 py-0.5 rounded text-xs">UC005 - UC007</span>
-                <span class="bg-success-100 text-success-700 font-semibold px-2 py-0.5 rounded text-xs flex items-center gap-1"><i data-lucide="check-circle" class="w-3 h-3"></i> Đã có mẫu</span>
-            </div>
-            <h4 class="font-bold text-gray-900 mb-1 pl-2 line-clamp-2">Thiết lập CTDL tích hợp</h4>
-            <p class="text-sm text-gray-500 mb-4 pl-2 line-clamp-2">Giao diện schema mapping giữa cấu trúc dữ liệu nguồn và đích.</p>
-            <a href="screens/UC005-thiet-lap-ctdl-tich-hop/index.html" class="ml-2 inline-flex items-center gap-1.5 text-sm font-semibold text-primary-600 hover:text-primary-700 hover:bg-primary-50 px-3 py-1.5 rounded transition-colors border border-primary-200 w-fit">
-                Xem màn hình <i data-lucide="arrow-right" class="w-4 h-4"></i>
-            </a>
-        </div>
+  <div></div>
+
+  <button class="user-chip" aria-label="Tài khoản người dùng">
+    <div class="user-avatar" aria-hidden="true">AD</div>
+    <div>
+      <div class="user-name">Quản trị hệ thống</div>
+      <div class="user-email">admin@abc.gov.vn</div>
+    </div>
+    <i data-lucide="chevron-down" style="width:15px;height:15px;color:rgba(255,255,255,0.7)" aria-hidden="true"></i>
+  </button>
+</header>
+
+<!-- Page content -->
+<div class="page-wrap">
+
+  <!-- Hero -->
+  <div class="hero">
+    <div>
+      <h1 class="hero-title">Thiết kế Giao diện (Mockup)</h1>
+      <p class="hero-sub">Tổng hợp toàn bộ màn hình HTML mockup cho các luồng Use Case của dự án.<br>
+      Click vào từng thẻ để xem màn hình tương ứng.</p>
+    </div>
+    <div class="hero-stats">
+      <div class="hero-stat total">
+        <div class="hero-stat-num">42</div>
+        <div class="hero-stat-lbl">Tổng UC</div>
       </div>
-    </section>
-    
-    <!-- Phân hệ II -->
-    <section>
-      <div class="flex items-center gap-2 mb-6 border-b border-gray-200 pb-2">
-        <i data-lucide="workflow" class="w-6 h-6 text-primary-600"></i>
-        <h2 class="text-xl font-bold text-gray-800">Phân hệ II: Trích xuất, lưu trữ, chuyển đổi dữ liệu</h2>
-      </div>
-      
-      <h3 class="text-md font-bold text-gray-700 mb-4 flex items-center gap-2">
-        <span class="bg-gray-200 text-gray-700 px-2.5 py-0.5 rounded text-sm font-semibold">II.1</span>
-        Tích hợp dữ liệu từ CSDL gốc
-      </h3>
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mb-8">
-        <!-- Card UC 16-31 placeholder -->
-        <div class="bg-white rounded-xl p-5 border border-dashed border-gray-300 shadow-sm opacity-60 hover:opacity-100 transition-opacity">
-            <div class="flex justify-between items-start mb-2">
-                <span class="bg-gray-100 text-gray-600 font-bold px-2 py-0.5 rounded text-xs">UC016 - UC031</span>
-                <span class="bg-gray-100 text-gray-500 font-semibold px-2 py-0.5 rounded text-xs flex items-center gap-1"><i data-lucide="clock" class="w-3 h-3"></i> Chưa làm</span>
-            </div>
-            <h4 class="font-bold text-gray-700 mb-1 line-clamp-2">Các UC Tích hợp từ CSDL gốc</h4>
-            <p class="text-sm text-gray-500 mb-4 line-clamp-2">Giao diện ETL batch job.</p>
-            <button disabled class="inline-flex items-center gap-1 text-sm font-medium text-gray-400 bg-gray-50 px-3 py-1.5 rounded border border-gray-200 cursor-not-allowed">
-                Đang phát triển
-            </button>
-        </div>
-      </div>
-      
-      <h3 class="text-md font-bold text-gray-700 mb-4 flex items-center gap-2">
-        <span class="bg-gray-200 text-gray-700 px-2.5 py-0.5 rounded text-sm font-semibold">II.2</span>
-        Cập nhật dữ liệu thay đổi (CDC)
-      </h3>
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mb-8">
-        <!-- Card UC 32-39 placeholder -->
-        <div class="bg-white rounded-xl p-5 border border-dashed border-gray-300 shadow-sm opacity-60 hover:opacity-100 transition-opacity">
-            <div class="flex justify-between items-start mb-2">
-                <span class="bg-gray-100 text-gray-600 font-bold px-2 py-0.5 rounded text-xs">UC032 - UC039</span>
-                <span class="bg-gray-100 text-gray-500 font-semibold px-2 py-0.5 rounded text-xs flex items-center gap-1"><i data-lucide="clock" class="w-3 h-3"></i> Chưa làm</span>
-            </div>
-            <h4 class="font-bold text-gray-700 mb-1 line-clamp-2">Các UC CDC / Streaming</h4>
-            <p class="text-sm text-gray-500 mb-4 line-clamp-2">Giao diện stream log thay đổi thời gian thực.</p>
-            <button disabled class="inline-flex items-center gap-1 text-sm font-medium text-gray-400 bg-gray-50 px-3 py-1.5 rounded border border-gray-200 cursor-not-allowed">
-                Đang phát triển
-            </button>
-        </div>
-      </div>
-      
-      <h3 class="text-md font-bold text-gray-700 mb-4 flex items-center gap-2">
-        <span class="bg-gray-200 text-gray-700 px-2.5 py-0.5 rounded text-sm font-semibold">II.3</span>
-        Quản lý dữ liệu phi cấu trúc
-      </h3>
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-        <!-- Card UC 40-47 placeholder -->
-        <div class="bg-white rounded-xl p-5 border border-dashed border-gray-300 shadow-sm opacity-60 hover:opacity-100 transition-opacity">
-            <div class="flex justify-between items-start mb-2">
-                <span class="bg-gray-100 text-gray-600 font-bold px-2 py-0.5 rounded text-xs">UC040 - UC047</span>
-                <span class="bg-gray-100 text-gray-500 font-semibold px-2 py-0.5 rounded text-xs flex items-center gap-1"><i data-lucide="clock" class="w-3 h-3"></i> Chưa làm</span>
-            </div>
-            <h4 class="font-bold text-gray-700 mb-1 line-clamp-2">Quản lý File & Media</h4>
-            <p class="text-sm text-gray-500 mb-4 line-clamp-2">Quản trị các tệp phi cấu trúc.</p>
-            <button disabled class="inline-flex items-center gap-1 text-sm font-medium text-gray-400 bg-gray-50 px-3 py-1.5 rounded border border-gray-200 cursor-not-allowed">
-                Đang phát triển
-            </button>
-        </div>
-      </div>
-    </section>
-  </main>
-  
-        <div id="app-footer" class="flex-shrink-0"></div>
+      <div class="hero-stat done">
+        <div class="hero-stat-num">2</div>
+        <div class="hero-stat-lbl">Đã có mẫu</div>
       </div>
     </div>
   </div>
-  
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      loadLayout('./');
-    });
-  </script>
+
+  <!-- ═══ Phân hệ I ═══ -->
+  <section class="section">
+    <div class="section-header">
+      <div class="section-header-icon">
+        <i data-lucide="database" style="width:18px;height:18px;color:#2a4cdf" aria-hidden="true"></i>
+      </div>
+      <h2 class="section-title">Phân hệ I: Quản trị nguồn dữ liệu</h2>
+    </div>
+
+    <div class="subsection">
+      <div class="subsection-title">
+        <span class="subsection-tag">I.1</span>
+        Quản lý kết nối &amp; cấu trúc CSDL nguồn
+      </div>
+      <div class="uc-grid">
+
+        <!-- UC001 ✅ -->
+        <div class="uc-card done">
+          <div class="uc-card-top">
+            <span class="uc-code">UC001 – UC004</span>
+            <span class="uc-status-badge done">
+              <i data-lucide="check-circle" style="width:11px;height:11px" aria-hidden="true"></i> Đã có mẫu
+            </span>
+          </div>
+          <div class="uc-name">Quản lý CSDL nguồn</div>
+          <div class="uc-desc">Màn hình danh sách + chi tiết kết nối đa dạng RDBMS (Oracle, SQL Server, MySQL, PostgreSQL, MongoDB).</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <a href="screens/UC001-quan-ly-csdl-nguon/index.html" class="uc-link">
+              <i data-lucide="list" style="width:13px;height:13px" aria-hidden="true"></i> Danh sách
+            </a>
+            <a href="screens/UC001-quan-ly-csdl-nguon/chi-tiet.html" class="uc-link">
+              <i data-lucide="file-text" style="width:13px;height:13px" aria-hidden="true"></i> Chi tiết
+            </a>
+          </div>
+        </div>
+
+        <!-- UC027 – pending -->
+        <div class="uc-card pending">
+          <div class="uc-card-top">
+            <span class="uc-code">UC027</span>
+            <span class="uc-status-badge pending">
+              <i data-lucide="clock" style="width:11px;height:11px" aria-hidden="true"></i> Chưa làm
+            </span>
+          </div>
+          <div class="uc-name">Quản lý API endpoint</div>
+          <div class="uc-desc">Danh sách REST API nguồn với xác thực Bearer/Basic/OAuth2.</div>
+          <span class="uc-disabled">
+            <i data-lucide="lock" style="width:12px;height:12px" aria-hidden="true"></i> Đang phát triển
+          </span>
+        </div>
+
+        <!-- UC042 – pending -->
+        <div class="uc-card pending">
+          <div class="uc-card-top">
+            <span class="uc-code">UC042</span>
+            <span class="uc-status-badge pending">
+              <i data-lucide="clock" style="width:11px;height:11px" aria-hidden="true"></i> Chưa làm
+            </span>
+          </div>
+          <div class="uc-name">Quản lý tệp dữ liệu</div>
+          <div class="uc-desc">Upload và quản lý file CSV, Excel, JSON, XML làm nguồn tích hợp.</div>
+          <span class="uc-disabled">
+            <i data-lucide="lock" style="width:12px;height:12px" aria-hidden="true"></i> Đang phát triển
+          </span>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="subsection">
+      <div class="subsection-title">
+        <span class="subsection-tag">I.2</span>
+        Thiết kế kho tích hợp
+      </div>
+      <div class="uc-grid">
+
+        <!-- UC005 ✅ -->
+        <div class="uc-card done">
+          <div class="uc-card-top">
+            <span class="uc-code">UC005 – UC007</span>
+            <span class="uc-status-badge done">
+              <i data-lucide="check-circle" style="width:11px;height:11px" aria-hidden="true"></i> Đã có mẫu
+            </span>
+          </div>
+          <div class="uc-name">Thiết lập CTDL tích hợp</div>
+          <div class="uc-desc">Giao diện schema mapping giữa cấu trúc dữ liệu nguồn và đích.</div>
+          <a href="screens/UC005-thiet-lap-ctdl-tich-hop/index.html" class="uc-link">
+            <i data-lucide="arrow-right" style="width:13px;height:13px" aria-hidden="true"></i> Xem màn hình
+          </a>
+        </div>
+
+        <!-- UC010 – pending -->
+        <div class="uc-card pending">
+          <div class="uc-card-top">
+            <span class="uc-code">UC010 – UC014</span>
+            <span class="uc-status-badge pending">
+              <i data-lucide="clock" style="width:11px;height:11px" aria-hidden="true"></i> Chưa làm
+            </span>
+          </div>
+          <div class="uc-name">Quản lý CSDL tích hợp</div>
+          <div class="uc-desc">Danh sách kho dữ liệu trung tâm, chi tiết schema và trạng thái.</div>
+          <span class="uc-disabled">
+            <i data-lucide="lock" style="width:12px;height:12px" aria-hidden="true"></i> Đang phát triển
+          </span>
+        </div>
+
+        <!-- UC015 – pending -->
+        <div class="uc-card pending">
+          <div class="uc-card-top">
+            <span class="uc-code">UC015 – UC016</span>
+            <span class="uc-status-badge pending">
+              <i data-lucide="clock" style="width:11px;height:11px" aria-hidden="true"></i> Chưa làm
+            </span>
+          </div>
+          <div class="uc-name">Mapping &amp; chuyển đổi</div>
+          <div class="uc-desc">Kéo thả field nguồn → đích, cấu hình transform rule (UPPER, DATE FORMAT…).</div>
+          <span class="uc-disabled">
+            <i data-lucide="lock" style="width:12px;height:12px" aria-hidden="true"></i> Đang phát triển
+          </span>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ Phân hệ II ═══ -->
+  <section class="section">
+    <div class="section-header">
+      <div class="section-header-icon">
+        <i data-lucide="workflow" style="width:18px;height:18px;color:#2a4cdf" aria-hidden="true"></i>
+      </div>
+      <h2 class="section-title">Phân hệ II: Trích xuất, lưu trữ, chuyển đổi dữ liệu</h2>
+    </div>
+
+    <div class="subsection">
+      <div class="subsection-title">
+        <span class="subsection-tag">II.1</span>
+        Tích hợp dữ liệu từ CSDL gốc (ETL)
+      </div>
+      <div class="uc-grid">
+        <div class="uc-card pending">
+          <div class="uc-card-top">
+            <span class="uc-code">UC016 – UC031</span>
+            <span class="uc-status-badge pending">
+              <i data-lucide="clock" style="width:11px;height:11px" aria-hidden="true"></i> Chưa làm
+            </span>
+          </div>
+          <div class="uc-name">Tác vụ tích hợp ETL</div>
+          <div class="uc-desc">Quản lý và vận hành các batch job Full-load / Incremental từ CSDL nguồn.</div>
+          <span class="uc-disabled">
+            <i data-lucide="lock" style="width:12px;height:12px" aria-hidden="true"></i> Đang phát triển
+          </span>
+        </div>
+        <div class="uc-card pending">
+          <div class="uc-card-top">
+            <span class="uc-code">UC025</span>
+            <span class="uc-status-badge pending">
+              <i data-lucide="clock" style="width:11px;height:11px" aria-hidden="true"></i> Chưa làm
+            </span>
+          </div>
+          <div class="uc-name">Lập lịch tự động</div>
+          <div class="uc-desc">Cấu hình lịch cron, trigger, phụ thuộc giữa các job.</div>
+          <span class="uc-disabled">
+            <i data-lucide="lock" style="width:12px;height:12px" aria-hidden="true"></i> Đang phát triển
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <div class="subsection">
+      <div class="subsection-title">
+        <span class="subsection-tag">II.2</span>
+        Cập nhật dữ liệu thay đổi (CDC)
+      </div>
+      <div class="uc-grid">
+        <div class="uc-card pending">
+          <div class="uc-card-top">
+            <span class="uc-code">UC032 – UC039</span>
+            <span class="uc-status-badge pending">
+              <i data-lucide="clock" style="width:11px;height:11px" aria-hidden="true"></i> Chưa làm
+            </span>
+          </div>
+          <div class="uc-name">CDC / Streaming</div>
+          <div class="uc-desc">Theo dõi log binlog thời gian thực, đồng bộ thay đổi tức thì.</div>
+          <span class="uc-disabled">
+            <i data-lucide="lock" style="width:12px;height:12px" aria-hidden="true"></i> Đang phát triển
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <div class="subsection">
+      <div class="subsection-title">
+        <span class="subsection-tag">II.3</span>
+        Quản lý dữ liệu phi cấu trúc
+      </div>
+      <div class="uc-grid">
+        <div class="uc-card pending">
+          <div class="uc-card-top">
+            <span class="uc-code">UC040 – UC047</span>
+            <span class="uc-status-badge pending">
+              <i data-lucide="clock" style="width:11px;height:11px" aria-hidden="true"></i> Chưa làm
+            </span>
+          </div>
+          <div class="uc-name">Quản lý File &amp; Media</div>
+          <div class="uc-desc">Upload, phân loại và quản lý tệp dữ liệu phi cấu trúc.</div>
+          <span class="uc-disabled">
+            <i data-lucide="lock" style="width:12px;height:12px" aria-hidden="true"></i> Đang phát triển
+          </span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ Phân hệ III ═══ -->
+  <section class="section">
+    <div class="section-header">
+      <div class="section-header-icon">
+        <i data-lucide="activity" style="width:18px;height:18px;color:#2a4cdf" aria-hidden="true"></i>
+      </div>
+      <h2 class="section-title">Phân hệ III: Giám sát &amp; Quản trị</h2>
+    </div>
+
+    <div class="uc-grid">
+      <div class="uc-card pending">
+        <div class="uc-card-top">
+          <span class="uc-code">UC033 – UC034</span>
+          <span class="uc-status-badge pending">
+            <i data-lucide="clock" style="width:11px;height:11px" aria-hidden="true"></i> Chưa làm
+          </span>
+        </div>
+        <div class="uc-name">Theo dõi tác vụ &amp; Log</div>
+        <div class="uc-desc">Dashboard theo dõi job đang chạy, xem log terminal, lịch sử thực thi.</div>
+        <span class="uc-disabled">
+          <i data-lucide="lock" style="width:12px;height:12px" aria-hidden="true"></i> Đang phát triển
+        </span>
+      </div>
+      <div class="uc-card pending">
+        <div class="uc-card-top">
+          <span class="uc-code">UC038</span>
+          <span class="uc-status-badge pending">
+            <i data-lucide="clock" style="width:11px;height:11px" aria-hidden="true"></i> Chưa làm
+          </span>
+        </div>
+        <div class="uc-name">Nhật ký hệ thống</div>
+        <div class="uc-desc">Xem, lọc, tìm kiếm log audit toàn hệ thống theo thời gian và mức độ.</div>
+        <span class="uc-disabled">
+          <i data-lucide="lock" style="width:12px;height:12px" aria-hidden="true"></i> Đang phát triển
+        </span>
+      </div>
+      <div class="uc-card pending">
+        <div class="uc-card-top">
+          <span class="uc-code">UC040</span>
+          <span class="uc-status-badge pending">
+            <i data-lucide="clock" style="width:11px;height:11px" aria-hidden="true"></i> Chưa làm
+          </span>
+        </div>
+        <div class="uc-name">Cảnh báo &amp; sự cố</div>
+        <div class="uc-desc">Quản lý alert, rule cảnh báo, lịch sử sự cố và xử lý.</div>
+        <span class="uc-disabled">
+          <i data-lucide="lock" style="width:12px;height:12px" aria-hidden="true"></i> Đang phát triển
+        </span>
+      </div>
+      <div class="uc-card pending">
+        <div class="uc-card-top">
+          <span class="uc-code">UC045</span>
+          <span class="uc-status-badge pending">
+            <i data-lucide="clock" style="width:11px;height:11px" aria-hidden="true"></i> Chưa làm
+          </span>
+        </div>
+        <div class="uc-name">Cài đặt hệ thống</div>
+        <div class="uc-desc">Cấu hình hệ thống, quản lý người dùng, phân quyền, sao lưu.</div>
+        <span class="uc-disabled">
+          <i data-lucide="lock" style="width:12px;height:12px" aria-hidden="true"></i> Đang phát triển
+        </span>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<footer class="page-footer">
+  Hệ thống Quản trị Tích hợp Dữ liệu · Cơ quan ABC · Phiên bản 2026
+</footer>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    if (window.lucide) lucide.createIcons();
+  });
+</script>
 </body>
 </html>

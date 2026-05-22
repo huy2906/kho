@@ -4,194 +4,1245 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>UC005 - Thiết lập CTDL tích hợp | Hệ thống Tích hợp Dữ liệu</title>
-  
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-  tailwind.config = {
-    theme: {
-      extend: {
-        colors: {
-          primary: {
-            50: '#EFF6FF', 100: '#DBEAFE', 200: '#BFDBFE',
-            500: '#3B82F6', 600: '#2563EB', 700: '#1D4ED8',
-            800: '#1E40AF', 900: '#1E3A8A'
-          },
-          success: { 50: '#F0FDF4', 100: '#DCFCE7', 600: '#16A34A', 700: '#15803D' },
-          warning: { 50: '#FFFBEB', 100: '#FEF3C7', 600: '#F59E0B', 700: '#B45309' },
-          error:   { 50: '#FEF2F2', 100: '#FEE2E2', 600: '#DC2626', 700: '#B91C1C' },
-          info:    { 50: '#F0F9FF', 100: '#E0F2FE', 600: '#0EA5E9', 700: '#0369A1' },
-          'gov-header': '#7C1F2C',
-          'gov-header-dark': '#5D1620',
-          'gov-blue': { 50:'#E3F2FD', 100:'#BBDEFB', 500:'#2196F3', 600:'#1E88E5', 700:'#1976D2', 800:'#1565C0' },
-          'gov-red': '#DA251D',
-          'gov-yellow': '#FFCD00'
-        },
-        fontFamily: {
-          sans: ['"Be Vietnam Pro"', '"Plus Jakarta Sans"', 'Inter', 'system-ui', 'sans-serif'],
-          gov:  ['"Be Vietnam Pro"', '"Plus Jakarta Sans"', 'Inter', 'sans-serif'],
-          mono: ['"JetBrains Mono"', 'ui-monospace', 'monospace']
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+
+  <style>
+    /* ─── Reset & Base ─── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { height: 100%; }
+    body {
+      font-family: 'Plus Jakarta Sans', Inter, system-ui, sans-serif;
+      background: #f3f4fb;
+      color: #2a2f45;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    /* ─── Design Tokens ─── */
+    :root {
+      --bg:           #f3f4fb;
+      --surface:      #ffffff;
+      --surface-2:    #fafbff;
+      --border:       #e6e7ef;
+      --border-strong:#d4d6e0;
+
+      --ink-900: #0b1020;
+      --ink-700: #2a2f45;
+      --ink-500: #5b6175;
+      --ink-400: #8087a0;
+      --ink-300: #b3b8c8;
+
+      --navy-900: #0a1442;
+      --navy-800: #14215c;
+      --navy-700: #2a4cdf;
+      --navy-600: #3b5fee;
+      --navy-500: #5b7bf5;
+      --navy-100: #dde6ff;
+      --navy-50:  #eef3ff;
+
+      --success-50:  #ecfdf5;
+      --success-500: #10b981;
+      --success-700: #047857;
+      --warning-50:  #fffbeb;
+      --warning-500: #f59e0b;
+      --warning-700: #b45309;
+      --danger-50:   #fef2f2;
+      --danger-500:  #ef4444;
+      --danger-700:  #b91c1c;
+
+      --header-grad:    linear-gradient(95deg, #0a1442 0%, #14215c 35%, #1e2d80 70%, #2a4cdf 100%);
+      --workspace-grad: linear-gradient(95deg, #2a4cdf 0%, #3b5fee 100%);
+
+      --shadow-1: 0 1px 2px rgba(15,23,42,0.04);
+      --shadow-2: 0 4px 16px rgba(15,23,42,0.06), 0 1px 2px rgba(15,23,42,0.04);
+      --shadow-pop: 0 12px 32px rgba(15,23,42,0.12);
+      --shadow-navy: 0 8px 22px rgba(19,31,92,0.28);
+
+      --radius-sm:  6px;
+      --radius:     10px;
+      --radius-lg:  14px;
+      --radius-xl:  18px;
+    }
+
+    /* ─── App Layout ─── */
+    .app-shell {
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      grid-template-rows: 84px 1fr;
+      grid-template-areas: "header header" "sidebar main";
+      height: 100vh;
+    }
+
+    /* ─── Header ─── */
+    .topbar {
+      grid-area: header;
+      background: var(--header-grad);
+      height: 84px;
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: center;
+      gap: 16px;
+      padding: 0 28px;
+      box-shadow: 0 6px 20px rgba(10,20,66,0.25);
+      position: sticky;
+      top: 0;
+      z-index: 30;
+    }
+    .topbar-brand { display: flex; align-items: center; gap: 16px; }
+    .emblem {
+      width: 56px; height: 56px; border-radius: 50%;
+      background: radial-gradient(circle at 50% 40%, #e53935, #b71c1c 70%, #7a0f12 100%);
+      display: grid; place-items: center; flex-shrink: 0;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.25), inset 0 0 0 1.5px rgba(245,195,36,0.4);
+    }
+    .brand-title {
+      font-size: 19px; font-weight: 800; text-transform: uppercase;
+      letter-spacing: 0.04em; color: white; line-height: 1.2;
+      white-space: nowrap;
+    }
+    .brand-accent { color: #ffd84a; text-shadow: 0 0 18px rgba(255,216,74,0.35); }
+    .brand-sub { font-size: 12px; font-style: italic; color: rgba(255,255,255,0.72); margin-top: 2px; }
+
+    .user-chip {
+      display: flex; align-items: center; gap: 12px;
+      padding: 8px 18px; border-radius: 999px;
+      background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.14);
+      cursor: pointer; transition: background 0.18s;
+      color: white; text-align: left;
+    }
+    .user-chip:hover { background: rgba(255,255,255,0.14); }
+    .user-avatar {
+      width: 38px; height: 38px; border-radius: 50%;
+      background: linear-gradient(135deg, #f59e0b, #ef4444);
+      display: grid; place-items: center;
+      font-weight: 800; font-size: 13px; color: white; flex-shrink: 0;
+    }
+    .user-name { font-size: 13.5px; font-weight: 700; white-space: nowrap; }
+    .user-email { font-size: 11.5px; color: rgba(255,255,255,0.7); white-space: nowrap; }
+
+    /* ─── Sidebar ─── */
+    .sidebar {
+      grid-area: sidebar;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      position: sticky;
+      top: 84px;
+      height: calc(100vh - 84px);
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      padding: 12px 16px;
+      gap: 4px;
+    }
+    .sidebar::-webkit-scrollbar { width: 4px; }
+    .sidebar::-webkit-scrollbar-track { background: transparent; }
+    .sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+    /* Workspace pill */
+    .workspace-pill {
+      position: relative;
+      background: var(--workspace-grad);
+      border-radius: 12px;
+      padding: 11px 14px;
+      box-shadow: var(--shadow-navy);
+      display: flex; align-items: center; gap: 10px;
+      min-height: 54px;
+      margin-bottom: 8px;
+      overflow: hidden;
+      cursor: pointer;
+    }
+    .workspace-pill::before {
+      content: '';
+      position: absolute; top: -20px; right: -10px;
+      width: 70px; height: 70px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(255,255,255,0.18) 0%, transparent 70%);
+    }
+    .workspace-icon {
+      width: 30px; height: 30px; border-radius: 8px;
+      background: rgba(255,255,255,0.18);
+      display: grid; place-items: center; flex-shrink: 0;
+      color: white;
+    }
+    .workspace-name { font-size: 13px; font-weight: 700; color: white; line-height: 1.2; }
+    .workspace-role { font-size: 11px; color: rgba(255,255,255,0.75); }
+    .workspace-chevron { margin-left: auto; color: rgba(255,255,255,0.7); }
+
+    /* Nav section label */
+    .nav-section-label {
+      font-size: 10.5px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.10em; color: var(--ink-400);
+      padding: 8px 4px 4px; margin-top: 4px;
+    }
+
+    /* Nav item (parent) */
+    .nav-item {
+      display: flex; align-items: center; gap: 11px;
+      padding: 10px 12px; border-radius: 10px;
+      cursor: pointer; transition: background 0.15s, color 0.15s;
+      font-size: 13.5px; color: var(--ink-700);
+      position: relative;
+      text-decoration: none; width: 100%;
+      border: none; background: transparent; text-align: left;
+    }
+    .nav-item:hover { background: #f3f4fa; color: var(--navy-700); }
+    .nav-item.open {
+      background: var(--surface);
+      color: var(--navy-800); font-weight: 700;
+      box-shadow: 0 0 0 1.5px var(--navy-700), 0 4px 12px rgba(19,31,92,0.10);
+    }
+    .nav-item .nav-icon { color: rgba(42,76,223,0.85); flex-shrink: 0; }
+    .nav-item.open .nav-icon { color: var(--navy-700); }
+    .nav-badge {
+      margin-left: auto;
+      font-size: 10.5px; font-weight: 700;
+      padding: 1px 6px; border-radius: 999px;
+      background: var(--navy-100); color: var(--navy-700);
+    }
+    .nav-badge.danger { background: var(--danger-50); color: var(--danger-700); }
+    .nav-chevron {
+      margin-left: auto; color: var(--ink-300); transition: transform 0.2s;
+      flex-shrink: 0;
+    }
+    .nav-item.open .nav-chevron { transform: rotate(180deg); }
+
+    /* Nav children */
+    .nav-children {
+      position: relative; list-style: none;
+      margin: 2px 0 4px; padding: 0;
+      display: none;
+    }
+    .nav-children.open { display: block; }
+    .nav-guide {
+      position: absolute; left: 22px; top: 4px; bottom: 4px;
+      width: 1.5px; background: var(--border); border-radius: 2px;
+    }
+    .nav-sub {
+      display: flex; align-items: center; gap: 8px;
+      padding: 8px 14px 8px 38px;
+      font-size: 13px; color: var(--ink-500);
+      border-radius: 8px; cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+      text-decoration: none; position: relative;
+    }
+    .nav-sub:hover { background: #f3f4fa; color: var(--navy-700); }
+    .nav-sub.active {
+      background: var(--navy-50); color: var(--navy-800); font-weight: 600;
+    }
+    .nav-sub-dot {
+      position: absolute; left: 18px;
+      width: 7px; height: 7px; border-radius: 50%;
+      background: transparent;
+    }
+    .nav-sub.active .nav-sub-dot {
+      background: var(--navy-600);
+      box-shadow: 0 0 0 3px rgba(59,95,238,0.18);
+    }
+
+    /* Sidebar footer */
+    .sidebar-foot {
+      margin-top: auto;
+      padding: 12px 14px; background: var(--surface-2);
+      border-radius: 10px; display: flex; align-items: center; gap: 10px;
+    }
+    .health-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--success-500);
+      box-shadow: 0 0 0 3px rgba(16,185,129,0.15);
+      flex-shrink: 0; position: relative;
+    }
+    .health-dot::after {
+      content: '';
+      position: absolute; inset: -3px; border-radius: 50%;
+      background: rgba(16,185,129,0.35);
+      animation: pulse 2s ease-out infinite;
+    }
+    .health-text { font-size: 12px; color: var(--ink-500); line-height: 1.4; }
+    .health-text strong { color: var(--ink-700); font-weight: 600; }
+
+    /* ─── Main Content ─── */
+    .main-content {
+      grid-area: main;
+      overflow-y: auto;
+      padding: 20px 18px;
+    }
+    .main-content::-webkit-scrollbar { width: 6px; }
+    .main-content::-webkit-scrollbar-track { background: transparent; }
+    .main-content::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+    /* Breadcrumb */
+    .breadcrumb {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 12.5px; color: var(--ink-400);
+      margin-bottom: 14px;
+    }
+    .breadcrumb a { color: var(--ink-400); text-decoration: none; transition: color 0.15s; }
+    .breadcrumb a:hover { color: var(--navy-700); }
+    .breadcrumb .sep { color: var(--ink-300); }
+    .breadcrumb .current { color: var(--ink-900); font-weight: 600; }
+
+    /* Page header */
+    .page-header {
+      display: grid; grid-template-columns: 1fr auto;
+      align-items: flex-end; gap: 16px;
+      margin-bottom: 18px;
+    }
+    .page-title {
+      font-size: 26px; font-weight: 700; color: var(--ink-900);
+      letter-spacing: -0.01em; line-height: 1.2;
+    }
+    .page-sub {
+      font-size: 13.5px; color: var(--ink-500);
+      margin-top: 4px; max-width: 680px; line-height: 1.5;
+    }
+    .page-actions { display: flex; gap: 10px; align-items: center; flex-shrink: 0; }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 9px 14px; border-radius: 10px;
+      font-size: 13px; font-weight: 600; font-family: inherit;
+      cursor: pointer; transition: all 0.18s; border: none;
+      white-space: nowrap;
+    }
+    .btn-outline {
+      background: var(--surface); border: 1px solid var(--border);
+      color: var(--ink-700);
+    }
+    .btn-outline:hover { border-color: var(--border-strong); background: var(--surface-2); }
+    .btn-primary {
+      background: var(--workspace-grad); color: white;
+      box-shadow: 0 6px 16px rgba(19,31,92,0.28);
+    }
+    .btn-primary:hover { filter: brightness(1.08); }
+
+    /* Dual Column Layout */
+    .mapping-workspace {
+      display: grid;
+      grid-template-columns: 1fr 48px 1.2fr;
+      align-items: stretch;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+    @media (max-width: 991px) {
+      .mapping-workspace {
+        grid-template-columns: 1fr;
+      }
+      .workspace-connector {
+        transform: rotate(90deg);
+        margin: 8px 0;
+      }
+    }
+
+    .schema-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      box-shadow: var(--shadow-1);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      min-height: 380px;
+    }
+    .schema-header {
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .schema-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--ink-900);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .schema-badge {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2.5px 8px;
+      border-radius: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .schema-badge.orange { background: #fff2eb; color: #c2410c; border: 1px solid rgba(194,65,12,0.12); }
+    .schema-badge.blue { background: var(--navy-50); color: var(--navy-700); border: 1px solid rgba(42,76,223,0.12); }
+
+    .schema-body {
+      padding: 16px;
+      flex: 1;
+      overflow-y: auto;
+      max-height: 400px;
+      background: var(--surface-2);
+    }
+
+    /* Workspace connector */
+    .workspace-connector {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .connector-btn {
+      width: 40px; height: 40px; border-radius: 50%;
+      background: var(--workspace-grad); color: white;
+      display: grid; place-items: center;
+      box-shadow: var(--shadow-navy);
+      border: 4px solid var(--bg);
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    .connector-btn:hover {
+      transform: scale(1.08);
+    }
+
+    /* Schema Tree Styling */
+    .tree-list {
+      list-style: none;
+      padding: 0; margin: 0;
+    }
+    .tree-node {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 10px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 13px;
+      transition: background 0.15s;
+      position: relative;
+    }
+    .tree-node:hover {
+      background: var(--border);
+    }
+    .tree-node.db {
+      font-weight: 700;
+      color: var(--ink-900);
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .tree-node.schema {
+      font-weight: 600;
+      color: var(--ink-700);
+    }
+    .tree-node.table {
+      font-weight: 600;
+      color: var(--ink-700);
+      margin-left: 12px;
+    }
+    .tree-node.table.active {
+      background: var(--navy-50);
+      color: var(--navy-800);
+      font-weight: 700;
+      border: 1px solid rgba(59,95,238,0.18);
+    }
+    .tree-node.column {
+      margin-left: 28px;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      color: var(--ink-700);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 5px 8px;
+    }
+    .tree-node.column:hover {
+      background: rgba(255, 255, 255, 0.7);
+    }
+    .col-info {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .col-type {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10.5px;
+      background: var(--surface);
+      color: var(--ink-500);
+      padding: 1px 6px;
+      border-radius: 4px;
+      border: 1px solid var(--border);
+    }
+    .tree-guide {
+      position: absolute;
+      left: 18px; top: -6px; bottom: 18px;
+      width: 1.5px;
+      background: var(--border-strong);
+    }
+
+    /* Mapping Detail Table Card */
+    .mapping-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      box-shadow: var(--shadow-1);
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
+    .mapping-card-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .mapping-card-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--ink-900);
+    }
+    .mapping-summary {
+      font-size: 13px;
+      color: var(--ink-500);
+    }
+    .mapping-summary strong {
+      color: var(--navy-700);
+      font-weight: 700;
+    }
+
+    /* Mapping Table */
+    .m-table-wrap { overflow-x: auto; }
+    .m-table {
+      width: 100%; border-collapse: collapse;
+      font-size: 13.5px;
+      text-align: left;
+    }
+    .m-table th {
+      padding: 12px 18px;
+      font-size: 11px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.05em; color: var(--ink-400);
+      background: var(--surface-2);
+      border-bottom: 1px solid var(--border);
+    }
+    .m-table td {
+      padding: 14px 18px;
+      vertical-align: middle;
+      border-bottom: 1px solid var(--border);
+    }
+    .m-table tr:last-child td { border-bottom: none; }
+    .m-table tbody tr { transition: background 0.15s; }
+    .m-table tbody tr:hover { background: #fafbfd; }
+
+    /* Field detail elements */
+    .field-block {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .icon-box {
+      width: 32px; height: 32px; border-radius: 8px;
+      display: grid; place-items: center;
+      font-size: 12px;
+      flex-shrink: 0;
+    }
+    .icon-box.source { background: #fff2eb; color: #c2410c; border: 1px solid rgba(194,65,12,0.1); }
+    .icon-box.dest { background: var(--navy-50); color: var(--navy-700); border: 1px solid rgba(42,76,223,0.1); }
+    
+    .field-meta {
+      display: flex;
+      flex-direction: column;
+    }
+    .field-name {
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 700;
+      color: var(--ink-900);
+      font-size: 13px;
+    }
+    .field-type {
+      font-size: 10.5px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--ink-400);
+      font-weight: 600;
+      margin-top: 1px;
+    }
+
+    /* Transform select styling */
+    .transform-block {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+    .transform-select {
+      font-size: 12px;
+      font-weight: 600;
+      padding: 6px 10px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--ink-700);
+      background: var(--surface);
+      font-family: inherit;
+      outline: none;
+      cursor: pointer;
+      width: 170px;
+      transition: border-color 0.15s;
+    }
+    .transform-select:focus {
+      border-color: var(--navy-700);
+    }
+    .flow-arrow {
+      color: var(--ink-300);
+      display: flex;
+      align-items: center;
+    }
+
+    /* Action button */
+    .action-btn-circle {
+      width: 32px; height: 32px; border-radius: 8px;
+      display: grid; place-items: center;
+      border: none; background: transparent; cursor: pointer;
+      color: var(--ink-400); transition: all 0.15s;
+    }
+    .action-btn-circle:hover {
+      background: var(--danger-50); color: var(--danger-700);
+    }
+
+    .table-footer-btn-wrap {
+      padding: 16px;
+      background: var(--surface-2);
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: center;
+    }
+    .dashed-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      max-width: 380px;
+      padding: 10px;
+      border: 1px dashed var(--navy-500);
+      border-radius: 10px;
+      background: var(--surface);
+      color: var(--navy-700);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .dashed-btn:hover {
+      background: var(--navy-50);
+      border-color: var(--navy-700);
+    }
+
+    /* Toast */
+    .toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 100; display: flex; flex-direction: column; gap: 8px; }
+    .toast {
+      background: var(--ink-900); color: white;
+      padding: 10px 16px; border-radius: 10px;
+      font-size: 13px; font-weight: 500;
+      box-shadow: var(--shadow-pop);
+      animation: toastIn 0.22s ease;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .toast.success { background: #064e3b; }
+    .toast.error   { background: #7f1d1d; }
+
+    @keyframes toastIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0px rgba(16,185,129,0.4); }
+      70% { box-shadow: 0 0 0 6px rgba(16,185,129,0); }
+      100% { box-shadow: 0 0 0 0px rgba(16,185,129,0); }
+    }
+  </style>
+</head>
+<body>
+
+<div class="app-shell">
+
+  <!-- ═══════════════ HEADER ═══════════════ -->
+  <header class="topbar" role="banner">
+    <div class="topbar-brand">
+      <div class="emblem" aria-label="Quốc huy Việt Nam">
+        <svg width="26" height="26" viewBox="0 0 26 26" fill="none" aria-hidden="true">
+          <polygon points="13,2 15.9,9.8 24.2,9.8 17.6,14.8 20.5,22.5 13,17.5 5.5,22.5 8.4,14.8 1.8,9.8 10.1,9.8"
+                   fill="#f5c324" stroke="rgba(245,195,36,0.4)" stroke-width="0.5"/>
+        </svg>
+      </div>
+      <div>
+        <div class="brand-title">
+          HỆ THỐNG <span class="brand-accent">QUẢN TRỊ</span> TÍCH HỢP DỮ LIỆU
+        </div>
+        <div class="brand-sub">Cơ quan ABC — Phiên bản 2026</div>
+      </div>
+    </div>
+
+    <div></div><!-- spacer -->
+
+    <!-- User chip -->
+    <button class="user-chip" id="userChipBtn" aria-label="Tài khoản người dùng" aria-expanded="false">
+      <div class="user-avatar" aria-hidden="true">AD</div>
+      <div>
+        <div class="user-name">Quản trị hệ thống</div>
+        <div class="user-email">admin@abc.gov.vn</div>
+      </div>
+      <i data-lucide="chevron-down" style="width:16px;height:16px;color:rgba(255,255,255,0.7)" aria-hidden="true"></i>
+    </button>
+  </header>
+
+  <!-- ═══════════════ SIDEBAR ═══════════════ -->
+  <aside class="sidebar" aria-label="Điều hướng chính">
+
+    <!-- Workspace pill -->
+    <div class="workspace-pill" role="button" tabindex="0" aria-label="Chọn không gian làm việc">
+      <div class="workspace-icon">
+        <i data-lucide="layers" style="width:16px;height:16px" aria-hidden="true"></i>
+      </div>
+      <div>
+        <div class="workspace-name">Quản lý kho và báo cáo</div>
+        <div class="workspace-role">Workspace · Production</div>
+      </div>
+      <div class="workspace-chevron">
+        <i data-lucide="chevrons-up-down" style="width:14px;height:14px" aria-hidden="true"></i>
+      </div>
+    </div>
+
+    <!-- Dashboard -->
+    <a href="../../index.html" class="nav-item" id="nav-dashboard">
+      <i data-lucide="layout-dashboard" class="nav-icon" style="width:18px;height:18px" aria-hidden="true"></i>
+      <span>Dashboard tổng quan</span>
+    </a>
+
+    <!-- Quản lý cơ sở dữ liệu group (active) -->
+    <button class="nav-item open" id="nav-db-group" onclick="toggleNavGroup(this)" aria-expanded="true" aria-controls="nav-db-children">
+      <i data-lucide="database" class="nav-icon" style="width:18px;height:18px" aria-hidden="true"></i>
+      <span>Quản lý cơ sở dữ liệu</span>
+      <i data-lucide="chevron-down" class="nav-chevron" style="width:15px;height:15px" aria-hidden="true"></i>
+    </button>
+    <ul class="nav-children open" id="nav-db-children" role="menu">
+      <div class="nav-guide" aria-hidden="true"></div>
+      <li role="none">
+        <a href="../UC001-quan-ly-csdl-nguon/index.html" class="nav-sub" role="menuitem">
+          <span class="nav-sub-dot" aria-hidden="true"></span>CSDL nguồn
+        </a>
+      </li>
+      <li role="none">
+        <a href="#" class="nav-sub" role="menuitem">
+          <span class="nav-sub-dot" aria-hidden="true"></span>CSDL tích hợp
+        </a>
+      </li>
+      <li role="none">
+        <a href="#" class="nav-sub" role="menuitem">
+          <span class="nav-sub-dot" aria-hidden="true"></span>Nguồn dữ liệu ngoài
+        </a>
+      </li>
+      <li role="none">
+        <a href="index.html" class="nav-sub active" role="menuitem" aria-current="page">
+          <span class="nav-sub-dot" aria-hidden="true"></span>Cấu trúc dữ liệu
+        </a>
+      </li>
+    </ul>
+
+    <!-- Mapping -->
+    <button class="nav-item" onclick="toggleNavGroup(this)" aria-expanded="false">
+      <i data-lucide="git-branch" class="nav-icon" style="width:18px;height:18px" aria-hidden="true"></i>
+      <span>Mapping &amp; chuyển đổi</span>
+      <i data-lucide="chevron-down" class="nav-chevron" style="width:15px;height:15px" aria-hidden="true"></i>
+    </button>
+    <ul class="nav-children" role="menu">
+      <div class="nav-guide" aria-hidden="true"></div>
+      <li><a href="#" class="nav-sub" role="menuitem"><span class="nav-sub-dot"></span>Mapping quy tắc</a></li>
+      <li><a href="#" class="nav-sub" role="menuitem"><span class="nav-sub-dot"></span>Biến đổi dữ liệu</a></li>
+    </ul>
+
+    <!-- Tác vụ -->
+    <a href="#" class="nav-item" id="nav-jobs">
+      <i data-lucide="file-spreadsheet" class="nav-icon" style="width:18px;height:18px" aria-hidden="true"></i>
+      <span>Tác vụ tích hợp</span>
+      <span class="nav-badge" aria-label="8 tác vụ">8</span>
+    </a>
+
+    <!-- Lập lịch -->
+    <a href="#" class="nav-item">
+      <i data-lucide="clock" class="nav-icon" style="width:18px;height:18px" aria-hidden="true"></i>
+      <span>Lập lịch tự động</span>
+    </a>
+
+    <!-- Theo dõi -->
+    <a href="#" class="nav-item">
+      <i data-lucide="activity" class="nav-icon" style="width:18px;height:18px" aria-hidden="true"></i>
+      <span>Theo dõi tác vụ</span>
+    </a>
+
+    <!-- Nhật ký -->
+    <a href="#" class="nav-item">
+      <i data-lucide="file-text" class="nav-icon" style="width:18px;height:18px" aria-hidden="true"></i>
+      <span>Nhật ký hệ thống</span>
+    </a>
+
+    <!-- Cảnh báo -->
+    <a href="#" class="nav-item">
+      <i data-lucide="alert-triangle" class="nav-icon" style="width:18px;height:18px" aria-hidden="true"></i>
+      <span>Cảnh báo &amp; sự cố</span>
+      <span class="nav-badge danger" aria-label="2 cảnh báo">2</span>
+    </a>
+
+    <!-- Cài đặt -->
+    <a href="#" class="nav-item">
+      <i data-lucide="settings" class="nav-icon" style="width:18px;height:18px" aria-hidden="true"></i>
+      <span>Cài đặt hệ thống</span>
+    </a>
+
+    <!-- Sidebar footer -->
+    <div class="sidebar-foot">
+      <div class="health-dot" aria-hidden="true"></div>
+      <div class="health-text">Hệ thống: <strong>Ổn định</strong><br>Uptime: 99.98%</div>
+    </div>
+  </aside>
+
+  <!-- ═══════════════ MAIN CONTENT ═══════════════ -->
+  <main class="main-content" role="main">
+    
+    <!-- Breadcrumb -->
+    <nav class="breadcrumb" aria-label="Đường dẫn trang">
+      <a href="../../index.html">Trang chủ</a>
+      <span class="sep" aria-hidden="true"><i data-lucide="chevron-right" style="width:14px;height:14px"></i></span>
+      <a href="#">CSDL tích hợp</a>
+      <span class="sep" aria-hidden="true"><i data-lucide="chevron-right" style="width:14px;height:14px"></i></span>
+      <span class="current">Thiết lập CTDL</span>
+    </nav>
+
+    <!-- Page Header -->
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">Thiết lập Cấu trúc Dữ liệu Tích hợp</h1>
+        <p class="page-sub">Xây dựng schema và cấu hình ánh xạ (mapping) các cột dữ liệu kỹ thuật từ nguồn Oracle về đích PostgreSQL.</p>
+      </div>
+      <div class="page-actions">
+        <button class="btn btn-outline" onclick="showToast('Đã lưu cấu trúc nháp thành công!', '')">
+          Lưu nháp
+        </button>
+        <button class="btn btn-primary" onclick="showToast('Cấu trúc đã được lưu và áp dụng vào luồng đồng bộ CDC!', 'success')">
+          <i data-lucide="check" style="width:16px;height:16px" aria-hidden="true"></i>
+          Lưu và áp dụng
+        </button>
+      </div>
+    </div>
+
+    <!-- Dual Column Schema Trees -->
+    <div class="mapping-workspace">
+      
+      <!-- Source Tree (Oracle) -->
+      <div class="schema-card">
+        <div class="schema-header">
+          <div class="schema-title">
+            <i data-lucide="database" style="width:16px;height:16px;color:#c2410c"></i>
+            <span>CSDL Nguồn (Oracle)</span>
+          </div>
+          <span class="schema-badge orange">Oracle 19c</span>
+        </div>
+        <div class="schema-body">
+          <ul class="tree-list">
+            <li>
+              <div class="tree-node db" onclick="toggleTreeNode(this)">
+                <i data-lucide="chevron-down" style="width:14px;height:14px;color:var(--ink-400)"></i>
+                <i data-lucide="database" style="width:15px;height:15px;color:#c2410c"></i>
+                <span>HR_SYSTEM_DB</span>
+              </div>
+              <ul class="tree-list" style="margin-left:14px">
+                <li>
+                  <div class="tree-node schema" onclick="toggleTreeNode(this)">
+                    <i data-lucide="chevron-down" style="width:14px;height:14px;color:var(--ink-400)"></i>
+                    <i data-lucide="folder-tree" style="width:15px;height:15px;color:var(--warning-500)"></i>
+                    <span>public</span>
+                  </div>
+                  <ul class="tree-list">
+                    <li>
+                      <div class="tree-node table active" onclick="toggleTreeNode(this)">
+                        <i data-lucide="chevron-down" style="width:14px;height:14px;color:var(--navy-600)"></i>
+                        <i data-lucide="table-2" style="width:15px;height:15px;color:var(--navy-700)"></i>
+                        <span>employees</span>
+                      </div>
+                      <ul class="tree-list">
+                        <li>
+                          <div class="tree-node column" draggable="true" ondragstart="handleDragStart(event, 'emp_id', 'VARCHAR(20)')">
+                            <span class="col-info">
+                              <i data-lucide="key" style="width:13px;height:13px;color:var(--warning-500)"></i>
+                              <span>emp_id</span>
+                            </span>
+                            <span class="col-type">VARCHAR(20)</span>
+                          </div>
+                        </li>
+                        <li>
+                          <div class="tree-node column" draggable="true" ondragstart="handleDragStart(event, 'full_name', 'VARCHAR(100)')">
+                            <span class="col-info">
+                              <i data-lucide="hash" style="width:13px;height:13px;color:var(--ink-400)"></i>
+                              <span>full_name</span>
+                            </span>
+                            <span class="col-type">VARCHAR(100)</span>
+                          </div>
+                        </li>
+                        <li>
+                          <div class="tree-node column" draggable="true" ondragstart="handleDragStart(event, 'created_at', 'TIMESTAMP')">
+                            <span class="col-info">
+                              <i data-lucide="calendar" style="width:13px;height:13px;color:var(--ink-400)"></i>
+                              <span>created_at</span>
+                            </span>
+                            <span class="col-type">TIMESTAMP</span>
+                          </div>
+                        </li>
+                      </ul>
+                    </li>
+                    <li>
+                      <div class="tree-node table" onclick="toggleTreeNode(this)">
+                        <i data-lucide="chevron-right" style="width:14px;height:14px;color:var(--ink-400)"></i>
+                        <i data-lucide="table-2" style="width:15px;height:15px;color:var(--ink-400)"></i>
+                        <span>departments</span>
+                      </div>
+                    </li>
+                  </ul>
+                </li>
+              </ul>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Connector Button (visual only) -->
+      <div class="workspace-connector">
+        <button class="connector-btn" onclick="showToast('Chọn một cột nguồn và cột đích để thiết lập ánh xạ', '')" aria-label="Mối liên kết ánh xạ">
+          <i data-lucide="chevrons-right" style="width:18px;height:18px"></i>
+        </button>
+      </div>
+
+      <!-- Destination Tree (PostgreSQL) -->
+      <div class="schema-card">
+        <div class="schema-header">
+          <div class="schema-title">
+            <i data-lucide="server" style="width:16px;height:16px;color:var(--navy-700)"></i>
+            <span>CSDL Đích (DWH PostgreSQL)</span>
+          </div>
+          <span class="schema-badge blue">Postgres 16</span>
+        </div>
+        <div class="schema-body">
+          <ul class="tree-list">
+            <li>
+              <div class="tree-node db" onclick="toggleTreeNode(this)">
+                <i data-lucide="chevron-down" style="width:14px;height:14px;color:var(--ink-400)"></i>
+                <i data-lucide="database" style="width:15px;height:15px;color:var(--navy-700)"></i>
+                <span>DWH_DATA_GOV</span>
+              </div>
+              <ul class="tree-list" style="margin-left:14px">
+                <li>
+                  <div class="tree-node schema" onclick="toggleTreeNode(this)">
+                    <i data-lucide="chevron-down" style="width:14px;height:14px;color:var(--ink-400)"></i>
+                    <i data-lucide="folder-tree" style="width:15px;height:15px;color:var(--warning-500)"></i>
+                    <span>dwh_core</span>
+                  </div>
+                  <ul class="tree-list">
+                    <li>
+                      <div class="tree-node table active" onclick="toggleTreeNode(this)">
+                        <i data-lucide="chevron-down" style="width:14px;height:14px;color:var(--navy-600)"></i>
+                        <i data-lucide="table-2" style="width:15px;height:15px;color:var(--navy-700)"></i>
+                        <span>dim_employees</span>
+                      </div>
+                      <ul class="tree-list">
+                        <li>
+                          <div class="tree-node column" onclick="selectDestColumn(this, 'id', 'INT8')">
+                            <span class="col-info">
+                              <i data-lucide="key" style="width:13px;height:13px;color:var(--warning-500)"></i>
+                              <span>id</span>
+                            </span>
+                            <span class="col-type">INT8</span>
+                          </div>
+                        </li>
+                        <li>
+                          <div class="tree-node column" onclick="selectDestColumn(this, 'name', 'VARCHAR(255)')">
+                            <span class="col-info">
+                              <i data-lucide="hash" style="width:13px;height:13px;color:var(--ink-400)"></i>
+                              <span>name</span>
+                            </span>
+                            <span class="col-type">VARCHAR(255)</span>
+                          </div>
+                        </li>
+                        <li>
+                          <div class="tree-node column" onclick="selectDestColumn(this, 'created_date', 'TIMESTAMP')">
+                            <span class="col-info">
+                              <i data-lucide="calendar" style="width:13px;height:13px;color:var(--ink-400)"></i>
+                              <span>created_date</span>
+                            </span>
+                            <span class="col-type">TIMESTAMP</span>
+                          </div>
+                        </li>
+                      </ul>
+                    </li>
+                  </ul>
+                </li>
+              </ul>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Mapping Details Card -->
+    <div class="mapping-card">
+      <div class="mapping-card-header">
+        <h3 class="mapping-card-title">Chi tiết Mapping Fields</h3>
+        <span class="mapping-summary">Đã map: <strong id="mappingCount">2</strong> trường dữ liệu</span>
+      </div>
+      <div class="m-table-wrap">
+        <table class="m-table" id="mappingTable">
+          <thead>
+            <tr>
+              <th style="width: 38%">Trường Dữ Liệu Nguồn (Oracle)</th>
+              <th style="width: 20%; text-align: center">Phép biến đổi (Transform)</th>
+              <th style="width: 38%">Trường Dữ Liệu Đích (PostgreSQL)</th>
+              <th style="width: 4%"></th>
+            </tr>
+          </thead>
+          <tbody id="mappingTableBody">
+            <!-- Row 1 -->
+            <tr id="row-0">
+              <td>
+                <div class="field-block">
+                  <div class="icon-box source">
+                    <i data-lucide="database" style="width:14px;height:14px"></i>
+                  </div>
+                  <div class="field-meta">
+                    <span class="field-name">emp_id</span>
+                    <span class="field-type">VARCHAR(20)</span>
+                  </div>
+                </div>
+              </td>
+              <td>
+                <div class="transform-block">
+                  <select class="transform-select">
+                    <option value="direct">Trực tiếp (Direct)</option>
+                    <option value="to_number" selected>Ép kiểu số (To Number)</option>
+                    <option value="trim">Cắt khoảng trắng (Trim)</option>
+                    <option value="uppercase">Chuyển viết hoa (UPPER)</option>
+                  </select>
+                  <span class="flow-arrow"><i data-lucide="arrow-right" style="width:14px;height:14px"></i></span>
+                </div>
+              </td>
+              <td>
+                <div class="field-block">
+                  <div class="icon-box dest">
+                    <i data-lucide="server" style="width:14px;height:14px"></i>
+                  </div>
+                  <div class="field-meta">
+                    <span class="field-name">id</span>
+                    <span class="field-type">INT8</span>
+                  </div>
+                </div>
+              </td>
+              <td style="text-align: center">
+                <button class="action-btn-circle" onclick="deleteMappingRow('row-0')" title="Xóa ánh xạ">
+                  <i data-lucide="trash-2" style="width:15px;height:15px"></i>
+                </button>
+              </td>
+            </tr>
+
+            <!-- Row 2 -->
+            <tr id="row-1">
+              <td>
+                <div class="field-block">
+                  <div class="icon-box source">
+                    <i data-lucide="database" style="width:14px;height:14px"></i>
+                  </div>
+                  <div class="field-meta">
+                    <span class="field-name">full_name</span>
+                    <span class="field-type">VARCHAR(100)</span>
+                  </div>
+                </div>
+              </td>
+              <td>
+                <div class="transform-block">
+                  <select class="transform-select">
+                    <option value="direct">Trực tiếp (Direct)</option>
+                    <option value="to_number">Ép kiểu số (To Number)</option>
+                    <option value="trim">Cắt khoảng trắng (Trim)</option>
+                    <option value="uppercase" selected>Chuyển viết hoa (UPPER)</option>
+                  </select>
+                  <span class="flow-arrow"><i data-lucide="arrow-right" style="width:14px;height:14px"></i></span>
+                </div>
+              </td>
+              <td>
+                <div class="field-block">
+                  <div class="icon-box dest">
+                    <i data-lucide="server" style="width:14px;height:14px"></i>
+                  </div>
+                  <div class="field-meta">
+                    <span class="field-name">name</span>
+                    <span class="field-type">VARCHAR(255)</span>
+                  </div>
+                </div>
+              </td>
+              <td style="text-align: center">
+                <button class="action-btn-circle" onclick="deleteMappingRow('row-1')" title="Xóa ánh xạ">
+                  <i data-lucide="trash-2" style="width:15px;height:15px"></i>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="table-footer-btn-wrap">
+        <button class="dashed-btn" onclick="openAddMappingModal()">
+          <i data-lucide="plus" style="width:16px;height:16px"></i>
+          Thêm trường mapping (Map Field)
+        </button>
+      </div>
+    </div>
+
+  </main>
+
+</div>
+
+<!-- Toast notification container -->
+<div class="toast-container" id="toast-container" aria-live="assertive" aria-atomic="true"></div>
+
+<script>
+  // State variables for mapping creation
+  let mappingCounter = 2;
+
+  document.addEventListener('DOMContentLoaded', () => {
+    if (window.lucide) {
+      lucide.createIcons();
+    }
+  });
+
+  // Toggle navigation group ở sidebar
+  function toggleNavGroup(btn) {
+    const isExpanded = btn.getAttribute('aria-expanded') === 'true';
+    btn.setAttribute('aria-expanded', !isExpanded);
+    btn.classList.toggle('open');
+    
+    const children = btn.nextElementSibling;
+    if (children && children.classList.contains('nav-children')) {
+      children.classList.toggle('open');
+    }
+  }
+
+  // Toggle tree node collapse/expand
+  function toggleTreeNode(node) {
+    const nextList = node.nextElementSibling;
+    if (nextList && nextList.classList.contains('tree-list')) {
+      const icon = node.querySelector('[data-lucide="chevron-down"], [data-lucide="chevron-right"]');
+      if (nextList.style.display === 'none') {
+        nextList.style.display = 'block';
+        if (icon) {
+          icon.setAttribute('data-lucide', 'chevron-down');
+          lucide.createIcons({ name: 'chevron-down' });
+        }
+      } else {
+        nextList.style.display = 'none';
+        if (icon) {
+          icon.setAttribute('data-lucide', 'chevron-right');
+          lucide.createIcons({ name: 'chevron-right' });
         }
       }
     }
   }
-  </script>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-  <script src="https://unpkg.com/lucide@latest"></script>
-  <link rel="stylesheet" href="../../assets/css/custom.css">
-  
-  <script src="../../assets/js/common.js" defer></script>
-  <script src="../../assets/js/mock-data.js" defer></script>
-  <script src="../../assets/js/components.js" defer></script>
-</head>
-<body class="font-sans bg-gray-50 text-gray-800">
 
-  
-  <div class="flex flex-col min-h-screen">
-    <!-- Header full-width (màu đỏ tía gov VN - managed by component) -->
-    <div id="app-header" class="flex-shrink-0 sticky top-0 z-30"></div>
+  // Delete mapping row
+  function deleteMappingRow(rowId) {
+    const row = document.getElementById(rowId);
+    if (row) {
+      row.remove();
+      mappingCounter = Math.max(0, mappingCounter - 1);
+      document.getElementById('mappingCount').textContent = mappingCounter;
+      showToast('Đã xóa quan hệ ánh xạ trường!', '');
+    }
+  }
+
+  // Add new mapping mockup
+  function openAddMappingModal() {
+    // Generate new mock mapping row
+    const tbody = document.getElementById('mappingTableBody');
+    const newId = `row-${Date.now()}`;
     
-    <!-- Content area: sidebar trắng + main -->
-    <div class="flex flex-1 min-h-0">
-      <aside id="app-sidebar" class="flex-shrink-0 overflow-y-auto"></aside>
-      
-      <div class="flex-1 flex flex-col bg-gray-50">
-        <!-- Breadcrumb -->
-        <nav class="px-6 py-3 bg-white border-b border-gray-200 flex-shrink-0 shadow-sm relative z-10">
-        <ol class="flex items-center gap-2 text-sm">
-          <li><a href="../../index.html" class="text-gray-500 hover:text-primary-600 transition-colors">Trang chủ</a></li>
-          <li class="text-gray-400"><i data-lucide="chevron-right" class="w-4 h-4"></i></li>
-          <li class="text-gray-900 font-semibold">CSDL tích hợp</li>
-          <li class="text-gray-400"><i data-lucide="chevron-right" class="w-4 h-4"></i></li>
-          <li class="text-gray-900 font-semibold">Thiết lập CTDL</li>
-        </ol>
-      </nav>
-      
-      <main class="flex-1 overflow-auto bg-slate-50 relative p-6">
-        
-        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
-            <div>
-                <h1 class="text-2xl font-bold text-gray-900">Thiết lập Cấu trúc Dữ liệu Tích hợp</h1>
-                <p class="text-sm text-gray-500 mt-1">Xây dựng schema và ánh xạ (mapping) các trường dữ liệu từ nguồn về đích.</p>
+    // Choose third mock column pair
+    const rowHtml = `
+      <tr id="${newId}" style="animation: toastIn 0.22s ease">
+        <td>
+          <div class="field-block">
+            <div class="icon-box source">
+              <i data-lucide="database" style="width:14px;height:14px"></i>
             </div>
-            <div class="flex gap-3">
-                <button class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-semibold rounded-lg text-gray-700 bg-white hover:bg-gray-50 transition-colors gap-2">
-                    Lưu nháp
-                </button>
-                <button class="inline-flex items-center px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-sm font-semibold rounded-lg shadow-sm transition-colors gap-2">
-                    <i data-lucide="check" class="w-4 h-4"></i>
-                    Lưu và áp dụng
-                </button>
+            <div class="field-meta">
+              <span class="field-name">created_at</span>
+              <span class="field-type">TIMESTAMP</span>
             </div>
-        </div>
+          </div>
+        </td>
+        <td>
+          <div class="transform-block">
+            <select class="transform-select">
+              <option value="direct" selected>Trực tiếp (Direct)</option>
+              <option value="to_number">Ép kiểu số (To Number)</option>
+              <option value="trim">Cắt khoảng trắng (Trim)</option>
+              <option value="uppercase">Chuyển viết hoa (UPPER)</option>
+            </select>
+            <span class="flow-arrow"><i data-lucide="arrow-right" style="width:14px;height:14px"></i></span>
+          </div>
+        </td>
+        <td>
+          <div class="field-block">
+            <div class="icon-box dest">
+              <i data-lucide="server" style="width:14px;height:14px"></i>
+            </div>
+            <div class="field-meta">
+              <span class="field-name">created_date</span>
+              <span class="field-type">TIMESTAMP</span>
+            </div>
+          </div>
+        </td>
+        <td style="text-align: center">
+          <button class="action-btn-circle" onclick="deleteMappingRow('${newId}')" title="Xóa ánh xạ">
+            <i data-lucide="trash-2" style="width:15px;height:15px"></i>
+          </button>
+        </td>
+      </tr>
+    `;
+    
+    tbody.insertAdjacentHTML('beforeend', rowHtml);
+    mappingCounter++;
+    document.getElementById('mappingCount').textContent = mappingCounter;
+    
+    lucide.createIcons();
+    showToast('Đã thêm trường ánh xạ (created_at → created_date)!', 'success');
+  }
 
-        <!-- 2 Cột Schema -->
-        <div class="flex flex-col lg:flex-row gap-4 mb-6 items-stretch">
-            
-            <!-- Trái: Nguồn (40%) -->
-            <div class="w-full lg:w-[40%] bg-white rounded-xl border border-gray-200 shadow-sm flex flex-col">
-                <div class="p-4 border-b border-gray-200 bg-gray-50 rounded-t-xl flex justify-between items-center">
-                    <h3 class="font-bold text-gray-800 flex items-center gap-2">
-                        <i data-lucide="database" class="w-4 h-4 text-orange-600"></i> CSDL Nguồn
-                    </h3>
-                    <span class="text-xs font-semibold bg-orange-100 text-orange-700 px-2 py-0.5 rounded border border-orange-200">Oracle</span>
-                </div>
-                <div class="p-4 flex-1">
-                    <!-- Sẽ nhúng nội dung tree mẫu -->
-                    <div id="schema-tree-source-container">
-                        <div class="animate-pulse h-64 bg-gray-100 rounded"></div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Nút Map ở giữa -->
-            <div class="hidden lg:flex items-center justify-center -mx-3 z-10 relative">
-                <button class="w-10 h-10 rounded-full bg-primary-600 text-white flex items-center justify-center shadow-lg hover:bg-primary-700 hover:scale-105 transition-all border-4 border-slate-50" title="Ánh xạ (Map)">
-                    <i data-lucide="chevrons-right" class="w-5 h-5"></i>
-                </button>
-            </div>
-            
-            <!-- Phải: Đích (60%) -->
-            <div class="w-full lg:w-[60%] bg-white rounded-xl border border-gray-200 shadow-sm flex flex-col">
-                <div class="p-4 border-b border-gray-200 bg-blue-50/50 rounded-t-xl flex justify-between items-center">
-                    <h3 class="font-bold text-gray-800 flex items-center gap-2">
-                        <i data-lucide="server" class="w-4 h-4 text-blue-600"></i> CSDL Đích (Đang xây dựng)
-                    </h3>
-                    <span class="text-xs font-semibold bg-blue-100 text-blue-700 px-2 py-0.5 rounded border border-blue-200">PostgreSQL</span>
-                </div>
-                <div class="p-4 flex-1">
-                    <div id="schema-tree-dest-container">
-                        <!-- tree giả định để demo UI -->
-                        <div class="bg-gray-50 border border-gray-200 rounded-lg p-4 font-mono text-sm max-h-[500px] overflow-y-auto">
-                           <ul class="space-y-1">
-                               <li>
-                                   <div class="flex items-center gap-2 py-1.5 px-2 hover:bg-white rounded-md cursor-pointer group">
-                                       <i data-lucide="chevron-down" class="w-4 h-4 text-gray-400"></i>
-                                       <i data-lucide="database" class="w-4 h-4 text-blue-600"></i>
-                                       <span class="font-bold text-gray-800">DWH_DATA_GOV</span>
-                                   </div>
-                                   <ul class="ml-5 pl-2 border-l-2 border-gray-200 space-y-1 mt-1">
-                                       <li>
-                                           <div class="flex items-center gap-2 py-1.5 px-2 hover:bg-white rounded-md cursor-pointer group bg-white shadow-sm border border-gray-100">
-                                               <i data-lucide="chevron-down" class="w-4 h-4 text-gray-400"></i>
-                                               <i data-lucide="table-2" class="w-4 h-4 text-info-600"></i>
-                                               <span class="font-medium text-primary-700">dim_employees</span>
-                                           </div>
-                                           <ul class="ml-6 pl-2 border-l-2 border-gray-200 space-y-1 mt-1">
-                                               <li>
-                                                   <div class="flex items-center justify-between py-1.5 px-2 hover:bg-white rounded-md group bg-blue-50/30 border border-transparent hover:border-blue-100">
-                                                       <div class="flex items-center gap-2">
-                                                           <i data-lucide="key" class="w-3.5 h-3.5 text-warning-500"></i>
-                                                           <span class="text-gray-700 font-medium">id</span>
-                                                       </div>
-                                                       <span class="text-xs text-gray-500 bg-white px-1.5 py-0.5 rounded border border-gray-200">INT8</span>
-                                                   </div>
-                                               </li>
-                                               <li>
-                                                   <div class="flex items-center justify-between py-1.5 px-2 hover:bg-white rounded-md group bg-blue-50/30 border border-transparent hover:border-blue-100">
-                                                       <div class="flex items-center gap-2">
-                                                           <i data-lucide="hash" class="w-3.5 h-3.5 text-gray-400"></i>
-                                                           <span class="text-gray-700 font-medium">name</span>
-                                                       </div>
-                                                       <span class="text-xs text-gray-500 bg-white px-1.5 py-0.5 rounded border border-gray-200">VARCHAR</span>
-                                                   </div>
-                                               </li>
-                                           </ul>
-                                       </li>
-                                   </ul>
-                               </li>
-                           </ul>
-                       </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Bảng Mapping -->
-        <div class="bg-white rounded-xl border border-gray-200 shadow-sm">
-            <div class="px-5 py-4 border-b border-gray-200 flex items-center justify-between">
-                <h3 class="font-bold text-gray-800">Chi tiết Mapping Field</h3>
-                <span class="text-sm text-gray-500">Đã map: <strong class="text-primary-600">2</strong> trường</span>
-            </div>
-            <div class="p-5" id="mapping-table-container">
-                <div class="animate-pulse h-40 bg-gray-100 rounded"></div>
-            </div>
-        </div>
-      </main>
-      
-      <div id="app-footer" class="flex-shrink-0"></div>
-    </div>
-  </div>
-</div>
-  
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      loadLayout('../../').then(() => {
-          loadPartial('schema-tree-source-container', '../../components/data-integration/schema-tree.html');
-          loadPartial('mapping-table-container', '../../components/data-integration/mapping-table.html');
-      });
-    });
-  </script>
+  // Toast function
+  function showToast(msg, type = '') {
+    const container = document.getElementById('toast-container');
+    if (!container) return;
+    
+    const toast = document.createElement('div');
+    toast.className = `toast${type ? ' ' + type : ''}`;
+    
+    let iconName = 'info';
+    if (type === 'success') iconName = 'check-circle';
+    if (type === 'error') iconName = 'x-circle';
+    
+    toast.innerHTML = `
+      <i data-lucide="${iconName}" style="width:16px;height:16px" aria-hidden="true"></i>
+      <span>${msg}</span>
+    `;
+    
+    container.appendChild(toast);
+    lucide.createIcons({ attrs: { class: 'flex-shrink-0' } });
+    
+    setTimeout(() => {
+      toast.style.opacity = '0';
+      toast.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+      toast.style.transform = 'translateY(-10px)';
+      setTimeout(() => toast.remove(), 300);
+    }, 3000);
+  }
+</script>
 </body>
 </html>
