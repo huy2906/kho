@@ -1181,11 +1181,11 @@ const SOURCES = [
 ];
 
 const KIND_META = {
-  oracle:    { label:'Oracle',     short:'OR', bg:'#fef2f2', text:'#b91c1c', swatch:'#ef4444', iconBg:'#ef4444' },
-  sqlserver: { label:'SQL Server', short:'MS', bg:'#fef3ec', text:'#c2410c', swatch:'#f97316', iconBg:'#f97316' },
-  postgres:  { label:'PostgreSQL', short:'PG', bg:'#eff6ff', text:'#1d4ed8', swatch:'#3b82f6', iconBg:'#3b82f6' },
-  mongo:     { label:'MongoDB',    short:'MG', bg:'#ecfdf5', text:'#047857', swatch:'#10b981', iconBg:'#10b981' },
-  mysql:     { label:'MySQL',      short:'MY', bg:'#eef2ff', text:'#4338ca', swatch:'#6366f1', iconBg:'#6366f1' },
+  oracle:    { label:'Oracle',     icon:"data:image/svg+xml;utf8,%3Csvg viewBox='0 0 128 128' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath fill='white' d='M85.73 0H42.27C18.9 0 0 18.9 0 42.27v43.46C0 109.1 18.9 128 42.27 128h43.46C109.1 128 128 109.1 128 85.73V42.27C128 18.9 109.1 0 85.73 0z m18.23 85.73c0 10.05-8.18 18.23-18.23 18.23H42.27c-10.05 0-18.23-8.18-18.23-18.23V42.27c0-10.05 8.18-18.23 18.23-18.23h43.46c10.05 0 18.23 8.18 18.23 18.23v43.46z'/%3E%3C/svg%3E", short:'OR', bg:'#fef2f2', text:'#b91c1c', swatch:'#ef4444', iconBg:'#ef4444' },
+  sqlserver: { label:'SQL Server', icon:"data:image/svg+xml;utf8,%3Csvg viewBox='0 0 128 128' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath fill='white' d='M125 41L125 56L64 74L2 56L2 41L64 59Z'/%3E%3Cpath fill='white' d='M125 61L125 76L64 94L2 76L2 61L64 79Z'/%3E%3Cpath fill='white' d='M125 81L125 96L64 114L2 96L2 81L64 99Z'/%3E%3Cpath fill='white' d='M64 45C98.242 45 126 34.926 126 22.5C126 10.074 98.242 0 64 0C29.758 0 2 10.074 2 22.5C2 34.926 29.758 45 64 45Z'/%3E%3C/svg%3E", short:'MS', bg:'#fef3ec', text:'#c2410c', swatch:'#f97316', iconBg:'#f97316' },
+  postgres:  { label:'PostgreSQL', icon:'https://cdn.simpleicons.org/postgresql/white', short:'PG', bg:'#eff6ff', text:'#1d4ed8', swatch:'#3b82f6', iconBg:'#3b82f6' },
+  mongo:     { label:'MongoDB',    icon:'https://cdn.simpleicons.org/mongodb/white', short:'MG', bg:'#ecfdf5', text:'#047857', swatch:'#10b981', iconBg:'#10b981' },
+  mysql:     { label:'MySQL',      icon:'https://cdn.simpleicons.org/mysql/white', short:'MY', bg:'#eef2ff', text:'#4338ca', swatch:'#6366f1', iconBg:'#6366f1' },
 };
 const DEFAULT_PORTS = { oracle:1521, sqlserver:1433, postgres:5432, mongo:27017, mysql:3306 };
 
@@ -1276,7 +1276,7 @@ function renderTable() {
 
   const km = KIND_META;
   tbody.innerHTML = slice.map((r, idx) => {
-    const k = km[r.kind] || { label:r.kind, short:r.kind.slice(0,2).toUpperCase(), bg:'#f3f4fb', text:'#5b6175', swatch:'#b3b8c8', iconBg:'#b3b8c8' };
+    const k = km[r.kind] || { label:r.kind, icon:null, short:r.kind.slice(0,2).toUpperCase(), bg:'#f3f4fb', text:'#5b6175', swatch:'#b3b8c8', iconBg:'#b3b8c8' };
     const sttNum = String(start + idx + 1).padStart(2, '0');
     const statusCls = r.status;
     const statusLabel = r.status === 'ok' ? 'Đã kết nối' : r.status === 'warn' ? 'Chờ cấu hình' : 'Lỗi kết nối';
@@ -1285,7 +1285,7 @@ function renderTable() {
         <td class="center"><span class="stt">${sttNum}</span></td>
         <td>
           <div class="db-cell">
-            <div class="db-icon-wrap" style="background:${k.iconBg}" aria-hidden="true">${k.short}</div>
+            <div class="db-icon-wrap" style="background:${k.iconBg}" aria-hidden="true">${k.icon ? `<img src="${k.icon}" style="width:20px;height:20px;object-fit:contain" alt=""/>` : k.short}</div>
             <div>
               <div class="db-name">${r.name}</div>
               <div class="db-owner">${r.owner}</div>

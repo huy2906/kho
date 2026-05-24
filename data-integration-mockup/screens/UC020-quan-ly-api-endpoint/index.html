@@ -1,0 +1,2000 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UC020 - Quản lý API Endpoint | Hệ thống Quản trị Tích hợp Dữ liệu</title>
+  <meta name="description" content="Quản lý danh sách, cấu hình xác thực, kiểm tra kết nối và theo dõi nhật ký hoạt động của các API endpoint tích hợp từ bên thứ ba.">
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+
+  <style>
+    /* ─── Reset & Base ─── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { height: 100%; }
+    body {
+      font-family: 'Plus Jakarta Sans', Inter, system-ui, sans-serif;
+      background: #f3f4fb;
+      color: #2a2f45;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    /* ─── Design Tokens ─── */
+    :root {
+      --bg:           #f3f4fb;
+      --surface:      #ffffff;
+      --surface-2:    #fafbff;
+      --border:       #e6e7ef;
+      --border-strong:#d4d6e0;
+
+      --ink-900: #0b1020;
+      --ink-700: #2a2f45;
+      --ink-500: #5b6175;
+      --ink-400: #8087a0;
+      --ink-300: #b3b8c8;
+
+      --navy-900: #0a1442;
+      --navy-800: #14215c;
+      --navy-700: #2a4cdf;
+      --navy-600: #3b5fee;
+      --navy-500: #5b7bf5;
+      --navy-100: #dde6ff;
+      --navy-50:  #eef3ff;
+
+      --success-50:  #ecfdf5;
+      --success-500: #10b981;
+      --success-700: #047857;
+      --warning-50:  #fffbeb;
+      --warning-500: #f59e0b;
+      --warning-700: #b45309;
+      --danger-50:   #fef2f2;
+      --danger-500:  #ef4444;
+      --danger-700:  #b91c1c;
+
+      --header-grad:    linear-gradient(95deg, #0a1442 0%, #14215c 35%, #1e2d80 70%, #2a4cdf 100%);
+      --workspace-grad: linear-gradient(95deg, #2a4cdf 0%, #3b5fee 100%);
+
+      --shadow-1: 0 1px 2px rgba(15,23,42,0.04);
+      --shadow-2: 0 4px 16px rgba(15,23,42,0.06), 0 1px 2px rgba(15,23,42,0.04);
+      --shadow-pop: 0 12px 32px rgba(15,23,42,0.12);
+      --shadow-navy: 0 8px 22px rgba(19,31,92,0.28);
+
+      --radius-sm:  6px;
+      --radius:     10px;
+      --radius-lg:  14px;
+      --radius-xl:  18px;
+    }
+
+    /* ─── App Layout ─── */
+    .app-shell {
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      grid-template-rows: 84px 1fr;
+      grid-template-areas: "header header" "sidebar main";
+      height: 100vh;
+    }
+
+    /* ─── Header ─── */
+    .topbar {
+      grid-area: header;
+      background: var(--header-grad);
+      height: 84px;
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: center;
+      gap: 16px;
+      padding: 0 28px;
+      box-shadow: 0 6px 20px rgba(10,20,66,0.25);
+      position: sticky;
+      top: 0;
+      z-index: 30;
+    }
+    .topbar-brand { display: flex; align-items: center; gap: 16px; }
+    .emblem {
+      width: 56px; height: 56px; border-radius: 50%;
+      background: radial-gradient(circle at 50% 40%, #e53935, #b71c1c 70%, #7a0f12 100%);
+      display: grid; place-items: center; flex-shrink: 0;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.25), inset 0 0 0 1.5px rgba(245,195,36,0.4);
+    }
+    .brand-title {
+      font-size: 19px; font-weight: 800; text-transform: uppercase;
+      letter-spacing: 0.04em; color: white; line-height: 1.2;
+      white-space: nowrap;
+    }
+    .brand-accent { color: #ffd84a; text-shadow: 0 0 18px rgba(255,216,74,0.35); }
+    .brand-sub { font-size: 12px; font-style: italic; color: rgba(255,255,255,0.72); margin-top: 2px; }
+
+    .user-chip {
+      display: flex; align-items: center; gap: 12px;
+      padding: 8px 18px; border-radius: 999px;
+      background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.14);
+      cursor: pointer; transition: background 0.18s;
+      color: white; text-align: left;
+    }
+    .user-chip:hover { background: rgba(255,255,255,0.14); }
+    .user-avatar {
+      width: 38px; height: 38px; border-radius: 50%;
+      background: linear-gradient(135deg, #f59e0b, #ef4444);
+      display: grid; place-items: center;
+      font-weight: 800; font-size: 13px; color: white; flex-shrink: 0;
+    }
+    .user-name { font-size: 13.5px; font-weight: 700; white-space: nowrap; }
+    .user-email { font-size: 11.5px; color: rgba(255,255,255,0.7); white-space: nowrap; }
+
+    /* ─── Sidebar ─── */
+    .sidebar {
+      grid-area: sidebar;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      position: sticky;
+      top: 84px;
+      height: calc(100vh - 84px);
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      padding: 12px 16px;
+      gap: 4px;
+    }
+    .sidebar::-webkit-scrollbar { width: 4px; }
+    .sidebar::-webkit-scrollbar-track { background: transparent; }
+    .sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+    /* Workspace pill */
+    .workspace-pill {
+      position: relative;
+      background: var(--workspace-grad);
+      border-radius: 12px;
+      padding: 11px 14px;
+      box-shadow: var(--shadow-navy);
+      display: flex; align-items: center; gap: 10px;
+      min-height: 54px;
+      margin-bottom: 8px;
+      overflow: hidden;
+      cursor: pointer;
+    }
+    .workspace-pill::before {
+      content: '';
+      position: absolute; top: -20px; right: -10px;
+      width: 70px; height: 70px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(255,255,255,0.18) 0%, transparent 70%);
+    }
+    .workspace-icon {
+      width: 30px; height: 30px; border-radius: 8px;
+      background: rgba(255,255,255,0.18);
+      display: grid; place-items: center; flex-shrink: 0;
+      color: white;
+    }
+    .workspace-name { font-size: 13px; font-weight: 700; color: white; line-height: 1.2; }
+    .workspace-role { font-size: 11px; color: rgba(255,255,255,0.75); }
+    .workspace-chevron { margin-left: auto; color: rgba(255,255,255,0.7); }
+
+    /* Nav item (parent) */
+    .nav-item {
+      display: flex; align-items: center; gap: 11px;
+      padding: 10px 12px; border-radius: 10px;
+      cursor: pointer; transition: background 0.15s, color 0.15s;
+      font-size: 13.5px; color: var(--ink-700);
+      position: relative;
+      text-decoration: none; width: 100%;
+      border: none; background: transparent; text-align: left;
+    }
+    .nav-item:hover { background: #f3f4fa; color: var(--navy-700); }
+    .nav-item.open {
+      background: var(--surface);
+      color: var(--navy-800); font-weight: 700;
+      box-shadow: 0 0 0 1.5px var(--navy-700), 0 4px 12px rgba(19,31,92,0.10);
+    }
+    .nav-item .nav-icon { color: rgba(42,76,223,0.85); flex-shrink: 0; }
+    .nav-item.open .nav-icon { color: var(--navy-700); }
+    .nav-badge {
+      margin-left: auto;
+      font-size: 10.5px; font-weight: 700;
+      padding: 1px 6px; border-radius: 999px;
+      background: var(--navy-100); color: var(--navy-700);
+    }
+    .nav-badge.danger { background: var(--danger-50); color: var(--danger-700); }
+    .nav-chevron {
+      margin-left: auto; color: var(--ink-300); transition: transform 0.2s;
+      flex-shrink: 0;
+    }
+    .nav-item.open .nav-chevron { transform: rotate(180deg); }
+
+    /* Nav children */
+    .nav-children {
+      position: relative; list-style: none;
+      margin: 2px 0 4px; padding: 0;
+      display: none;
+    }
+    .nav-children.open { display: block; }
+    .nav-guide {
+      position: absolute; left: 22px; top: 4px; bottom: 4px;
+      width: 1.5px; background: var(--border); border-radius: 2px;
+    }
+    .nav-sub {
+      display: flex; align-items: center; gap: 8px;
+      padding: 8px 14px 8px 38px;
+      font-size: 13px; color: var(--ink-500);
+      border-radius: 8px; cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+      text-decoration: none; position: relative;
+    }
+    .nav-sub:hover { background: #f3f4fa; color: var(--navy-700); }
+    .nav-sub.active {
+      background: var(--navy-50); color: var(--navy-800); font-weight: 600;
+    }
+    .nav-sub-dot {
+      position: absolute; left: 18px;
+      width: 7px; height: 7px; border-radius: 50%;
+      background: transparent;
+    }
+    .nav-sub.active .nav-sub-dot {
+      background: var(--navy-600);
+      box-shadow: 0 0 0 3px rgba(59,95,238,0.18);
+    }
+
+    /* Sidebar footer */
+    .sidebar-foot {
+      margin-top: auto;
+      padding: 12px 14px; background: var(--surface-2);
+      border-radius: 10px; display: flex; align-items: center; gap: 10px;
+    }
+    .health-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--success-500);
+      box-shadow: 0 0 0 3px rgba(16,185,129,0.15);
+      flex-shrink: 0; position: relative;
+    }
+    .health-dot::after {
+      content: '';
+      position: absolute; inset: -3px; border-radius: 50%;
+      background: rgba(16,185,129,0.35);
+      animation: pulse 2s ease-out infinite;
+    }
+    .health-text { font-size: 12px; color: var(--ink-500); line-height: 1.4; }
+    .health-text strong { color: var(--ink-700); font-weight: 600; }
+
+    /* ─── Main Content ─── */
+    .main-content {
+      grid-area: main;
+      overflow-y: auto;
+      padding: 20px 18px;
+    }
+    .main-content::-webkit-scrollbar { width: 6px; }
+    .main-content::-webkit-scrollbar-track { background: transparent; }
+    .main-content::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+    /* Breadcrumb */
+    .breadcrumb {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 12.5px; color: var(--ink-400);
+      margin-bottom: 14px;
+    }
+    .breadcrumb a { color: var(--ink-400); text-decoration: none; transition: color 0.15s; }
+    .breadcrumb a:hover { color: var(--navy-700); }
+    .breadcrumb .sep { color: var(--ink-300); }
+    .breadcrumb .current { color: var(--ink-900); font-weight: 600; }
+
+    /* Page header */
+    .page-header {
+      display: grid; grid-template-columns: 1fr auto;
+      align-items: flex-end; gap: 16px;
+      margin-bottom: 18px;
+    }
+    .page-title {
+      font-size: 26px; font-weight: 700; color: var(--ink-900);
+      letter-spacing: -0.01em; line-height: 1.2;
+    }
+    .page-sub {
+      font-size: 13.5px; color: var(--ink-500);
+      margin-top: 4px; max-width: 680px; line-height: 1.5;
+    }
+    .page-actions { display: flex; gap: 10px; align-items: center; flex-shrink: 0; }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 9px 14px; border-radius: 10px;
+      font-size: 13px; font-weight: 600; font-family: inherit;
+      cursor: pointer; transition: all 0.18s; border: none;
+      white-space: nowrap;
+    }
+    .btn-outline {
+      background: var(--surface); border: 1px solid var(--border);
+      color: var(--ink-700);
+    }
+    .btn-outline:hover { border-color: var(--border-strong); background: var(--surface-2); }
+    .btn-primary {
+      background: var(--workspace-grad); color: white;
+      box-shadow: 0 6px 16px rgba(19,31,92,0.28);
+    }
+    .btn-primary:hover { filter: brightness(1.08); }
+
+    /* ─── Stat Cards ─── */
+    .stats-grid {
+      display: grid; grid-template-columns: repeat(4, 1fr);
+      gap: 14px; margin-bottom: 20px;
+    }
+    .stat-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 14px; padding: 16px 18px;
+      box-shadow: var(--shadow-1);
+      transition: border-color 0.18s, box-shadow 0.18s;
+      display: flex; flex-direction: column; gap: 10px;
+    }
+    .stat-card:hover { border-color: var(--border-strong); box-shadow: var(--shadow-2); }
+    .stat-card-top { display: flex; align-items: flex-start; justify-content: space-between; }
+    .stat-icon {
+      width: 34px; height: 34px; border-radius: 10px;
+      display: grid; place-items: center; flex-shrink: 0;
+    }
+    .stat-label { font-size: 12.5px; font-weight: 600; color: var(--ink-500); }
+    .stat-value {
+      font-size: 28px; font-weight: 700; color: var(--ink-900);
+      letter-spacing: -0.01em; line-height: 1;
+    }
+    .stat-bottom { display: flex; align-items: center; justify-content: space-between; }
+    .stat-delta {
+      font-size: 11.5px; font-weight: 600; padding: 2px 7px;
+      border-radius: 999px;
+    }
+    .stat-delta.green { background: var(--success-50); color: var(--success-700); }
+    .stat-delta.amber { background: var(--warning-50); color: var(--warning-700); }
+    .stat-delta.red   { background: var(--danger-50); color: var(--danger-700); }
+
+    /* ─── Toolbar + Table Card ─── */
+    .table-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 14px; box-shadow: var(--shadow-1);
+      overflow: hidden;
+    }
+    .toolbar {
+      padding: 12px 14px; display: flex;
+      flex-wrap: wrap; gap: 10px; align-items: center;
+      border-bottom: 1px solid var(--border);
+    }
+    .search-wrap {
+      position: relative; flex: 1; min-width: 240px; max-width: 340px;
+    }
+    .search-icon {
+      position: absolute; left: 11px; top: 50%; transform: translateY(-50%);
+      color: var(--ink-300); pointer-events: none;
+    }
+    .search-input {
+      width: 100%; padding: 8px 12px 8px 34px;
+      border: 1px solid var(--border); border-radius: 10px;
+      font-size: 13px; color: var(--ink-700);
+      background: var(--surface); font-family: inherit;
+      outline: none; transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .search-input::placeholder { color: var(--ink-300); }
+    .search-input:focus {
+      border-color: var(--navy-700);
+      box-shadow: 0 0 0 3px rgba(42,76,223,0.12);
+    }
+
+    /* Chip groups */
+    .chips { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+    .chip-label {
+      font-size: 11px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.06em; color: var(--ink-400); margin-right: 2px;
+    }
+    .chip {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 5px 11px; border-radius: 999px;
+      font-size: 12px; font-weight: 500;
+      border: 1px solid var(--border); background: var(--surface);
+      color: var(--ink-500); cursor: pointer;
+      transition: all 0.15s;
+    }
+    .chip:hover { background: var(--surface-2); color: var(--ink-700); }
+    .chip.active {
+      background: var(--workspace-grad); color: white;
+      border-color: transparent;
+      box-shadow: 0 2px 8px rgba(19,31,92,0.22);
+    }
+    .chip-dot { width: 7px; height: 7px; border-radius: 50%; }
+    .chip-count {
+      font-size: 11px; font-weight: 700;
+      background: rgba(255,255,255,0.25); border-radius: 999px;
+      padding: 0 4px; min-width: 16px; text-align: center;
+    }
+    .chip:not(.active) .chip-count {
+      background: var(--border); color: var(--ink-500);
+    }
+    .chips-spacer { flex: 1; min-width: 12px; }
+
+    /* Owner select filter */
+    .owner-select {
+      padding: 7px 12px; border: 1px solid var(--border); border-radius: 10px;
+      font-size: 12.5px; color: var(--ink-700); background: var(--surface);
+      outline: none; cursor: pointer; transition: border-color 0.15s;
+      font-family: inherit;
+    }
+    .owner-select:focus { border-color: var(--navy-700); }
+
+    /* ─── Table ─── */
+    .table-wrap { overflow-x: auto; }
+    table {
+      width: 100%; border-collapse: collapse;
+      font-size: 13.5px;
+    }
+    caption { display: none; }
+    thead tr {
+      background: var(--surface-2); border-bottom: 1px solid var(--border);
+    }
+    th {
+      padding: 12px 14px;
+      font-size: 11.5px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.04em; color: var(--ink-400);
+      white-space: nowrap; text-align: left;
+      cursor: pointer; user-select: none;
+      transition: color 0.15s;
+    }
+    th:hover { color: var(--ink-700); }
+    th.center { text-align: center; }
+    th.right  { text-align: right; }
+    .th-inner { display: inline-flex; align-items: center; gap: 4px; }
+    .sort-icon { color: var(--ink-300); }
+    .sort-icon.active { color: var(--navy-700); }
+
+    tbody tr {
+      border-bottom: 1px solid var(--border);
+      transition: background 0.12s;
+      cursor: pointer;
+    }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: #fafbfd; }
+    tbody tr:hover .row-actions { opacity: 1; }
+
+    td { padding: 14px; vertical-align: middle; }
+    td.center { text-align: center; }
+
+    .stt { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--ink-400); }
+
+    /* HTTP Method Badges */
+    .method-tag {
+      display: inline-flex; align-items: center; justify-content: center;
+      padding: 2.5px 8px; border-radius: 6px;
+      font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 700;
+      min-width: 58px; text-align: center;
+    }
+    .method-tag.get    { background: #eff6ff; color: #1d4ed8; border: 1px solid rgba(29,78,216,0.15); }
+    .method-tag.post   { background: #ecfdf5; color: #047857; border: 1px solid rgba(4,120,87,0.15); }
+    .method-tag.put    { background: #fffbeb; color: #b45309; border: 1px solid rgba(180,83,9,0.15); }
+    .method-tag.delete { background: #fef2f2; color: #b91c1c; border: 1px solid rgba(185,28,28,0.15); }
+
+    /* Auth Badges */
+    .auth-tag {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 2.5px 8px; border-radius: 6px;
+      font-size: 11px; font-weight: 600;
+      background: #f3f4fb; color: #5b6175; border: 1px solid #e6e7ef;
+    }
+    .auth-tag.key   { background: #e0f2fe; color: #0369a1; border-color: rgba(3,105,161,0.15); }
+    .auth-tag.oauth { background: #f3e8ff; color: #6b21a8; border-color: rgba(107,33,168,0.15); }
+    .auth-tag.token { background: #eef2ff; color: #3730a3; border-color: rgba(55,48,163,0.15); }
+
+    /* Success Rate visual */
+    .rate-container { display: flex; align-items: center; gap: 8px; }
+    .rate-bar-bg { flex: 1; height: 6px; background: #e6e7ef; border-radius: 3px; overflow: hidden; min-width: 60px; max-width: 80px; }
+    .rate-bar-fill { height: 100%; border-radius: 3px; transition: width 0.3s ease; }
+    .rate-text { font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 700; min-width: 42px; }
+
+    /* Endpoint cell */
+    .api-cell { display: flex; flex-direction: column; gap: 4px; }
+    .api-name { font-weight: 600; color: var(--ink-900); font-size: 13.5px; }
+    .api-owner { font-size: 11.5px; color: var(--ink-500); }
+    .api-url-wrap { display: flex; align-items: center; gap: 6px; margin-top: 2px; }
+    .api-url { font-family: 'JetBrains Mono', monospace; font-size: 11.5px; color: var(--ink-400); word-break: break-all; }
+
+    /* Status badge */
+    .status-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 4px 10px; border-radius: 999px;
+      font-size: 12px; font-weight: 600; white-space: nowrap;
+    }
+    .status-badge.ok   { background: var(--success-50); color: var(--success-700); }
+    .status-badge.warn { background: var(--warning-50); color: var(--warning-700); }
+    .status-badge.err  { background: var(--danger-50);  color: var(--danger-700); }
+    .status-badge.disabled { background: #f3f4fb; color: #8087a0; }
+    
+    .pulse {
+      width: 7px; height: 7px; border-radius: 50%; position: relative; flex-shrink: 0;
+    }
+    .pulse::after {
+      content: ''; position: absolute; inset: -3px;
+      border-radius: 50%; opacity: 0.4;
+      animation: pulse-ring 1.8s ease-out infinite;
+    }
+    .status-badge.ok   .pulse { background: var(--success-500); }
+    .status-badge.ok   .pulse::after { background: var(--success-500); }
+    .status-badge.warn .pulse { background: var(--warning-500); }
+    .status-badge.warn .pulse::after { background: var(--warning-500); }
+    .status-badge.err  .pulse { background: var(--danger-500); }
+    .status-badge.err  .pulse::after { background: var(--danger-500); }
+    .status-badge.disabled .pulse { background: #b3b8c8; }
+
+    @keyframes pulse-ring {
+      0%   { transform: scale(0.8); opacity: 0.5; }
+      100% { transform: scale(2.2); opacity: 0; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .pulse::after { animation: none; }
+    }
+
+    /* Updated time */
+    .updated-rel { font-size: 13px; color: var(--ink-700); }
+    .updated-abs { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--ink-400); margin-top: 3px; }
+
+    /* Row actions */
+    .row-actions {
+      display: flex; align-items: center; justify-content: flex-end; gap: 2px;
+      opacity: 0; transition: opacity 0.15s;
+    }
+    .action-btn {
+      width: 30px; height: 30px; border-radius: 7px;
+      display: grid; place-items: center;
+      border: none; cursor: pointer; background: transparent;
+      color: var(--ink-400); transition: background 0.15s, color 0.15s;
+    }
+    .action-btn:hover { background: var(--surface-2); color: var(--ink-700); }
+    .action-btn.danger:hover { background: var(--danger-50); color: var(--danger-700); }
+
+    /* ─── Pagination ─── */
+    .pagination {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 18px; background: var(--surface-2);
+      border-top: 1px solid var(--border); flex-wrap: wrap; gap: 12px;
+    }
+    .page-size-select {
+      padding: 5px 10px; border: 1px solid var(--border); border-radius: 8px;
+      font-size: 12.5px; color: var(--ink-700); background: var(--surface);
+      font-family: inherit; outline: none; cursor: pointer;
+    }
+    .page-size-select:focus { border-color: var(--navy-700); }
+    .page-info { font-size: 13px; color: var(--ink-500); }
+    .page-info strong { color: var(--ink-900); font-weight: 600; }
+    .pager { display: flex; gap: 4px; }
+    .page-btn {
+      min-width: 32px; height: 32px; border-radius: 8px;
+      display: grid; place-items: center;
+      border: 1px solid var(--border); background: var(--surface);
+      font-size: 13px; font-weight: 500; color: var(--ink-500);
+      cursor: pointer; transition: all 0.15s; padding: 0 8px;
+      font-family: inherit;
+    }
+    .page-btn:hover { background: var(--surface-2); color: var(--ink-700); }
+    .page-btn.active { background: var(--ink-900); color: white; border-color: var(--ink-900); }
+    .page-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    /* ─── Empty state ─── */
+    .empty-state {
+      padding: 60px 20px; text-align: center;
+      display: none; flex-direction: column; align-items: center; gap: 10px;
+    }
+    .empty-state.visible { display: flex; }
+    .empty-title { font-size: 16px; font-weight: 600; color: var(--ink-700); }
+    .empty-hint  { font-size: 13.5px; color: var(--ink-400); }
+
+    /* ─── Dialogs ─── */
+    .dialog-overlay {
+      position: fixed; inset: 0; z-index: 50;
+      background: rgba(11,16,32,0.45); backdrop-filter: blur(3px);
+      display: none; align-items: center; justify-content: center;
+    }
+    .dialog-overlay.open { display: flex; }
+    .dialog {
+      background: var(--surface); border-radius: 16px;
+      width: min(640px, 95vw); max-height: 90vh; overflow-y: auto;
+      box-shadow: var(--shadow-pop);
+      animation: slideUp 0.22s ease;
+    }
+    .dialog.large {
+      width: min(840px, 95vw);
+    }
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .dialog-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 20px 24px 14px; border-bottom: 1px solid var(--border);
+    }
+    .dialog-title { font-size: 18px; font-weight: 700; color: var(--ink-900); }
+    .dialog-close {
+      width: 30px; height: 30px; border-radius: 8px;
+      display: grid; place-items: center;
+      border: none; background: transparent; cursor: pointer;
+      color: var(--ink-400); transition: background 0.15s;
+    }
+    .dialog-close:hover { background: var(--surface-2); }
+    .dialog-body { padding: 20px 24px; display: grid; gap: 14px; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .form-group { display: flex; flex-direction: column; gap: 5px; }
+    .form-label { font-size: 12.5px; font-weight: 600; color: var(--ink-700); }
+    .form-input, .form-select, .form-textarea {
+      padding: 8px 12px; border: 1px solid var(--border); border-radius: 9px;
+      font-size: 13px; color: var(--ink-700); font-family: inherit;
+      background: var(--surface); outline: none; transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .form-input:focus, .form-select:focus, .form-textarea:focus {
+      border-color: var(--navy-700);
+      box-shadow: 0 0 0 3px rgba(42,76,223,0.12);
+    }
+    .form-textarea { min-height: 80px; resize: vertical; }
+    .dialog-footer {
+      display: flex; align-items: center; justify-content: flex-end; gap: 10px;
+      padding: 14px 24px; border-top: 1px solid var(--border);
+    }
+
+    /* Response Viewer in Test Dialog */
+    .response-viewer {
+      background: #0b1020; color: #e2e8f0;
+      padding: 14px; border-radius: 10px;
+      font-family: 'JetBrains Mono', monospace; font-size: 12px;
+      line-height: 1.5; overflow-x: auto;
+      border: 1px solid #2a2f45; max-height: 280px;
+    }
+    .response-meta {
+      display: flex; gap: 16px; margin-bottom: 8px;
+      font-size: 11.5px; border-bottom: 1px solid #2a2f45; padding-bottom: 6px;
+    }
+    .meta-status { font-weight: 700; }
+    .meta-status.success { color: #10b981; }
+    .meta-status.error { color: #ef4444; }
+    .meta-time { color: #8087a0; }
+
+    /* Logs view */
+    .log-header-stats {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: 12px; margin-bottom: 16px;
+      background: var(--surface-2); padding: 12px; border-radius: 10px;
+      border: 1px solid var(--border);
+    }
+    .log-stat { display: flex; flex-direction: column; gap: 2px; }
+    .log-stat-label { font-size: 11.5px; color: var(--ink-500); font-weight: 500; }
+    .log-stat-val { font-size: 16px; font-weight: 700; color: var(--ink-900); font-family: 'JetBrains Mono', monospace; }
+
+    .log-list {
+      display: flex; flex-direction: column; border: 1px solid var(--border);
+      border-radius: 10px; overflow: hidden;
+    }
+    .log-list-header {
+      display: grid; grid-template-columns: 150px 70px 80px 80px 1fr;
+      padding: 10px 12px; background: var(--surface-2);
+      border-bottom: 1px solid var(--border);
+      font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--ink-400);
+      letter-spacing: 0.05em;
+    }
+    .log-item {
+      display: grid; grid-template-columns: 150px 70px 80px 80px 1fr;
+      padding: 11px 12px; border-bottom: 1px solid var(--border);
+      align-items: center; font-size: 12.5px;
+    }
+    .log-item:last-child { border-bottom: none; }
+    .log-item:hover { background: #fafbfd; }
+    .log-time { font-family: 'JetBrains Mono', monospace; color: var(--ink-700); }
+    .log-method { font-family: 'JetBrains Mono', monospace; font-weight: 700; color: var(--navy-700); }
+    .log-status { font-family: 'JetBrains Mono', monospace; font-weight: 700; }
+    .log-status.code-2xx { color: var(--success-700); }
+    .log-status.code-4xx, .log-status.code-5xx { color: var(--danger-700); }
+    .log-latency { font-family: 'JetBrains Mono', monospace; color: var(--ink-500); }
+    .log-message { color: var(--ink-700); }
+
+    /* Toast container */
+    .toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 100; display: flex; flex-direction: column; gap: 8px; }
+    .toast {
+      background: var(--ink-900); color: white;
+      padding: 10px 16px; border-radius: 10px;
+      font-size: 13px; font-weight: 500;
+      box-shadow: var(--shadow-pop);
+      animation: toastIn 0.22s ease;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .toast.success { background: #064e3b; }
+    .toast.error   { background: #7f1d1d; }
+
+    @keyframes toastIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0px rgba(16,185,129,0.4); }
+      70% { box-shadow: 0 0 0 6px rgba(16,185,129,0); }
+      100% { box-shadow: 0 0 0 0px rgba(16,185,129,0); }
+    }
+
+    /* ─── Responsive ─── */
+    @media (max-width: 1099px) {
+      .app-shell { grid-template-columns: 220px 1fr; }
+    }
+    @media (max-width: 759px) {
+      .app-shell {
+        grid-template-columns: 1fr;
+        grid-template-areas: "header" "main";
+      }
+      .sidebar { display: none; }
+      .stats-grid { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 520px) {
+      .stats-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="app-shell">
+
+  <!-- ═══════════════ HEADER ═══════════════ -->
+  <header class="topbar" role="banner">
+    <div class="topbar-brand">
+      <div class="emblem" aria-label="Quốc huy Việt Nam">
+        <svg width="26" height="26" viewBox="0 0 26 26" fill="none" aria-hidden="true">
+          <polygon points="13,2 15.9,9.8 24.2,9.8 17.6,14.8 20.5,22.5 13,17.5 5.5,22.5 8.4,14.8 1.8,9.8 10.1,9.8"
+                   fill="#f5c324" stroke="rgba(245,195,36,0.4)" stroke-width="0.5"/>
+        </svg>
+      </div>
+      <div>
+        <div class="brand-title">
+          HỆ THỐNG <span class="brand-accent">QUẢN TRỊ</span> TÍCH HỢP DỮ LIỆU
+        </div>
+        <div class="brand-sub">Cơ quan ABC — Phiên bản 2026</div>
+      </div>
+    </div>
+
+    <div></div><!-- spacer -->
+
+    <!-- User chip -->
+    <button class="user-chip" id="userChipBtn" aria-label="Tài khoản người dùng" aria-expanded="false">
+      <div class="user-avatar" aria-hidden="true">AD</div>
+      <div>
+        <div class="user-name">Quản trị hệ thống</div>
+        <div class="user-email">admin@abc.gov.vn</div>
+      </div>
+      <i data-lucide="chevron-down" style="width:16px;height:16px;color:rgba(255,255,255,0.7)" aria-hidden="true"></i>
+    </button>
+  </header>
+
+  <!-- ═══════════════ SIDEBAR ═══════════════ -->
+  <aside class="sidebar" aria-label="Điều hướng chính">
+
+    <!-- Workspace pill -->
+    <div class="workspace-pill" role="button" tabindex="0" aria-label="Chọn không gian làm việc">
+      <div class="workspace-icon">
+        <i data-lucide="layers" style="width:16px;height:16px" aria-hidden="true"></i>
+      </div>
+      <div>
+        <div class="workspace-name">Quản lý kho và báo cáo</div>
+        <div class="workspace-role">Workspace · Production</div>
+      </div>
+      <div class="workspace-chevron">
+        <i data-lucide="chevrons-up-down" style="width:14px;height:14px" aria-hidden="true"></i>
+      </div>
+    </div>
+
+    <!-- Dashboard -->
+    <a href="../../index.html" class="nav-item" id="nav-dashboard">
+      <i data-lucide="layout-dashboard" class="nav-icon" style="width:18px;height:18px" aria-hidden="true"></i>
+      <span>Dashboard tổng quan</span>
+    </a>
+
+    <!-- Quản lý cơ sở dữ liệu group (closed) -->
+    <button class="nav-item" id="nav-db-group" onclick="toggleNavGroup(this)" aria-expanded="false" aria-controls="nav-db-children">
+      <i data-lucide="database" class="nav-icon" style="width:18px;height:18px" aria-hidden="true"></i>
+      <span>Quản lý cơ sở dữ liệu</span>
+      <i data-lucide="chevron-down" class="nav-chevron" style="width:15px;height:15px" aria-hidden="true"></i>
+    </button>
+    <ul class="nav-children" id="nav-db-children" role="menu">
+      <div class="nav-guide" aria-hidden="true"></div>
+      <li role="none">
+        <a href="../UC001-quan-ly-csdl-nguon/index.html" class="nav-sub" role="menuitem">
+          <span class="nav-sub-dot" aria-hidden="true"></span>CSDL nguồn
+        </a>
+      </li>
+      <li role="none">
+        <a href="#" class="nav-sub" role="menuitem">
+          <span class="nav-sub-dot" aria-hidden="true"></span>CSDL tích hợp
+        </a>
+      </li>
+      <li role="none">
+        <a href="../UC005-thiet-lap-ctdl-tich-hop/index.html" class="nav-sub" role="menuitem">
+          <span class="nav-sub-dot" aria-hidden="true"></span>Cấu trúc dữ liệu
+        </a>
+      </li>
+    </ul>
+
+    <!-- Nguồn dữ liệu ngoài group (open, active) -->
+    <button class="nav-item open" id="nav-ext-group" onclick="toggleNavGroup(this)" aria-expanded="true" aria-controls="nav-ext-children">
+      <i data-lucide="globe" class="nav-icon" style="width:18px;height:18px" aria-hidden="true"></i>
+      <span>Nguồn dữ liệu ngoài</span>
+      <i data-lucide="chevron-down" class="nav-chevron" style="width:15px;height:15px" aria-hidden="true"></i>
+    </button>
+    <ul class="nav-children open" id="nav-ext-children" role="menu">
+      <div class="nav-guide" aria-hidden="true"></div>
+      <li role="none">
+        <a href="index.html" class="nav-sub active" role="menuitem" aria-current="page">
+          <span class="nav-sub-dot" aria-hidden="true"></span>API
+        </a>
+      </li>
+      <li role="none">
+        <a href="#" class="nav-sub" role="menuitem">
+          <span class="nav-sub-dot" aria-hidden="true"></span>Tệp dữ liệu
+        </a>
+      </li>
+    </ul>
+
+    <!-- Mapping -->
+    <button class="nav-item" onclick="toggleNavGroup(this)" aria-expanded="false">
+      <i data-lucide="git-branch" class="nav-icon" style="width:18px;height:18px" aria-hidden="true"></i>
+      <span>Mapping &amp; chuyển đổi</span>
+      <i data-lucide="chevron-down" class="nav-chevron" style="width:15px;height:15px" aria-hidden="true"></i>
+    </button>
+    <ul class="nav-children" role="menu">
+      <div class="nav-guide" aria-hidden="true"></div>
+      <li><a href="#" class="nav-sub" role="menuitem"><span class="nav-sub-dot"></span>Mapping quy tắc</a></li>
+      <li><a href="#" class="nav-sub" role="menuitem"><span class="nav-sub-dot"></span>Biến đổi dữ liệu</a></li>
+    </ul>
+
+    <!-- Tác vụ -->
+    <a href="#" class="nav-item" id="nav-jobs">
+      <i data-lucide="file-spreadsheet" class="nav-icon" style="width:18px;height:18px" aria-hidden="true"></i>
+      <span>Tác vụ tích hợp</span>
+      <span class="nav-badge" aria-label="8 tác vụ">8</span>
+    </a>
+
+    <!-- Lập lịch -->
+    <a href="#" class="nav-item">
+      <i data-lucide="clock" class="nav-icon" style="width:18px;height:18px" aria-hidden="true"></i>
+      <span>Lập lịch tự động</span>
+    </a>
+
+    <!-- Theo dõi -->
+    <a href="#" class="nav-item">
+      <i data-lucide="activity" class="nav-icon" style="width:18px;height:18px" aria-hidden="true"></i>
+      <span>Theo dõi tác vụ</span>
+    </a>
+
+    <!-- Nhật ký -->
+    <a href="#" class="nav-item">
+      <i data-lucide="file-text" class="nav-icon" style="width:18px;height:18px" aria-hidden="true"></i>
+      <span>Nhật ký hệ thống</span>
+    </a>
+
+    <!-- Cảnh báo -->
+    <a href="#" class="nav-item">
+      <i data-lucide="alert-triangle" class="nav-icon" style="width:18px;height:18px" aria-hidden="true"></i>
+      <span>Cảnh báo &amp; sự cố</span>
+      <span class="nav-badge danger" aria-label="2 cảnh báo">2</span>
+    </a>
+
+    <!-- Cài đặt -->
+    <a href="#" class="nav-item">
+      <i data-lucide="settings" class="nav-icon" style="width:18px;height:18px" aria-hidden="true"></i>
+      <span>Cài đặt hệ thống</span>
+    </a>
+
+    <!-- Sidebar footer -->
+    <div class="sidebar-foot" role="status" aria-live="polite">
+      <div class="health-dot" aria-hidden="true"></div>
+      <div class="health-text">Hệ thống: <strong>Ổn định</strong><br>Uptime: 99.98%</div>
+    </div>
+  </aside>
+
+  <!-- ═══════════════ MAIN CONTENT ═══════════════ -->
+  <main class="main-content" id="main" role="main">
+
+    <!-- Breadcrumb -->
+    <nav class="breadcrumb" aria-label="Đường dẫn trang">
+      <a href="../../index.html">Trang chủ</a>
+      <span class="sep" aria-hidden="true"><i data-lucide="chevron-right" style="width:14px;height:14px"></i></span>
+      <a href="#">Nguồn dữ liệu ngoài</a>
+      <span class="sep" aria-hidden="true"><i data-lucide="chevron-right" style="width:14px;height:14px"></i></span>
+      <span class="current">Quản lý API endpoint</span>
+    </nav>
+
+    <!-- Page Header -->
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">Quản lý API Endpoint</h1>
+        <p class="page-sub">Quản lý danh sách các API tích hợp từ bên thứ ba, cấu hình xác thực và giám sát tỷ lệ thành công của dữ liệu thu thập.</p>
+      </div>
+      <div class="page-actions">
+        <button class="btn btn-outline" onclick="exportExcel()" id="btn-export" title="Xuất dữ liệu ra file Excel">
+          <i data-lucide="download" style="width:15px;height:15px" aria-hidden="true"></i>
+          Xuất Excel
+        </button>
+        <button class="btn btn-primary" onclick="openDialog()" id="btn-add-new" title="Thêm API Endpoint mới (N)">
+          <i data-lucide="plus" style="width:15px;height:15px" aria-hidden="true"></i>
+          Thêm Endpoint mới
+        </button>
+      </div>
+    </div>
+
+    <!-- Stat cards -->
+    <div class="stats-grid" role="region" aria-label="Thống kê tổng quan">
+      <div class="stat-card" id="stat-total">
+        <div class="stat-card-top">
+          <div>
+            <div class="stat-label">Tổng số API</div>
+            <div class="stat-value" id="val-total">8</div>
+          </div>
+          <div class="stat-icon" style="background:var(--navy-50)">
+            <i data-lucide="globe" style="width:18px;height:18px;color:var(--navy-700)" aria-hidden="true"></i>
+          </div>
+        </div>
+        <div class="stat-bottom">
+          <span class="stat-delta green">+1 tháng này</span>
+          <svg width="64" height="22" viewBox="0 0 64 22" fill="none" aria-hidden="true">
+            <polyline points="0,18 10,14 20,16 30,10 40,12 50,6 64,8"
+              stroke="var(--navy-600)" stroke-width="1.5" fill="none" opacity="0.7" stroke-linejoin="round"/>
+          </svg>
+        </div>
+      </div>
+      <div class="stat-card" id="stat-ok">
+        <div class="stat-card-top">
+          <div>
+            <div class="stat-label">Hoạt động</div>
+            <div class="stat-value" id="val-ok">5</div>
+          </div>
+          <div class="stat-icon" style="background:var(--success-50)">
+            <i data-lucide="check-circle" style="width:18px;height:18px;color:var(--success-700)" aria-hidden="true"></i>
+          </div>
+        </div>
+        <div class="stat-bottom">
+          <span class="stat-delta green">99.4% uptime</span>
+          <svg width="64" height="22" viewBox="0 0 64 22" fill="none" aria-hidden="true">
+            <polyline points="0,14 12,10 24,12 36,6 48,8 64,4"
+              stroke="var(--success-500)" stroke-width="1.5" fill="none" opacity="0.7" stroke-linejoin="round"/>
+          </svg>
+        </div>
+      </div>
+      <div class="stat-card" id="stat-warn">
+        <div class="stat-card-top">
+          <div>
+            <div class="stat-label">Chờ cấu hình</div>
+            <div class="stat-value" id="val-warn">1</div>
+          </div>
+          <div class="stat-icon" style="background:var(--warning-50)">
+            <i data-lucide="clock" style="width:18px;height:18px;color:var(--warning-700)" aria-hidden="true"></i>
+          </div>
+        </div>
+        <div class="stat-bottom">
+          <span class="stat-delta amber">Cần hành động</span>
+          <svg width="64" height="22" viewBox="0 0 64 22" fill="none" aria-hidden="true">
+            <polyline points="0,10 16,14 32,8 48,16 64,12"
+              stroke="var(--warning-500)" stroke-width="1.5" fill="none" opacity="0.7" stroke-linejoin="round"/>
+          </svg>
+        </div>
+      </div>
+      <div class="stat-card" id="stat-err">
+        <div class="stat-card-top">
+          <div>
+            <div class="stat-label">Lỗi kết nối</div>
+            <div class="stat-value" id="val-err">2</div>
+          </div>
+          <div class="stat-icon" style="background:var(--danger-50)">
+            <i data-lucide="alert-circle" style="width:18px;height:18px;color:var(--danger-700)" aria-hidden="true"></i>
+          </div>
+        </div>
+        <div class="stat-bottom">
+          <span class="stat-delta red">Cần khắc phục</span>
+          <svg width="64" height="22" viewBox="0 0 64 22" fill="none" aria-hidden="true">
+            <polyline points="0,8 16,12 32,6 48,16 64,10"
+              stroke="var(--danger-500)" stroke-width="1.5" fill="none" opacity="0.7" stroke-linejoin="round"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- Table card: Toolbar + Table + Pagination -->
+    <div class="table-card">
+
+      <!-- Toolbar -->
+      <div class="toolbar" role="search">
+        <!-- Search -->
+        <div class="search-wrap">
+          <i data-lucide="search" class="search-icon" style="width:15px;height:15px" aria-hidden="true"></i>
+          <input type="search" class="search-input" id="search-input"
+                 placeholder="Tìm theo tên, URL, đơn vị chủ quản…"
+                 aria-label="Tìm kiếm API Endpoint"
+                 oninput="onSearchChange(this.value)">
+        </div>
+
+        <!-- Status chips -->
+        <div class="chips" role="group" aria-label="Lọc theo trạng thái">
+          <button class="chip active" id="chip-status-all" onclick="setStatusFilter('all')" data-status="all">
+            Tất cả
+            <span class="chip-count" id="chip-count-all">8</span>
+          </button>
+          <button class="chip" id="chip-status-active" onclick="setStatusFilter('active')" data-status="active">
+            <span class="chip-dot" style="background:var(--success-500)"></span>
+            Hoạt động
+            <span class="chip-count" id="chip-count-active">5</span>
+          </button>
+          <button class="chip" id="chip-status-pending" onclick="setStatusFilter('pending')" data-status="pending">
+            <span class="chip-dot" style="background:var(--warning-500)"></span>
+            Chờ cấu hình
+            <span class="chip-count" id="chip-count-pending">1</span>
+          </button>
+          <button class="chip" id="chip-status-error" onclick="setStatusFilter('error')" data-status="error">
+            <span class="chip-dot" style="background:var(--danger-500)"></span>
+            Lỗi
+            <span class="chip-count" id="chip-count-error">2</span>
+          </button>
+        </div>
+
+        <div class="chips-spacer"></div>
+
+        <!-- Method select filter -->
+        <div class="chips" role="group" aria-label="Lọc theo phương thức">
+          <span class="chip-label">Phương thức:</span>
+          <button class="chip active" id="chip-method-all" onclick="setMethodFilter('all')">Tất cả</button>
+          <button class="chip" id="chip-method-get" onclick="setMethodFilter('GET')">GET</button>
+          <button class="chip" id="chip-method-post" onclick="setMethodFilter('POST')">POST</button>
+        </div>
+
+        <!-- Owner filter dropdown -->
+        <select class="owner-select" id="owner-filter" onchange="setOwnerFilter(this.value)" aria-label="Lọc theo Đơn vị chủ quản">
+          <option value="all">— Tất cả Đơn vị —</option>
+          <option value="BHXH Việt Nam">BHXH Việt Nam</option>
+          <option value="Tổng cục Thuế">Tổng cục Thuế</option>
+          <option value="Văn phòng Chính phủ">Văn phòng Chính phủ</option>
+          <option value="Bộ Y tế">Bộ Y tế</option>
+          <option value="Bộ Kế hoạch và Đầu tư">Bộ KH&ĐT</option>
+          <option value="Bộ Giao thông Vận tải">Bộ GTVT</option>
+          <option value="Bộ Tư pháp">Bộ Tư pháp</option>
+        </select>
+      </div>
+
+      <!-- Table -->
+      <div class="table-wrap">
+        <table id="main-table" aria-label="Danh sách API Endpoint">
+          <caption class="sr-only">Danh sách API Endpoint</caption>
+          <thead>
+            <tr>
+              <th class="center" style="width:48px" onclick="sortBy('id')" aria-sort="ascending">
+                <span class="th-inner">STT <i data-lucide="chevrons-up-down" class="sort-icon active" style="width:12px;height:12px" id="sort-id" aria-hidden="true"></i></span>
+              </th>
+              <th style="min-width:240px" onclick="sortBy('name')" aria-sort="none">
+                <span class="th-inner">Tên định danh / Đơn vị <i data-lucide="chevrons-up-down" class="sort-icon" style="width:12px;height:12px" id="sort-name" aria-hidden="true"></i></span>
+              </th>
+              <th style="min-width:280px" onclick="sortBy('url')" aria-sort="none">
+                <span class="th-inner">URL Endpoint / Xác thực <i data-lucide="chevrons-up-down" class="sort-icon" style="width:12px;height:12px" id="sort-url" aria-hidden="true"></i></span>
+              </th>
+              <th onclick="sortBy('successRate')" aria-sort="none" style="width:160px">
+                <span class="th-inner">Tỷ lệ 24h <i data-lucide="chevrons-up-down" class="sort-icon" style="width:12px;height:12px" id="sort-successRate" aria-hidden="true"></i></span>
+              </th>
+              <th onclick="sortBy('status')" aria-sort="none" style="width:140px">
+                <span class="th-inner">Trạng thái <i data-lucide="chevrons-up-down" class="sort-icon" style="width:12px;height:12px" id="sort-status" aria-hidden="true"></i></span>
+              </th>
+              <th onclick="sortBy('lastCalled')" aria-sort="none" style="width:160px">
+                <span class="th-inner">Lần gọi cuối <i data-lucide="chevrons-up-down" class="sort-icon" style="width:12px;height:12px" id="sort-lastCalled" aria-hidden="true"></i></span>
+              </th>
+              <th class="right" style="width:180px">Thao tác</th>
+            </tr>
+          </thead>
+          <tbody id="table-body">
+            <!-- Rendered by JS -->
+          </tbody>
+        </table>
+
+        <!-- Empty state -->
+        <div class="empty-state" id="empty-state" role="status">
+          <i data-lucide="globe" style="width:48px;height:48px;color:var(--border-strong)" aria-hidden="true"></i>
+          <div class="empty-title">Không tìm thấy API Endpoint nào</div>
+          <div class="empty-hint">Vui lòng thay đổi từ khóa tìm kiếm hoặc chỉnh sửa lại bộ lọc.</div>
+        </div>
+      </div>
+
+      <!-- Pagination -->
+      <div class="pagination" role="navigation" aria-label="Phân trang">
+        <div style="display:flex;align-items:center;gap:12px">
+          <select class="page-size-select" id="page-size-select" onchange="setPageSize(Number(this.value))" aria-label="Số bản ghi mỗi trang">
+            <option value="10">10 bản ghi/trang</option>
+            <option value="20">20 bản ghi/trang</option>
+            <option value="50">50 bản ghi/trang</option>
+          </select>
+          <p class="page-info" id="page-info" aria-live="polite">
+            Hiển thị <strong id="page-from">1</strong>–<strong id="page-to">8</strong> trong tổng <strong id="page-total">8</strong> bản ghi
+          </p>
+        </div>
+        <div class="pager" id="pager" role="group" aria-label="Trang"></div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- ═══════════════ ADD/EDIT DIALOG ═══════════════ -->
+<div class="dialog-overlay" id="add-dialog" role="dialog" aria-modal="true" aria-labelledby="dialog-title" onclick="closeDialogOnOverlay(event)">
+  <div class="dialog">
+    <div class="dialog-header">
+      <div class="dialog-title" id="dialog-title">Thêm Endpoint cấu hình mới</div>
+      <button class="dialog-close" onclick="closeDialog()" aria-label="Đóng hộp thoại">
+        <i data-lucide="x" style="width:16px;height:16px" aria-hidden="true"></i>
+      </button>
+    </div>
+    <div class="dialog-body">
+      <div class="form-row">
+        <div class="form-group" style="grid-column:1/-1">
+          <label class="form-label" for="f-name">Tên định danh API <span style="color:var(--danger-500)">*</span></label>
+          <input type="text" id="f-name" class="form-input" placeholder="VD: API Bảo hiểm xã hội" required minlength="3" maxlength="100">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group" style="grid-column:1/-1">
+          <label class="form-label" for="f-url">URL Endpoint đầy đủ <span style="color:var(--danger-500)">*</span></label>
+          <input type="url" id="f-url" class="form-input" placeholder="https://api.baohiemxh.gov.vn/v1/users" required>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="f-method">Phương thức HTTP <span style="color:var(--danger-500)">*</span></label>
+          <select id="f-method" class="form-select" required>
+            <option value="GET">GET</option>
+            <option value="POST">POST</option>
+            <option value="PUT">PUT</option>
+            <option value="DELETE">DELETE</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="f-auth">Loại xác thực <span style="color:var(--danger-500)">*</span></label>
+          <select id="f-auth" class="form-select" required>
+            <option value="None">None</option>
+            <option value="API Key">API Key</option>
+            <option value="OAuth2">OAuth2</option>
+            <option value="Bearer Token">Bearer Token</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group" style="grid-column:1/-1">
+          <label class="form-label" for="f-token">Mã token / API Key (Nếu có)</label>
+          <input type="password" id="f-token" class="form-input" placeholder="••••••••••••••••••••">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group" style="grid-column:1/-1">
+          <label class="form-label" for="f-owner">Đơn vị chủ quản <span style="color:var(--danger-500)">*</span></label>
+          <select id="f-owner" class="form-select" required>
+            <option value="">— Chọn đơn vị chủ quản —</option>
+            <option value="BHXH Việt Nam">BHXH Việt Nam</option>
+            <option value="Tổng cục Thuế">Tổng cục Thuế</option>
+            <option value="Văn phòng Chính phủ">Văn phòng Chính phủ</option>
+            <option value="Bộ Y tế">Bộ Y tế</option>
+            <option value="Bộ Kế hoạch và Đầu tư">Bộ Kế hoạch và Đầu tư</option>
+            <option value="Bộ Giao thông Vận tải">Bộ Giao thông Vận tải</option>
+            <option value="Bộ Tư pháp">Bộ Tư pháp</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="f-notes">Mô tả chi tiết</label>
+        <textarea id="f-notes" class="form-textarea" placeholder="Nhập mục đích tích hợp, tần suất cập nhật dữ liệu..."></textarea>
+      </div>
+    </div>
+    <div class="dialog-footer">
+      <button class="btn btn-outline" id="btn-test-conn" onclick="triggerDirectTest()" style="margin-right:auto">
+        <i data-lucide="zap" style="width:14px;height:14px" aria-hidden="true"></i>
+        Kiểm tra kết nối
+      </button>
+      <button class="btn btn-outline" onclick="closeDialog()">Huỷ</button>
+      <button class="btn btn-primary" onclick="saveApi()">
+        <i data-lucide="save" style="width:14px;height:14px" aria-hidden="true"></i>
+        Lưu cấu hình
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ TEST CONNECTION DIALOG ═══════════════ -->
+<div class="dialog-overlay" id="test-dialog" role="dialog" aria-modal="true" aria-labelledby="test-dialog-title" onclick="closeTestDialogOnOverlay(event)">
+  <div class="dialog large">
+    <div class="dialog-header">
+      <div class="dialog-title" id="test-dialog-title">Kiểm tra kết nối API Endpoint (Simulated)</div>
+      <button class="dialog-close" onclick="closeTestDialog()" aria-label="Đóng hộp thoại">
+        <i data-lucide="x" style="width:16px;height:16px" aria-hidden="true"></i>
+      </button>
+    </div>
+    <div class="dialog-body">
+      <div style="background:var(--surface-2); padding:16px; border-radius:10px; border:1px solid var(--border); display:grid; gap:8px;">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span id="test-method-badge" class="method-tag get">GET</span>
+          <strong id="test-api-name" style="font-size:14px; color:var(--ink-900);">API Bảo hiểm xã hội</strong>
+        </div>
+        <div class="api-url" id="test-api-url" style="color:var(--ink-500); word-break:break-all;">https://api.baohiemxh.gov.vn/v1/user-records</div>
+        <div style="display:flex; gap:16px; font-size:12px; color:var(--ink-500); margin-top:4px;">
+          <span>Cơ quan: <strong id="test-api-owner">BHXH Việt Nam</strong></span>
+          <span>Xác thực: <strong id="test-api-auth">Bearer Token</strong></span>
+        </div>
+      </div>
+
+      <div style="display:grid; grid-template-columns: 1fr 1.2fr; gap:16px; margin-top:6px;">
+        <!-- Configuration options -->
+        <div style="display:flex; flex-direction:column; gap:12px;">
+          <h4 style="font-size:13px; font-weight:700; color:var(--ink-900); text-transform:uppercase; letter-spacing:0.04em; border-bottom:1.5px solid var(--border); padding-bottom:6px;">Tham số Header (HTTP Headers)</h4>
+          <div class="form-group">
+            <label class="form-label" style="font-size:11px;">Authorization</label>
+            <input type="text" class="form-input" id="test-header-auth" value="Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." style="font-family:'JetBrains Mono'; font-size:11.5px;">
+          </div>
+          <div class="form-group">
+            <label class="form-label" style="font-size:11px;">Content-Type</label>
+            <input type="text" class="form-input" value="application/json" readonly style="font-family:'JetBrains Mono'; font-size:11.5px; background:var(--surface-2); color:var(--ink-400);">
+          </div>
+          <div class="form-group" id="test-body-group" style="display:none;">
+            <label class="form-label" style="font-size:11px;">Request Body (JSON)</label>
+            <textarea class="form-textarea" style="font-family:'JetBrains Mono'; font-size:11.5px; min-height:80px;">{
+  "search_criteria": "all",
+  "limit": 100
+}</textarea>
+          </div>
+        </div>
+
+        <!-- Simulation results -->
+        <div style="display:flex; flex-direction:column; gap:12px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1.5px solid var(--border); padding-bottom:6px;">
+            <h4 style="font-size:13px; font-weight:700; color:var(--ink-900); text-transform:uppercase; letter-spacing:0.04em;">Kết quả phản hồi (Response)</h4>
+            <button class="btn btn-primary" id="btn-run-simulation" onclick="runSimulation()" style="padding: 6px 12px; font-size: 12px; box-shadow:none;">
+              <i data-lucide="send" style="width:13px;height:13px;"></i>
+              Gửi yêu cầu
+            </button>
+          </div>
+
+          <!-- Loading state -->
+          <div id="test-loading-state" style="display:none; text-align:center; padding:48px 0; color:var(--ink-500);">
+            <i data-lucide="loader" style="width:32px;height:32px;animation:spin 1s linear infinite;color:var(--navy-600);margin-bottom:10px;display:inline-block;"></i>
+            <p style="font-size:13px; font-weight:500;">Đang gửi HTTP Request và phân tích phản hồi...</p>
+          </div>
+
+          <!-- Simulation Output viewer -->
+          <div id="test-result-wrapper" style="display:none;">
+            <div class="response-meta">
+              <span class="meta-status success" id="test-resp-status">200 OK</span>
+              <span class="meta-time" id="test-resp-time">Latency: 124ms</span>
+            </div>
+            <pre class="response-viewer" id="test-resp-body"></pre>
+          </div>
+
+          <!-- Prompt state -->
+          <div id="test-prompt-state" style="text-align:center; padding:60px 20px; color:var(--ink-400); border:1px dashed var(--border-strong); border-radius:10px; background:var(--surface-2);">
+            <i data-lucide="terminal" style="width:32px;height:32px;margin-bottom:10px;" aria-hidden="true"></i>
+            <p style="font-size:12.5px;">Click nút <strong>Gửi yêu cầu</strong> để kiểm tra kết nối với API bên thứ ba.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="dialog-footer" style="padding: 12px 24px;">
+      <button class="btn btn-outline" onclick="closeTestDialog()">Đóng</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ VIEW RECENT LOGS DIALOG ═══════════════ -->
+<div class="dialog-overlay" id="logs-dialog" role="dialog" aria-modal="true" aria-labelledby="logs-dialog-title" onclick="closeLogsDialogOnOverlay(event)">
+  <div class="dialog large">
+    <div class="dialog-header">
+      <div class="dialog-title" id="logs-dialog-title">Nhật ký hoạt động API - [API Bảo hiểm xã hội]</div>
+      <button class="dialog-close" onclick="closeLogsDialog()" aria-label="Đóng hộp thoại">
+        <i data-lucide="x" style="width:16px;height:16px" aria-hidden="true"></i>
+      </button>
+    </div>
+    <div class="dialog-body">
+      
+      <!-- API log stats -->
+      <div class="log-header-stats">
+        <div class="log-stat">
+          <span class="log-stat-label">Tổng lượt gọi (24h)</span>
+          <span class="log-stat-val" id="log-total-calls">1,452</span>
+        </div>
+        <div class="log-stat">
+          <span class="log-stat-label">Tỷ lệ thành công</span>
+          <span class="log-stat-val" id="log-success-rate" style="color:var(--success-700)">99.4%</span>
+        </div>
+        <div class="log-stat">
+          <span class="log-stat-label">Thời gian phản hồi TB</span>
+          <span class="log-stat-val" id="log-avg-latency">154ms</span>
+        </div>
+      </div>
+
+      <h4 style="font-size:13px; font-weight:700; color:var(--ink-900); text-transform:uppercase; letter-spacing:0.04em; margin-bottom:10px;">Lịch sử gọi API 5 lần gần nhất</h4>
+      
+      <!-- Log list -->
+      <div class="log-list" id="logs-list-body">
+        <!-- Rendered dynamically -->
+      </div>
+
+    </div>
+    <div class="dialog-footer" style="padding: 12px 24px;">
+      <button class="btn btn-outline" onclick="closeLogsDialog()">Đóng</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast notification container -->
+<div class="toast-container" id="toast-container" aria-live="assertive" aria-atomic="true"></div>
+
+<script>
+  // ─── Data ───────────────────────────────────────────────────────────────
+  const API_ENDPOINTS = [
+    { id: 1, name: 'API Bảo hiểm xã hội', url: 'https://api.baohiemxh.gov.vn/v1/user-records', method: 'GET', auth: 'Bearer Token', owner: 'BHXH Việt Nam', status: 'active', lastCalled: '2026-05-24 10:45:00', successRate: 99.4 },
+    { id: 2, name: 'API Tra cứu MST Thuế', url: 'https://api.gdt.gov.vn/v2/taxpayer/search', method: 'POST', auth: 'API Key', owner: 'Tổng cục Thuế', status: 'active', lastCalled: '2026-05-24 11:02:15', successRate: 98.7 },
+    { id: 3, name: 'API Dịch vụ Công Quốc gia', url: 'https://dichvucong.gov.vn/api/v2/citizens/verify', method: 'GET', auth: 'OAuth2', owner: 'Văn phòng Chính phủ', status: 'error', lastCalled: '2026-05-24 08:30:12', successRate: 74.2 },
+    { id: 4, name: 'API Cơ sở khám chữa bệnh', url: 'https://api.moh.gov.vn/v1/hospitals/sync', method: 'POST', auth: 'Bearer Token', owner: 'Bộ Y tế', status: 'pending', lastCalled: '2026-05-20 14:20:00', successRate: 0.0 },
+    { id: 5, name: 'API Đăng ký Kinh doanh', url: 'https://dangkykinhdoanh.gov.vn/api/v1/enterprises', method: 'GET', auth: 'None', owner: 'Bộ Kế hoạch và Đầu tư', status: 'active', lastCalled: '2026-05-24 10:55:00', successRate: 100.0 },
+    { id: 6, name: 'API Giấy phép lái xe', url: 'https://gplx.gov.vn/api/v2/licenses/lookup', method: 'GET', auth: 'API Key', owner: 'Bộ Giao thông Vận tải', status: 'active', lastCalled: '2026-05-24 09:12:00', successRate: 99.1 },
+    { id: 7, name: 'API Tra cứu hộ tịch', url: 'https://api.moj.gov.vn/v1/civil-status', method: 'POST', auth: 'OAuth2', owner: 'Bộ Tư pháp', status: 'error', lastCalled: '2026-05-24 07:15:00', successRate: 45.8 },
+    { id: 8, name: 'API Danh mục thuốc tân dược', url: 'https://api.moh.gov.vn/v1/medicines', method: 'GET', auth: 'None', owner: 'Bộ Y tế', status: 'active', lastCalled: '2026-05-24 10:20:00', successRate: 99.8 }
+  ];
+
+  // ─── State ──────────────────────────────────────────────────────────────
+  let state = {
+    q: '',
+    status: 'all',
+    method: 'all',
+    owner: 'all',
+    sort: 'id',
+    order: 'asc',
+    page: 1,
+    pageSize: 10
+  };
+  let data = [...API_ENDPOINTS];
+  let filteredRows = [];
+  let editId = null;
+  let activeTestRecord = null;
+
+  // ─── Filter & Sort ──────────────────────────────────────────────────────
+  function applyFilters() {
+    const { q, status, method, owner, sort, order } = state;
+    filteredRows = data
+      .filter(r => !q || [r.name, r.url, r.owner].some(s => s.toLowerCase().includes(q.toLowerCase())))
+      .filter(r => status === 'all' || r.status === status)
+      .filter(r => method === 'all' || r.method === method)
+      .filter(r => owner === 'all' || r.owner === owner)
+      .sort((a, b) => {
+        const dir = order === 'asc' ? 1 : -1;
+        let va = a[sort];
+        let vb = b[sort];
+        if (typeof va === 'string') va = va.toLowerCase();
+        if (typeof vb === 'string') vb = vb.toLowerCase();
+        return va < vb ? -dir : va > vb ? dir : 0;
+      });
+  }
+
+  // ─── Relative Time Helper ───────────────────────────────────────────────
+  function relTime(iso) {
+    if (!iso || iso.startsWith('0.0')) return 'Chưa từng gọi';
+    const now = Date.now();
+    const t = new Date(iso).getTime();
+    const min = Math.round((now - t) / 60000);
+    if (min < 1) return 'Vừa xong';
+    if (min < 60) return `${min} phút trước`;
+    if (min < 1440) return `${Math.round(min/60)} giờ trước`;
+    const d = Math.round(min/1440);
+    if (d < 30) return `${d} ngày trước`;
+    return iso.slice(0,10);
+  }
+
+  // ─── Render ─────────────────────────────────────────────────────────────
+  function render() {
+    applyFilters();
+    updateStats();
+    renderTable();
+    renderPagination();
+    updateChips();
+    if (window.lucide) lucide.createIcons();
+  }
+
+  function updateStats() {
+    const counts = { active: 0, pending: 0, error: 0 };
+    data.forEach(r => {
+      if (counts[r.status] !== undefined) counts[r.status]++;
+    });
+    document.getElementById('val-total').textContent = data.length;
+    document.getElementById('val-ok').textContent    = counts.active;
+    document.getElementById('val-warn').textContent  = counts.pending;
+    document.getElementById('val-err').textContent   = counts.error;
+
+    // Filtered count highlights
+    const countByStatus = { all: 0, active: 0, pending: 0, error: 0 };
+    data.filter(r => 
+      (!state.q || [r.name, r.url, r.owner].some(s => s.toLowerCase().includes(state.q.toLowerCase()))) &&
+      (state.method === 'all' || r.method === state.method) &&
+      (state.owner === 'all' || r.owner === state.owner)
+    ).forEach(r => {
+      countByStatus.all++;
+      if (countByStatus[r.status] !== undefined) countByStatus[r.status]++;
+    });
+
+    document.getElementById('chip-count-all').textContent     = countByStatus.all;
+    document.getElementById('chip-count-active').textContent  = countByStatus.active;
+    document.getElementById('chip-count-pending').textContent = countByStatus.pending;
+    document.getElementById('chip-count-error').textContent   = countByStatus.error;
+  }
+
+  function renderTable() {
+    const tbody = document.getElementById('table-body');
+    const empty = document.getElementById('empty-state');
+    const { page, pageSize } = state;
+    const start = (page - 1) * pageSize;
+    const slice = filteredRows.slice(start, start + pageSize);
+
+    if (filteredRows.length === 0) {
+      tbody.innerHTML = '';
+      empty.classList.add('visible');
+      return;
+    }
+    empty.classList.remove('visible');
+
+    tbody.innerHTML = slice.map((r, idx) => {
+      const sttNum = String(start + idx + 1).padStart(2, '0');
+      
+      // Method badge class
+      const mClass = r.method.toLowerCase();
+      
+      // Auth badge class
+      let authClass = '';
+      if (r.auth === 'API Key') authClass = 'key';
+      else if (r.auth === 'OAuth2') authClass = 'oauth';
+      else if (r.auth === 'Bearer Token') authClass = 'token';
+
+      // Status badge and text
+      let statusCls = 'disabled';
+      let statusLabel = 'Ngắt kết nối';
+      if (r.status === 'active') { statusCls = 'ok'; statusLabel = 'Đang hoạt động'; }
+      else if (r.status === 'error') { statusCls = 'err'; statusLabel = 'Lỗi kết nối'; }
+      else if (r.status === 'pending') { statusCls = 'warn'; statusLabel = 'Chờ cấu hình'; }
+
+      // Success Rate Bar Color
+      let rateColor = 'var(--success-500)';
+      if (r.successRate < 80.0 && r.successRate > 0) rateColor = 'var(--warning-500)';
+      else if (r.successRate === 0) rateColor = 'var(--ink-300)';
+      if (r.status === 'error') rateColor = 'var(--danger-500)';
+
+      return `
+        <tr tabindex="0" role="row" onclick="openTestDialog(${r.id})" onkeydown="if(event.key==='Enter')openTestDialog(${r.id})">
+          <td class="center"><span class="stt">${sttNum}</span></td>
+          <td>
+            <div class="api-cell">
+              <div class="api-name">${r.name}</div>
+              <div class="api-owner">${r.owner}</div>
+            </div>
+          </td>
+          <td>
+            <div class="api-cell">
+              <div class="api-url-wrap">
+                <span class="method-tag ${mClass}">${r.method}</span>
+                <span class="api-url">${r.url}</span>
+              </div>
+              <div style="margin-top:2px;">
+                <span class="auth-tag ${authClass}">
+                  <i data-lucide="key" style="width:10px;height:10px;color:var(--ink-400);"></i>
+                  ${r.auth}
+                </span>
+              </div>
+            </div>
+          </td>
+          <td>
+            <div class="rate-container">
+              <div class="rate-bar-bg">
+                <div class="rate-bar-fill" style="width:${r.successRate}%; background:${rateColor};"></div>
+              </div>
+              <span class="rate-text" style="color:${rateColor === 'var(--ink-300)' ? 'var(--ink-500)' : rateColor}">${r.successRate.toFixed(1)}%</span>
+            </div>
+          </td>
+          <td>
+            <span class="status-badge ${statusCls}" role="status" aria-label="${statusLabel}">
+              <span class="pulse" aria-hidden="true"></span>
+              ${statusLabel}
+            </span>
+          </td>
+          <td>
+            <div class="updated-rel">${relTime(r.lastCalled)}</div>
+            <div class="updated-abs">${r.lastCalled ? r.lastCalled.replace('T', ' ').slice(0, 16) : '—'}</div>
+          </td>
+          <td onclick="event.stopPropagation()">
+            <div class="row-actions">
+              <button class="action-btn" onclick="openTestDialog(${r.id})" aria-label="Test kết nối ${r.name}" title="Kiểm tra kết nối">
+                <i data-lucide="zap" style="width:15px;height:15px" aria-hidden="true"></i>
+              </button>
+              <button class="action-btn" onclick="openLogsDialog(${r.id})" aria-label="Nhật ký kết nối ${r.name}" title="Xem lịch sử cuộc gọi">
+                <i data-lucide="file-text" style="width:15px;height:15px" aria-hidden="true"></i>
+              </button>
+              <button class="action-btn" onclick="editApi(${r.id})" aria-label="Chỉnh sửa ${r.name}" title="Cấu hình API">
+                <i data-lucide="edit-3" style="width:15px;height:15px" aria-hidden="true"></i>
+              </button>
+              <button class="action-btn" onclick="toggleApiConnection(${r.id})" aria-label="Ngắt/Kích hoạt ${r.name}" title="${r.status === 'active' ? 'Ngắt kết nối' : 'Kích hoạt lại'}">
+                <i data-lucide="power" style="width:15px;height:15px; color:${r.status === 'active' ? 'var(--danger-500)' : 'var(--success-500)'};" aria-hidden="true"></i>
+              </button>
+              <button class="action-btn danger" onclick="deleteApi(${r.id})" aria-label="Xoá ${r.name}" title="Xoá endpoint">
+                <i data-lucide="trash-2" style="width:15px;height:15px" aria-hidden="true"></i>
+              </button>
+            </div>
+          </td>
+        </tr>`;
+    }).join('');
+  }
+
+  function renderPagination() {
+    const { page, pageSize } = state;
+    const total = filteredRows.length;
+    const totalPages = Math.max(1, Math.ceil(total / pageSize));
+    const from = total === 0 ? 0 : (page - 1) * pageSize + 1;
+    const to   = Math.min(page * pageSize, total);
+
+    document.getElementById('page-from').textContent  = from;
+    document.getElementById('page-to').textContent    = to;
+    document.getElementById('page-total').textContent = total;
+
+    const pager = document.getElementById('pager');
+    let html = `<button class="page-btn" onclick="goPage(${page-1})" ${page<=1?'disabled':''} aria-label="Trang trước">
+      <i data-lucide="chevron-left" style="width:14px;height:14px"></i>
+    </button>`;
+    const maxVisible = 5;
+    let startP = Math.max(1, page - 2), endP = Math.min(totalPages, startP + maxVisible - 1);
+    if (endP - startP < maxVisible - 1) startP = Math.max(1, endP - maxVisible + 1);
+    for (let p = startP; p <= endP; p++) {
+      html += `<button class="page-btn${p===page?' active':''}" onclick="goPage(${p})" aria-label="Trang ${p}" ${p===page?'aria-current="page"':''}>${p}</button>`;
+    }
+    html += `<button class="page-btn" onclick="goPage(${page+1})" ${page>=totalPages?'disabled':''} aria-label="Trang sau">
+      <i data-lucide="chevron-right" style="width:14px;height:14px"></i>
+    </button>`;
+    pager.innerHTML = html;
+  }
+
+  function updateChips() {
+    const statuses = ['all','active','pending','error'];
+    statuses.forEach(s => {
+      const el = document.getElementById(`chip-status-${s}`);
+      if (el) el.classList.toggle('active', state.status === s);
+    });
+
+    const methods = ['all','get','post'];
+    methods.forEach(m => {
+      const el = document.getElementById(`chip-method-${m}`);
+      if (el) el.classList.toggle('active', state.method.toLowerCase() === m || (state.method === 'all' && m === 'all'));
+    });
+
+    const sortCols = ['id','name','url','successRate','status','lastCalled'];
+    sortCols.forEach(col => {
+      const el = document.getElementById(`sort-${col}`);
+      if (el) el.classList.toggle('active', state.sort === col);
+    });
+
+    const ths = document.querySelectorAll('#main-table thead th');
+    sortCols.forEach((col, i) => {
+      const th = ths[i];
+      if (!th) return;
+      if (state.sort === col) {
+        th.setAttribute('aria-sort', state.order === 'asc' ? 'ascending' : 'descending');
+      } else {
+        th.setAttribute('aria-sort', 'none');
+      }
+    });
+  }
+
+  // ─── Filter Events ──────────────────────────────────────────────────────
+  function onSearchChange(v) {
+    state.q = v; state.page = 1; render();
+  }
+  function setStatusFilter(s) {
+    state.status = s; state.page = 1; render();
+  }
+  function setMethodFilter(m) {
+    state.method = m === 'all' ? 'all' : m;
+    state.page = 1;
+    render();
+  }
+  function setOwnerFilter(o) {
+    state.owner = o; state.page = 1; render();
+  }
+  function sortBy(col) {
+    if (state.sort === col) {
+      state.order = state.order === 'asc' ? 'desc' : 'asc';
+    } else {
+      state.sort = col; state.order = 'asc';
+    }
+    state.page = 1; render();
+  }
+  function goPage(p) {
+    const total = filteredRows.length;
+    const maxP = Math.max(1, Math.ceil(total / state.pageSize));
+    if (p < 1 || p > maxP) return;
+    state.page = p; render();
+  }
+  function setPageSize(n) {
+    state.pageSize = n; state.page = 1; render();
+  }
+
+  // ─── Dialog: Add & Edit API ──────────────────────────────────────────────
+  function openDialog() {
+    editId = null;
+    document.getElementById('dialog-title').textContent = 'Thêm API Endpoint cấu hình mới';
+    document.getElementById('f-name').value = '';
+    document.getElementById('f-url').value = '';
+    document.getElementById('f-method').value = 'GET';
+    document.getElementById('f-auth').value = 'None';
+    document.getElementById('f-token').value = '';
+    document.getElementById('f-owner').value = '';
+    document.getElementById('f-notes').value = '';
+    document.getElementById('add-dialog').classList.add('open');
+    document.getElementById('f-name').focus();
+  }
+
+  function editApi(id) {
+    const item = data.find(r => r.id === id);
+    if (!item) return;
+    editId = id;
+    document.getElementById('dialog-title').textContent = 'Chỉnh sửa cấu hình API Endpoint';
+    document.getElementById('f-name').value = item.name;
+    document.getElementById('f-url').value = item.url;
+    document.getElementById('f-method').value = item.method;
+    document.getElementById('f-auth').value = item.auth;
+    document.getElementById('f-token').value = 'MOCKED_KEY_AUTH_VALUE';
+    document.getElementById('f-owner').value = item.owner;
+    document.getElementById('f-notes').value = `API tích hợp dữ liệu cơ bản từ đơn vị ${item.owner}.`;
+    
+    document.getElementById('add-dialog').classList.add('open');
+  }
+
+  function saveApi() {
+    const name = document.getElementById('f-name').value.trim();
+    const url = document.getElementById('f-url').value.trim();
+    const method = document.getElementById('f-method').value;
+    const auth = document.getElementById('f-auth').value;
+    const owner = document.getElementById('f-owner').value;
+    const notes = document.getElementById('f-notes').value;
+
+    if (!name || !url || !method || !auth || !owner) {
+      showToast('Vui lòng điền đầy đủ các trường bắt buộc (*)', 'error');
+      return;
+    }
+
+    if (editId !== null) {
+      // Edit mode
+      const idx = data.findIndex(r => r.id === editId);
+      if (idx !== -1) {
+        data[idx] = { 
+          ...data[idx], 
+          name, url, method, auth, owner, 
+          lastCalled: new Date().toISOString().replace('T', ' ').slice(0, 19)
+        };
+      }
+      showToast(`Đã lưu cập nhật cho API "${name}"`, 'success');
+    } else {
+      // Add mode
+      const newId = Math.max(...data.map(r => r.id)) + 1;
+      data.push({
+        id: newId,
+        name, url, method, auth, owner,
+        status: 'pending',
+        lastCalled: '',
+        successRate: 0.0
+      });
+      showToast(`Đã thêm cấu hình API "${name}" thành công!`, 'success');
+    }
+    
+    closeDialog();
+    render();
+  }
+
+  function closeDialog() {
+    document.getElementById('add-dialog').classList.remove('open');
+  }
+  function closeDialogOnOverlay(e) {
+    if (e.target === document.getElementById('add-dialog')) closeDialog();
+  }
+
+  function deleteApi(id) {
+    const item = data.find(r => r.id === id);
+    if (!item) return;
+    if (confirm(`Xác nhận xoá cấu hình API Endpoint "${item.name}"?\nHành động này không thể hoàn tác.`)) {
+      data = data.filter(r => r.id !== id);
+      render();
+      showToast(`Đã xoá API Endpoint "${item.name}"`, 'success');
+    }
+  }
+
+  // ─── API Connection Toggle (Ngắt/Kích hoạt) ──────────────────────────────
+  function toggleApiConnection(id) {
+    const idx = data.findIndex(r => r.id === id);
+    if (idx === -1) return;
+    
+    const item = data[idx];
+    if (item.status === 'active') {
+      // Disconnect
+      data[idx].status = 'inactive';
+      showToast(`Đã ngắt kết nối với Endpoint "${item.name}"`, 'success');
+    } else {
+      // Reconnect/Activate
+      data[idx].status = 'active';
+      if (data[idx].successRate === 0) data[idx].successRate = 95.0; // Simulated activation rates
+      data[idx].lastCalled = new Date().toISOString().replace('T', ' ').slice(0, 19);
+      showToast(`Đã kích hoạt hoạt động trở lại cho Endpoint "${item.name}"`, 'success');
+    }
+    render();
+  }
+
+  // ─── Test Endpoint Dialog ───────────────────────────────────────────────
+  function openTestDialog(id) {
+    const item = data.find(r => r.id === id);
+    if (!item) return;
+    activeTestRecord = item;
+
+    // Load data to view
+    document.getElementById('test-api-name').textContent = item.name;
+    document.getElementById('test-api-url').textContent = item.url;
+    document.getElementById('test-api-owner').textContent = item.owner;
+    document.getElementById('test-api-auth').textContent = item.auth;
+
+    // Reset simulator UI states
+    document.getElementById('test-prompt-state').style.display = 'block';
+    document.getElementById('test-loading-state').style.display = 'none';
+    document.getElementById('test-result-wrapper').style.display = 'none';
+
+    // Configure headers and methods preview
+    const authHeader = document.getElementById('test-header-auth');
+    if (item.auth === 'None') authHeader.value = 'None (Public API)';
+    else if (item.auth === 'API Key') authHeader.value = 'x-api-key: d3b07384d113edec49eaa6238ad';
+    else if (item.auth === 'OAuth2') authHeader.value = 'Authorization: Bearer oauth2_token_098f6bcd4621d37';
+    else authHeader.value = 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...';
+
+    // Show request body for POST methods
+    const bodyGroup = document.getElementById('test-body-group');
+    if (item.method === 'POST') bodyGroup.style.display = 'flex';
+    else bodyGroup.style.display = 'none';
+
+    // Method badge
+    const badge = document.getElementById('test-method-badge');
+    badge.className = `method-tag ${item.method.toLowerCase()}`;
+    badge.textContent = item.method;
+
+    document.getElementById('test-dialog').classList.add('open');
+  }
+
+  function closeTestDialog() {
+    document.getElementById('test-dialog').classList.remove('open');
+    activeTestRecord = null;
+  }
+  function closeTestDialogOnOverlay(e) {
+    if (e.target === document.getElementById('test-dialog')) closeTestDialog();
+  }
+
+  // Trigger test directly from Add Form
+  function triggerDirectTest() {
+    const name = document.getElementById('f-name').value.trim() || 'API Endpoint test';
+    const url = document.getElementById('f-url').value.trim();
+    const method = document.getElementById('f-method').value;
+    const auth = document.getElementById('f-auth').value;
+    const owner = document.getElementById('f-owner').value || 'Đơn vị thử nghiệm';
+
+    if (!url) {
+      showToast('Vui lòng nhập URL Endpoint để kiểm tra kết nối', 'error');
+      return;
+    }
+
+    const testObject = { id: 99, name, url, method, auth, owner, status: 'active' };
+    closeDialog();
+    setTimeout(() => {
+      openTestDialog(99);
+      activeTestRecord = testObject;
+    }, 250);
+  }
+
+  function runSimulation() {
+    if (!activeTestRecord) return;
+
+    // Show loader
+    document.getElementById('test-prompt-state').style.display = 'none';
+    document.getElementById('test-result-wrapper').style.display = 'none';
+    document.getElementById('test-loading-state').style.display = 'block';
+
+    const btn = document.getElementById('btn-run-simulation');
+    btn.disabled = true;
+    btn.textContent = 'Đang gửi...';
+
+    setTimeout(() => {
+      btn.disabled = false;
+      btn.innerHTML = '<i data-lucide="send" style="width:13px;height:13px;"></i> Gửi yêu cầu';
+      if (window.lucide) lucide.createIcons();
+
+      document.getElementById('test-loading-state').style.display = 'none';
+      document.getElementById('test-result-wrapper').style.display = 'block';
+
+      const isSuccess = activeTestRecord.status === 'active' || activeTestRecord.status === 'pending';
+      const statusCode = isSuccess ? '200 OK' : '503 Service Unavailable';
+      const responseTime = isSuccess ? `${Math.floor(Math.random() * 200) + 100}ms` : '3500ms (Timeout)';
+      
+      const statusEl = document.getElementById('test-resp-status');
+      statusEl.textContent = statusCode;
+      statusEl.className = `meta-status ${isSuccess ? 'success' : 'error'}`;
+      document.getElementById('test-resp-time').textContent = `Latency: ${responseTime}`;
+
+      const resBodyEl = document.getElementById('test-resp-body');
+      
+      if (isSuccess) {
+        const successJson = {
+          "status": "success",
+          "code": 200,
+          "timestamp": new Date().toISOString(),
+          "meta": {
+            "version": "1.0.4",
+            "provider": activeTestRecord.owner,
+            "quota_limit": 50000,
+            "quota_remaining": 48259
+          },
+          "data": [
+            { "record_id": "REC_90281489", "national_id": "038096001248", "fullname": "Nguyễn Văn Hùng", "sync_action": "UPDATE" },
+            { "record_id": "REC_90281490", "national_id": "034091008459", "fullname": "Trần Thị Mai", "sync_action": "CREATE" },
+            { "record_id": "REC_90281491", "national_id": "025095009148", "fullname": "Phạm Quốc Bảo", "sync_action": "DELETE" }
+          ]
+        };
+        resBodyEl.textContent = JSON.stringify(successJson, null, 2);
+        showToast('Gửi yêu cầu kiểm tra thành công!', 'success');
+      } else {
+        const errorJson = {
+          "error": {
+            "code": "CONNECTION_TIMEOUT",
+            "message": "Không thể kết nối đến máy chủ bên thứ ba. Kết nối bị từ chối sau 3000ms.",
+            "host": activeTestRecord.url,
+            "details": "Gateway timeout. Vui lòng kiểm tra lại cấu hình DNS hoặc cấu hình firewall đầu đích."
+          }
+        };
+        resBodyEl.textContent = JSON.stringify(errorJson, null, 2);
+        showToast('Kết nối thử nghiệm thất bại!', 'error');
+      }
+
+    }, 1500);
+  }
+
+  // ─── View Recent Logs Dialog ─────────────────────────────────────────────
+  function openLogsDialog(id) {
+    const item = data.find(r => r.id === id);
+    if (!item) return;
+
+    document.getElementById('logs-dialog-title').innerHTML = `Nhật ký hoạt động API — <strong>${item.name}</strong>`;
+    
+    // Fill stats based on API status
+    const countTotal = item.status === 'active' ? 1450 : item.status === 'error' ? 840 : 0;
+    const rateVal = item.status === 'active' ? `${item.successRate}%` : item.status === 'error' ? '0.0%' : 'Chưa chạy';
+    const latencyVal = item.status === 'active' ? '128ms' : item.status === 'error' ? 'Timeout' : '—';
+
+    document.getElementById('log-total-calls').textContent = countTotal.toLocaleString('vi-VN');
+    
+    const rateEl = document.getElementById('log-success-rate');
+    rateEl.textContent = rateVal;
+    rateEl.style.color = item.status === 'active' ? 'var(--success-700)' : item.status === 'error' ? 'var(--danger-700)' : 'var(--ink-500)';
+    
+    document.getElementById('log-avg-latency').textContent = latencyVal;
+
+    // Generate mock logs
+    const logsList = document.getElementById('logs-list-body');
+    if (item.status === 'pending') {
+      logsList.innerHTML = `<div style="padding: 24px; text-align:center; color:var(--ink-400);">Không có lịch sử cuộc gọi nào được ghi nhận cho Endpoint mới này.</div>`;
+    } else {
+      const logsMockData = [
+        { time: '2026-05-24 10:45:12', method: item.method, status: item.status === 'active' ? 200 : 503, latency: item.status === 'active' ? '112ms' : '3000ms', msg: item.status === 'active' ? 'Tải thành công 120 dòng' : 'Connection Timeout' },
+        { time: '2026-05-24 10:30:05', method: item.method, status: item.status === 'active' ? 200 : 503, latency: item.status === 'active' ? '124ms' : '3000ms', msg: item.status === 'active' ? 'Tải thành công 45 dòng' : 'Connection Timeout' },
+        { time: '2026-05-24 10:15:20', method: item.method, status: item.status === 'active' ? 200 : 503, latency: item.status === 'active' ? '142ms' : '3000ms', msg: item.status === 'active' ? 'Không có bản ghi mới' : 'Connection Timeout' },
+        { time: '2026-05-24 10:00:11', method: item.method, status: 200, latency: '130ms', msg: 'Tải thành công 98 dòng' },
+        { time: '2026-05-24 09:45:00', method: item.method, status: 200, latency: '118ms', msg: 'Tải thành công 214 dòng' }
+      ];
+
+      logsList.innerHTML = `
+        <div class="log-list-header">
+          <div>Thời gian gọi</div>
+          <div>M.Thức</div>
+          <div>Mã Lỗi</div>
+          <div>Độ trễ</div>
+          <div>Chi tiết thông điệp</div>
+        </div>
+        ${logsMockData.map(log => {
+          const is2xx = log.status === 200;
+          return `
+            <div class="log-item">
+              <div class="log-time">${log.time}</div>
+              <div class="log-method">${log.method}</div>
+              <div class="log-status ${is2xx ? 'code-2xx' : 'code-4xx'}">${log.status}</div>
+              <div class="log-latency">${log.latency}</div>
+              <div class="log-message">${log.msg}</div>
+            </div>
+          `;
+        }).join('')}
+      `;
+    }
+
+    document.getElementById('logs-dialog').classList.add('open');
+  }
+
+  function closeLogsDialog() {
+    document.getElementById('logs-dialog').classList.remove('open');
+  }
+  function closeLogsDialogOnOverlay(e) {
+    if (e.target === document.getElementById('logs-dialog')) closeLogsDialog();
+  }
+
+  // ─── Export to Excel ───────────────────────────────────────────────────
+  function exportExcel() {
+    showToast('Đang tạo và tải file Excel báo cáo API Endpoints...', '');
+    setTimeout(() => {
+      showToast('Đã tải thành công file báo cáo excel (8 kết nối API)', 'success');
+    }, 1500);
+  }
+
+  // ─── Nav group toggle ──────────────────────────────────────────────────
+  function toggleNavGroup(btn) {
+    const childId = btn.getAttribute('aria-controls');
+    const children = childId ? document.getElementById(childId) : btn.nextElementSibling;
+    if (!children) return;
+    const isOpen = children.classList.contains('open');
+    children.classList.toggle('open');
+    btn.classList.toggle('open', !isOpen);
+    btn.setAttribute('aria-expanded', String(!isOpen));
+  }
+
+  // ─── Toast ─────────────────────────────────────────────────────────────
+  function showToast(msg, type = '') {
+    const container = document.getElementById('toast-container');
+    const toast = document.createElement('div');
+    toast.className = `toast${type ? ' '+type : ''}`;
+    
+    let iconName = 'info';
+    if (type === 'success') iconName = 'check-circle';
+    if (type === 'error') iconName = 'alert-circle';
+    
+    toast.innerHTML = `
+      <i data-lucide="${iconName}" style="width:16px;height:16px" aria-hidden="true"></i>
+      <span>${msg}</span>
+    `;
+    
+    container.appendChild(toast);
+    if (window.lucide) {
+      lucide.createIcons();
+    }
+    
+    setTimeout(() => {
+      toast.style.opacity = '0';
+      toast.style.transition = 'opacity 0.3s';
+      setTimeout(() => toast.remove(), 300);
+    }, 3000);
+  }
+
+  // ─── Keyboard shortcuts ─────────────────────────────────────────────────
+  document.addEventListener('keydown', e => {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+      e.preventDefault();
+      document.getElementById('search-input').focus();
+    }
+    if (e.key === '/' && document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') {
+      e.preventDefault();
+      document.getElementById('search-input').focus();
+    }
+    if (e.key === 'n' && document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') {
+      openDialog();
+    }
+    if (e.key === 'Escape') {
+      closeDialog();
+      closeTestDialog();
+      closeLogsDialog();
+      const si = document.getElementById('search-input');
+      if (document.activeElement === si && si.value) {
+        si.value = '';
+        onSearchChange('');
+      }
+    }
+  });
+
+  // ─── Init ──────────────────────────────────────────────────────────────
+  document.addEventListener('DOMContentLoaded', () => {
+    render();
+    if (window.lucide) lucide.createIcons();
+  });
+</script>
+</body>
+</html>
