@@ -1,0 +1,2625 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quản lý Tệp dữ liệu | Hệ thống Quản trị Tích hợp Dữ liệu</title>
+  <meta name="description" content="Quản lý các nguồn dữ liệu dạng tệp vật lý (file-based) tích hợp vào hệ thống, cấu hình nguồn nạp tự động FTP/SFTP và theo dõi tiến trình xử lý.">
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+
+  <!-- Mock Data reference -->
+  <script src="../../assets/js/mock-data.js"></script>
+
+  <style>
+    /* ─── Reset & Base ─── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { height: 100%; }
+    body {
+      font-family: 'Plus Jakarta Sans', Inter, system-ui, sans-serif;
+      background: #f3f4fb;
+      color: #2a2f45;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    /* ─── Design Tokens ─── */
+    :root {
+      --bg:           #f3f4fb;
+      --surface:      #ffffff;
+      --surface-2:    #fafbff;
+      --border:       #e6e7ef;
+      --border-strong:#d4d6e0;
+
+      --ink-900: #0b1020;
+      --ink-700: #2a2f45;
+      --ink-500: #5b6175;
+      --ink-400: #8087a0;
+      --ink-300: #b3b8c8;
+
+      --navy-900: #0a1442;
+      --navy-800: #14215c;
+      --navy-700: #2a4cdf;
+      --navy-600: #3b5fee;
+      --navy-500: #5b7bf5;
+      --navy-100: #dde6ff;
+      --navy-50:  #eef3ff;
+
+      --success-50:  #ecfdf5;
+      --success-500: #10b981;
+      --success-700: #047857;
+      --warning-50:  #fffbeb;
+      --warning-500: #f59e0b;
+      --warning-700: #b45309;
+      --danger-50:   #fef2f2;
+      --danger-500:  #ef4444;
+      --danger-700:  #b91c1c;
+      --info-50:    #eff6ff;
+      --info-500:   #3b82f6;
+      --info-700:   #1d4ed8;
+
+      --header-grad:    linear-gradient(95deg, #0a1442 0%, #14215c 35%, #1e2d80 70%, #2a4cdf 100%);
+      --workspace-grad: linear-gradient(95deg, #2a4cdf 0%, #3b5fee 100%);
+
+      --shadow-1: 0 1px 2px rgba(15,23,42,0.04);
+      --shadow-2: 0 4px 16px rgba(15,23,42,0.06), 0 1px 2px rgba(15,23,42,0.04);
+      --shadow-pop: 0 12px 32px rgba(15,23,42,0.12);
+      --shadow-navy: 0 8px 22px rgba(19,31,92,0.28);
+
+      --radius-sm:  6px;
+      --radius:     10px;
+      --radius-lg:  14px;
+      --radius-xl:  18px;
+    }
+
+    /* ─── App Layout ─── */
+    .app-shell {
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      grid-template-rows: 84px 1fr;
+      grid-template-areas: "header header" "sidebar main";
+      height: 100vh;
+    }
+
+    /* ─── Header ─── */
+    .topbar {
+      grid-area: header;
+      background: var(--header-grad);
+      height: 84px;
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: center;
+      gap: 16px;
+      padding: 0 28px;
+      box-shadow: 0 6px 20px rgba(10,20,66,0.25);
+      position: sticky;
+      top: 0;
+      z-index: 30;
+    }
+    .topbar-brand { display: flex; align-items: center; gap: 16px; }
+    .emblem {
+      width: 56px; height: 56px; border-radius: 50%;
+      background: radial-gradient(circle at 50% 40%, #e53935, #b71c1c 70%, #7a0f12 100%);
+      display: grid; place-items: center; flex-shrink: 0;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.25), inset 0 0 0 1.5px rgba(245,195,36,0.4);
+    }
+    .brand-title {
+      font-size: 19px; font-weight: 800; text-transform: uppercase;
+      letter-spacing: 0.04em; color: white; line-height: 1.2;
+      white-space: nowrap;
+    }
+    .brand-accent { color: #ffd84a; text-shadow: 0 0 18px rgba(255,216,74,0.35); }
+    .brand-sub { font-size: 12px; font-style: italic; color: rgba(255,255,255,0.72); margin-top: 2px; }
+
+    .user-chip {
+      display: flex; align-items: center; gap: 12px;
+      padding: 8px 18px; border-radius: 999px;
+      background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.14);
+      cursor: pointer; transition: background 0.18s;
+      color: white; text-align: left;
+    }
+    .user-chip:hover { background: rgba(255,255,255,0.14); }
+    .user-avatar {
+      width: 38px; height: 38px; border-radius: 50%;
+      background: linear-gradient(135deg, #f59e0b, #ef4444);
+      display: grid; place-items: center;
+      font-weight: 800; font-size: 13px; color: white; flex-shrink: 0;
+    }
+    .user-name { font-size: 13.5px; font-weight: 700; white-space: nowrap; }
+    .user-email { font-size: 11.5px; color: rgba(255,255,255,0.7); white-space: nowrap; }
+
+    /* ─── Sidebar ─── */
+    .sidebar {
+      grid-area: sidebar;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      position: sticky;
+      top: 84px;
+      height: calc(100vh - 84px);
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      padding: 12px 16px;
+      gap: 4px;
+    }
+    .sidebar::-webkit-scrollbar { width: 4px; }
+    .sidebar::-webkit-scrollbar-track { background: transparent; }
+    .sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+    /* Workspace pill */
+    .workspace-pill {
+      position: relative;
+      background: var(--workspace-grad);
+      border-radius: 12px;
+      padding: 11px 14px;
+      box-shadow: var(--shadow-navy);
+      display: flex; align-items: center; gap: 10px;
+      min-height: 54px;
+      margin-bottom: 8px;
+      overflow: hidden;
+      cursor: pointer;
+    }
+    .workspace-pill::before {
+      content: '';
+      position: absolute; top: -20px; right: -10px;
+      width: 70px; height: 70px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(255,255,255,0.18) 0%, transparent 70%);
+    }
+    .workspace-icon {
+      width: 30px; height: 30px; border-radius: 8px;
+      background: rgba(255,255,255,0.18);
+      display: grid; place-items: center; flex-shrink: 0;
+      color: white;
+    }
+    .workspace-name { font-size: 13px; font-weight: 700; color: white; line-height: 1.2; }
+    .workspace-role { font-size: 11px; color: rgba(255,255,255,0.75); }
+    .workspace-chevron { margin-left: auto; color: rgba(255,255,255,0.7); }
+
+    /* Nav items */
+    .nav-item {
+      display: flex; align-items: center; gap: 11px;
+      padding: 10px 12px; border-radius: 10px;
+      cursor: pointer; transition: background 0.15s, color 0.15s;
+      font-size: 13.5px; color: var(--ink-700);
+      position: relative;
+      text-decoration: none; width: 100%;
+      border: none; background: transparent; text-align: left;
+    }
+    .nav-item:hover { background: #f3f4fa; color: var(--navy-700); }
+    .nav-item.open {
+      background: var(--surface);
+      color: var(--navy-800); font-weight: 700;
+      box-shadow: 0 0 0 1.5px var(--navy-700), 0 4px 12px rgba(19,31,92,0.10);
+    }
+    .nav-item .nav-icon { color: rgba(42,76,223,0.85); flex-shrink: 0; }
+    .nav-item.open .nav-icon { color: var(--navy-700); }
+    .nav-badge {
+      margin-left: auto;
+      font-size: 10.5px; font-weight: 700;
+      padding: 1px 6px; border-radius: 999px;
+      background: var(--navy-100); color: var(--navy-700);
+    }
+    .nav-badge.danger { background: var(--danger-50); color: var(--danger-700); }
+    .nav-chevron {
+      margin-left: auto; color: var(--ink-300); transition: transform 0.2s;
+      flex-shrink: 0;
+    }
+    .nav-item.open .nav-chevron { transform: rotate(180deg); }
+
+    /* Nav children */
+    .nav-children {
+      position: relative; list-style: none;
+      margin: 2px 0 4px; padding: 0;
+      display: none;
+    }
+    .nav-children.open { display: block; }
+    .nav-guide {
+      position: absolute; left: 22px; top: 4px; bottom: 4px;
+      width: 1.5px; background: var(--border); border-radius: 2px;
+    }
+    .nav-sub {
+      display: flex; align-items: center; gap: 8px;
+      padding: 8px 14px 8px 38px;
+      font-size: 13px; color: var(--ink-500);
+      border-radius: 8px; cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+      text-decoration: none; position: relative;
+    }
+    .nav-sub:hover { background: #f3f4fa; color: var(--navy-700); }
+    .nav-sub.active {
+      background: var(--navy-50); color: var(--navy-800); font-weight: 600;
+    }
+    .nav-sub-dot {
+      position: absolute; left: 18px;
+      width: 7px; height: 7px; border-radius: 50%;
+      background: transparent;
+    }
+    .nav-sub.active .nav-sub-dot {
+      background: var(--navy-600);
+      box-shadow: 0 0 0 3px rgba(59,95,238,0.18);
+    }
+
+    .sidebar-foot {
+      margin-top: auto;
+      padding: 12px 14px; background: var(--surface-2);
+      border-radius: 10px; display: flex; align-items: center; gap: 10px;
+    }
+    .health-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--success-500);
+      box-shadow: 0 0 0 3px rgba(16,185,129,0.15);
+      flex-shrink: 0; position: relative;
+    }
+    .health-dot::after {
+      content: ''; position: absolute; inset: -3px; border-radius: 50%;
+      background: rgba(16,185,129,0.35);
+      animation: pulse 2s ease-out infinite;
+    }
+    .health-text { font-size: 12px; color: var(--ink-500); line-height: 1.4; }
+    .health-text strong { color: var(--ink-700); font-weight: 600; }
+
+    /* ─── Main Content ─── */
+    .main-content {
+      grid-area: main;
+      overflow-y: auto;
+      padding: 20px 18px;
+    }
+    .main-content::-webkit-scrollbar { width: 6px; }
+    .main-content::-webkit-scrollbar-track { background: transparent; }
+    .main-content::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+    /* Breadcrumb */
+    .breadcrumb {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 12.5px; color: var(--ink-400);
+      margin-bottom: 14px;
+    }
+    .breadcrumb a { color: var(--ink-400); text-decoration: none; transition: color 0.15s; }
+    .breadcrumb a:hover { color: var(--navy-700); }
+    .breadcrumb .sep { color: var(--ink-300); }
+    .breadcrumb .current { color: var(--ink-900); font-weight: 600; }
+
+    /* Page header */
+    .page-header {
+      display: grid; grid-template-columns: 1fr auto;
+      align-items: flex-end; gap: 16px;
+      margin-bottom: 18px;
+    }
+    .page-title {
+      font-size: 26px; font-weight: 700; color: var(--ink-900);
+      letter-spacing: -0.01em; line-height: 1.2;
+    }
+    .page-sub {
+      font-size: 13.5px; color: var(--ink-500);
+      margin-top: 4px; max-width: 680px; line-height: 1.5;
+    }
+    .page-actions { display: flex; gap: 10px; align-items: center; flex-shrink: 0; }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 9px 14px; border-radius: 10px;
+      font-size: 13px; font-weight: 600; font-family: inherit;
+      cursor: pointer; transition: all 0.18s; border: none;
+      white-space: nowrap;
+    }
+    .btn-outline {
+      background: var(--surface); border: 1px solid var(--border);
+      color: var(--ink-700);
+    }
+    .btn-outline:hover { border-color: var(--border-strong); background: var(--surface-2); }
+    .btn-primary {
+      background: var(--workspace-grad); color: white;
+      box-shadow: 0 6px 16px rgba(19,31,92,0.28);
+    }
+    .btn-primary:hover { filter: brightness(1.08); }
+
+    /* ─── Stat Cards ─── */
+    .stats-grid {
+      display: grid; grid-template-columns: repeat(4, 1fr);
+      gap: 14px; margin-bottom: 20px;
+    }
+    .stat-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 14px; padding: 16px 18px;
+      box-shadow: var(--shadow-1);
+      transition: border-color 0.18s, box-shadow 0.18s;
+      display: flex; flex-direction: column; gap: 10px;
+    }
+    .stat-card:hover { border-color: var(--border-strong); box-shadow: var(--shadow-2); }
+    .stat-card-top { display: flex; align-items: flex-start; justify-content: space-between; }
+    .stat-icon {
+      width: 34px; height: 34px; border-radius: 10px;
+      display: grid; place-items: center; flex-shrink: 0;
+    }
+    .stat-label { font-size: 12.5px; font-weight: 600; color: var(--ink-500); }
+    .stat-value {
+      font-size: 28px; font-weight: 700; color: var(--ink-900);
+      letter-spacing: -0.01em; line-height: 1;
+    }
+    .stat-bottom { display: flex; align-items: center; justify-content: space-between; }
+    .stat-delta {
+      font-size: 11.5px; font-weight: 600; padding: 2px 7px;
+      border-radius: 999px;
+    }
+    .stat-delta.green { background: var(--success-50); color: var(--success-700); }
+    .stat-delta.amber { background: var(--warning-50); color: var(--warning-700); }
+    .stat-delta.red   { background: var(--danger-50); color: var(--danger-700); }
+    .stat-delta.blue  { background: var(--info-50); color: var(--info-700); }
+
+    /* ─── Table Card: Toolbar + Table + Pagination ─── */
+    .table-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 14px; box-shadow: var(--shadow-1);
+      overflow: hidden;
+    }
+    .toolbar {
+      padding: 14px; display: flex;
+      flex-direction: column; gap: 12px;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface-2);
+    }
+    .toolbar-row {
+      display: flex; flex-wrap: wrap; gap: 10px; align-items: center;
+    }
+    .search-wrap {
+      position: relative; flex: 1; min-width: 240px; max-width: 380px;
+    }
+    .search-icon {
+      position: absolute; left: 11px; top: 50%; transform: translateY(-50%);
+      color: var(--ink-300); pointer-events: none;
+    }
+    .search-input {
+      width: 100%; padding: 8px 12px 8px 34px;
+      border: 1px solid var(--border); border-radius: 10px;
+      font-size: 13px; color: var(--ink-700);
+      background: var(--surface); font-family: inherit;
+      outline: none; transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .search-input::placeholder { color: var(--ink-300); }
+    .search-input:focus {
+      border-color: var(--navy-700);
+      box-shadow: 0 0 0 3px rgba(42,76,223,0.12);
+    }
+
+    /* Chips */
+    .chips { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+    .chip-label {
+      font-size: 11px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.06em; color: var(--ink-400); margin-right: 2px;
+    }
+    .chip {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 5px 11px; border-radius: 999px;
+      font-size: 12px; font-weight: 500;
+      border: 1px solid var(--border); background: var(--surface);
+      color: var(--ink-500); cursor: pointer;
+      transition: all 0.15s;
+    }
+    .chip:hover { background: var(--surface-2); color: var(--ink-700); }
+    .chip.active {
+      background: var(--workspace-grad); color: white;
+      border-color: transparent;
+      box-shadow: 0 2px 8px rgba(19,31,92,0.22);
+    }
+    .chip-dot { width: 7px; height: 7px; border-radius: 50%; }
+    .chip-count {
+      font-size: 11px; font-weight: 700;
+      background: rgba(255,255,255,0.25); border-radius: 999px;
+      padding: 0 4px; min-width: 16px; text-align: center;
+    }
+    .chip:not(.active) .chip-count {
+      background: var(--border); color: var(--ink-500);
+    }
+    .chips-spacer { flex: 1; min-width: 12px; }
+
+    /* ─── Table ─── */
+    .table-wrap { overflow-x: auto; }
+    table {
+      width: 100%; border-collapse: collapse;
+      font-size: 13.5px;
+    }
+    caption { display: none; }
+    thead tr {
+      background: var(--surface-2); border-bottom: 1px solid var(--border);
+    }
+    th {
+      padding: 12px 14px;
+      font-size: 11.5px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.04em; color: var(--ink-400);
+      white-space: nowrap; text-align: left;
+      cursor: pointer; user-select: none;
+      transition: color 0.15s;
+    }
+    th:hover { color: var(--ink-700); }
+    th.center { text-align: center; }
+    th.right  { text-align: right; }
+    .th-inner { display: inline-flex; align-items: center; gap: 4px; }
+    .sort-icon { color: var(--ink-300); }
+    .sort-icon.active { color: var(--navy-700); }
+
+    tbody tr {
+      border-bottom: 1px solid var(--border);
+      transition: background 0.12s;
+      cursor: pointer;
+    }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: #fafbfd; }
+    tbody tr:hover .row-actions { opacity: 1; }
+
+    td { padding: 14px; vertical-align: middle; }
+    td.center { text-align: center; }
+
+    .stt { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--ink-400); }
+
+    /* File detail cell */
+    .file-cell { display: flex; align-items: center; gap: 10px; }
+    .file-icon-wrap {
+      width: 34px; height: 34px; border-radius: 8px;
+      display: grid; place-items: center; flex-shrink: 0;
+      color: white; font-weight: 800; font-size: 9.5px;
+    }
+    .file-name { font-weight: 600; color: var(--ink-900); font-size: 13.5px; word-break: break-all; }
+    .file-provider { font-size: 11.5px; color: var(--ink-500); margin-top: 2px; }
+
+    /* Format pill tags */
+    .format-tag {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 4px 10px; border-radius: 999px;
+      font-size: 11.5px; font-weight: 600;
+    }
+    .format-swatch { width: 8px; height: 8px; border-radius: 3px; flex-shrink: 0; }
+    .format-size {
+      border-left: 1px solid currentColor; padding-left: 6px; margin-left: 2px;
+      font-family: 'JetBrains Mono', monospace; font-size: 10.5px; opacity: 0.75;
+    }
+
+    /* Path Pill */
+    .path-pill {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 4px 9px; border-radius: 7px;
+      background: var(--surface-2); border: 1px solid var(--border);
+      font-family: 'JetBrains Mono', monospace; font-size: 11.5px;
+      max-width: 200px;
+    }
+    .path-method { color: var(--navy-700); font-weight: 600; }
+    .path-sep { color: var(--ink-300); }
+    .path-val {
+      color: var(--ink-500); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+
+    /* Status badge */
+    .status-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 4px 10px; border-radius: 999px;
+      font-size: 12px; font-weight: 600; white-space: nowrap;
+    }
+    .status-badge.ok   { background: var(--success-50); color: var(--success-700); }
+    .status-badge.warn { background: var(--warning-50); color: var(--warning-700); }
+    .status-badge.err  { background: var(--danger-50);  color: var(--danger-700); }
+    .status-badge.info { background: var(--info-50);    color: var(--info-700); }
+
+    .pulse {
+      width: 7px; height: 7px; border-radius: 50%; position: relative; flex-shrink: 0;
+    }
+    .pulse::after {
+      content: ''; position: absolute; inset: -3px;
+      border-radius: 50%; opacity: 0.4;
+      animation: pulse-ring 1.8s ease-out infinite;
+    }
+    .status-badge.ok   .pulse { background: var(--success-500); }
+    .status-badge.ok   .pulse::after { background: var(--success-500); }
+    .status-badge.warn .pulse { background: var(--warning-500); }
+    .status-badge.warn .pulse::after { background: var(--warning-500); }
+    .status-badge.err  .pulse { background: var(--danger-500); }
+    .status-badge.err  .pulse::after { background: var(--danger-500); }
+    .status-badge.info .pulse { background: var(--info-500); }
+    .status-badge.info .pulse::after { background: var(--info-500); }
+
+    @keyframes pulse-ring {
+      0%   { transform: scale(0.8); opacity: 0.5; }
+      100% { transform: scale(2.2); opacity: 0; }
+    }
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0px rgba(16,185,129,0.4); }
+      70% { box-shadow: 0 0 0 6px rgba(16,185,129,0); }
+      100% { box-shadow: 0 0 0 0px rgba(16,185,129,0); }
+    }
+
+    /* Row values */
+    .row-rows { font-weight: 600; color: var(--ink-900); }
+    .row-freq { font-size: 11.5px; color: var(--ink-500); margin-top: 2px; }
+
+    /* Row actions */
+    .row-actions {
+      display: flex; align-items: center; justify-content: flex-end; gap: 2px;
+      opacity: 0; transition: opacity 0.15s;
+    }
+    .action-btn {
+      width: 30px; height: 30px; border-radius: 7px;
+      display: grid; place-items: center;
+      border: none; cursor: pointer; background: transparent;
+      color: var(--ink-400); transition: background 0.15s, color 0.15s;
+    }
+    .action-btn:hover { background: var(--surface-2); color: var(--ink-700); }
+    .action-btn.danger:hover { background: var(--danger-50); color: var(--danger-700); }
+
+    /* Parsing spin animation */
+    .spin {
+      animation: spin-anim 1.2s linear infinite;
+    }
+    @keyframes spin-anim {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    /* ─── Pagination ─── */
+    .pagination {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 18px; background: var(--surface-2);
+      border-top: 1px solid var(--border); flex-wrap: wrap; gap: 12px;
+    }
+    .page-size-select {
+      padding: 5px 10px; border: 1px solid var(--border); border-radius: 8px;
+      font-size: 12.5px; color: var(--ink-700); background: var(--surface);
+      font-family: inherit; outline: none; cursor: pointer;
+    }
+    .page-size-select:focus { border-color: var(--navy-700); }
+    .page-info { font-size: 13px; color: var(--ink-500); }
+    .page-info strong { color: var(--ink-900); font-weight: 600; }
+    .pager { display: flex; gap: 4px; }
+    .page-btn {
+      min-width: 32px; height: 32px; border-radius: 8px;
+      display: grid; place-items: center;
+      border: 1px solid var(--border); background: var(--surface);
+      font-size: 13px; font-weight: 500; color: var(--ink-500);
+      cursor: pointer; transition: all 0.15s; padding: 0 8px;
+      font-family: inherit;
+    }
+    .page-btn:hover { background: var(--surface-2); color: var(--ink-700); }
+    .page-btn.active { background: var(--ink-900); color: white; border-color: var(--ink-900); }
+    .page-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    /* ─── Empty state ─── */
+    .empty-state {
+      padding: 60px 20px; text-align: center;
+      display: none; flex-direction: column; align-items: center; gap: 10px;
+    }
+    .empty-state.visible { display: flex; }
+    .empty-title { font-size: 16px; font-weight: 600; color: var(--ink-700); }
+    .empty-hint  { font-size: 13.5px; color: var(--ink-400); }
+
+    /* ─── Dialog / Modal ─── */
+    .dialog-overlay {
+      position: fixed; inset: 0; z-index: 50;
+      background: rgba(11,16,32,0.45); backdrop-filter: blur(3px);
+      display: none; align-items: center; justify-content: center;
+    }
+    .dialog-overlay.open { display: flex; }
+    .dialog {
+      background: var(--surface); border-radius: 16px;
+      width: min(640px, 95vw); max-height: 90vh; overflow-y: auto;
+      box-shadow: var(--shadow-pop);
+      animation: slideUp 0.22s ease;
+      display: flex; flex-direction: column;
+    }
+    .dialog.large { width: min(840px, 95vw); }
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .dialog-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 20px 24px 14px; border-bottom: 1px solid var(--border);
+    }
+    .dialog-title { font-size: 18px; font-weight: 700; color: var(--ink-900); }
+    .dialog-close {
+      width: 30px; height: 30px; border-radius: 8px;
+      display: grid; place-items: center;
+      border: none; background: transparent; cursor: pointer;
+      color: var(--ink-400); transition: background 0.15s;
+    }
+    .dialog-close:hover { background: var(--surface-2); }
+    .dialog-body { padding: 20px 24px; display: grid; gap: 14px; overflow-y: auto; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .form-group { display: flex; flex-direction: column; gap: 5px; }
+    .form-label { font-size: 12.5px; font-weight: 600; color: var(--ink-700); }
+    .form-input, .form-select, .form-textarea {
+      padding: 8px 12px; border: 1px solid var(--border); border-radius: 9px;
+      font-size: 13px; color: var(--ink-700); font-family: inherit;
+      background: var(--surface); outline: none; transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .form-input:focus, .form-select:focus, .form-textarea:focus {
+      border-color: var(--navy-700);
+      box-shadow: 0 0 0 3px rgba(42,76,223,0.12);
+    }
+    .form-textarea { min-height: 80px; resize: vertical; }
+
+    /* Upload box styling */
+    .upload-box {
+      border: 2px dashed var(--border-strong);
+      border-radius: 12px;
+      padding: 28px 16px;
+      text-align: center;
+      background: var(--surface-2);
+      cursor: pointer;
+      transition: all 0.18s;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+    .upload-box:hover {
+      border-color: var(--navy-500);
+      background: var(--navy-50);
+    }
+    .upload-box-icon {
+      width: 48px; height: 48px; border-radius: 50%;
+      background: var(--surface); display: grid; place-items: center;
+      border: 1px solid var(--border); color: var(--ink-400);
+    }
+    .upload-box-text { font-size: 13px; color: var(--ink-700); }
+    .upload-box-sub { font-size: 11.5px; color: var(--ink-400); }
+
+    /* Progress bar */
+    .progress-wrap {
+      display: none; flex-direction: column; gap: 6px;
+      padding: 10px 14px; border: 1px solid var(--border);
+      border-radius: 10px; background: var(--surface-2);
+    }
+    .progress-info { display: flex; justify-content: space-between; font-size: 12px; font-weight: 600; }
+    .progress-bar-bg { width: 100%; height: 6px; background: var(--border-strong); border-radius: 999px; overflow: hidden; }
+    .progress-bar-fill { height: 100%; width: 0%; background: var(--workspace-grad); transition: width 0.15s; }
+
+    .dialog-footer {
+      display: flex; align-items: center; justify-content: flex-end; gap: 10px;
+      padding: 14px 24px; border-top: 1px solid var(--border);
+    }
+
+    /* ─── Preview Table ─── */
+    .preview-meta {
+      background: var(--surface-2); border: 1px solid var(--border);
+      border-radius: 10px; padding: 10px 14px;
+      display: flex; flex-wrap: wrap; gap: 16px;
+    }
+    .preview-meta-item { font-size: 12.5px; color: var(--ink-700); }
+    .preview-meta-item strong { color: var(--ink-900); font-weight: 700; font-family: 'JetBrains Mono', monospace; }
+    .preview-table-wrap {
+      max-height: 380px; overflow: auto; border: 1px solid var(--border); border-radius: 10px;
+    }
+    .preview-table-wrap th { background: var(--navy-900); color: white; font-weight: 600; font-size: 11.5px; position: sticky; top: 0; }
+    .preview-table-wrap td { padding: 10px 12px; font-size: 12.5px; }
+
+    /* ─── Versions History Table ─── */
+    .version-table { width: 100%; border-collapse: collapse; }
+    .version-table th { background: var(--surface-2); padding: 10px 12px; font-size: 11px; }
+    .version-table td { padding: 12px; border-bottom: 1px solid var(--border); font-size: 13px; }
+    .version-table tr:last-child td { border-bottom: none; }
+    .ver-badge {
+      font-size: 11px; font-weight: 700; background: var(--navy-100); color: var(--navy-700);
+      padding: 2px 6px; border-radius: 6px; font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* Toast */
+    .toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 100; display: flex; flex-direction: column; gap: 8px; }
+    .toast {
+      background: var(--ink-900); color: white;
+      padding: 10px 16px; border-radius: 10px;
+      font-size: 13px; font-weight: 500;
+      box-shadow: var(--shadow-pop);
+      animation: toastIn 0.22s ease;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .toast.success { background: #064e3b; }
+    .toast.error   { background: #7f1d1d; }
+    @keyframes toastIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ─── Responsive ─── */
+    @media (max-width: 1099px) {
+      .app-shell { grid-template-columns: 220px 1fr; }
+    }
+    @media (max-width: 759px) {
+      .app-shell {
+        grid-template-columns: 1fr;
+        grid-template-areas: "header" "main";
+      }
+      .sidebar { display: none; }
+      .stats-grid { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 520px) {
+      .stats-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="app-shell">
+
+  <!-- ═══════════════ HEADER ═══════════════ -->
+  <header class="topbar" role="banner">
+    <div class="topbar-brand">
+      <div class="emblem" aria-label="Quốc huy Việt Nam">
+        <svg width="26" height="26" viewBox="0 0 26 26" fill="none" aria-hidden="true">
+          <polygon points="13,2 15.9,9.8 24.2,9.8 17.6,14.8 20.5,22.5 13,17.5 5.5,22.5 8.4,14.8 1.8,9.8 10.1,9.8"
+                   fill="#f5c324" stroke="rgba(245,195,36,0.4)" stroke-width="0.5"/>
+        </svg>
+      </div>
+      <div>
+        <div class="brand-title">
+          HỆ THỐNG <span class="brand-accent">QUẢN TRỊ</span> TÍCH HỢP DỮ LIỆU
+        </div>
+        <div class="brand-sub">Cơ quan ABC — Phiên bản 2026</div>
+      </div>
+    </div>
+
+    <div></div><!-- spacer -->
+
+    <!-- User chip -->
+    <button class="user-chip" id="userChipBtn" aria-label="Tài khoản người dùng" aria-expanded="false">
+      <div class="user-avatar" aria-hidden="true">AD</div>
+      <div>
+        <div class="user-name">Quản trị hệ thống</div>
+        <div class="user-email">admin@abc.gov.vn</div>
+      </div>
+      <i data-lucide="chevron-down" style="width:16px;height:16px;color:rgba(255,255,255,0.7)" aria-hidden="true"></i>
+    </button>
+  </header>
+
+  <!-- ═══════════════ SIDEBAR ═══════════════ -->
+  <aside class="sidebar" aria-label="Điều hướng chính">
+
+    <!-- Workspace pill -->
+    <div class="workspace-pill" role="button" tabindex="0" aria-label="Chọn không gian làm việc">
+      <div class="workspace-icon">
+        <i data-lucide="layers" style="width:16px;height:16px" aria-hidden="true"></i>
+      </div>
+      <div>
+        <div class="workspace-name">Quản lý kho và báo cáo</div>
+        <div class="workspace-role">Workspace · Production</div>
+      </div>
+      <div class="workspace-chevron">
+        <i data-lucide="chevrons-up-down" style="width:14px;height:14px" aria-hidden="true"></i>
+      </div>
+    </div>
+
+    <!-- Dashboard -->
+    <a href="../../index.html" class="nav-item" id="nav-dashboard">
+      <i data-lucide="layout-dashboard" class="nav-icon" style="width:18px;height:18px" aria-hidden="true"></i>
+      <span>Dashboard tổng quan</span>
+    </a>
+
+    <!-- Quản lý cơ sở dữ liệu group (open) -->
+    <button class="nav-item open" id="nav-db-group" onclick="toggleNavGroup(this)" aria-expanded="true" aria-controls="nav-db-children">
+      <i data-lucide="database" class="nav-icon" style="width:18px;height:18px" aria-hidden="true"></i>
+      <span>Quản lý cơ sở dữ liệu</span>
+      <i data-lucide="chevron-down" class="nav-chevron" style="width:15px;height:15px" aria-hidden="true"></i>
+    </button>
+    <ul class="nav-children open" id="nav-db-children" role="menu">
+      <div class="nav-guide" aria-hidden="true"></div>
+      <li role="none">
+        <a href="../UC001-quan-ly-csdl-nguon/index.html" class="nav-sub" role="menuitem">
+          <span class="nav-sub-dot" aria-hidden="true"></span>CSDL nguồn
+        </a>
+      </li>
+      <li role="none">
+        <a href="#" class="nav-sub" role="menuitem">
+          <span class="nav-sub-dot" aria-hidden="true"></span>CSDL tích hợp
+        </a>
+      </li>
+      <li role="none">
+        <a href="index.html" class="nav-sub active" role="menuitem" aria-current="page">
+          <span class="nav-sub-dot" aria-hidden="true"></span>Nguồn dữ liệu ngoài
+        </a>
+      </li>
+      <li role="none">
+        <a href="../UC005-thiet-lap-ctdl-tich-hop/index.html" class="nav-sub" role="menuitem">
+          <span class="nav-sub-dot" aria-hidden="true"></span>Cấu trúc dữ liệu
+        </a>
+      </li>
+    </ul>
+
+    <!-- Mapping -->
+    <button class="nav-item" onclick="toggleNavGroup(this)" aria-expanded="false">
+      <i data-lucide="git-branch" class="nav-icon" style="width:18px;height:18px" aria-hidden="true"></i>
+      <span>Mapping &amp; chuyển đổi</span>
+      <i data-lucide="chevron-down" class="nav-chevron" style="width:15px;height:15px" aria-hidden="true"></i>
+    </button>
+    <ul class="nav-children" role="menu">
+      <div class="nav-guide" aria-hidden="true"></div>
+      <li><a href="#" class="nav-sub" role="menuitem"><span class="nav-sub-dot"></span>Mapping quy tắc</a></li>
+      <li><a href="#" class="nav-sub" role="menuitem"><span class="nav-sub-dot"></span>Biến đổi dữ liệu</a></li>
+    </ul>
+
+    <!-- Tác vụ -->
+    <a href="#" class="nav-item" id="nav-jobs">
+      <i data-lucide="file-spreadsheet" class="nav-icon" style="width:18px;height:18px" aria-hidden="true"></i>
+      <span>Tác vụ tích hợp</span>
+      <span class="nav-badge" aria-label="8 tác vụ">8</span>
+    </a>
+
+    <!-- Lập lịch -->
+    <a href="#" class="nav-item">
+      <i data-lucide="clock" class="nav-icon" style="width:18px;height:18px" aria-hidden="true"></i>
+      <span>Lập lịch tự động</span>
+    </a>
+
+    <!-- Theo dõi -->
+    <a href="#" class="nav-item">
+      <i data-lucide="activity" class="nav-icon" style="width:18px;height:18px" aria-hidden="true"></i>
+      <span>Theo dõi tác vụ</span>
+    </a>
+
+    <!-- Nhật ký -->
+    <a href="#" class="nav-item">
+      <i data-lucide="file-text" class="nav-icon" style="width:18px;height:18px" aria-hidden="true"></i>
+      <span>Nhật ký hệ thống</span>
+    </a>
+
+    <!-- Cảnh báo -->
+    <a href="#" class="nav-item">
+      <i data-lucide="alert-triangle" class="nav-icon" style="width:18px;height:18px" aria-hidden="true"></i>
+      <span>Cảnh báo &amp; sự cố</span>
+      <span class="nav-badge danger" aria-label="3 cảnh báo">3</span>
+    </a>
+
+    <!-- Cài đặt -->
+    <a href="#" class="nav-item">
+      <i data-lucide="settings" class="nav-icon" style="width:18px;height:18px" aria-hidden="true"></i>
+      <span>Cài đặt hệ thống</span>
+    </a>
+
+    <!-- Sidebar footer -->
+    <div class="sidebar-foot" role="status" aria-live="polite">
+      <div class="health-dot" aria-hidden="true"></div>
+      <div class="health-text">Hệ thống: <strong>Ổn định</strong><br>Uptime: 99.98%</div>
+    </div>
+  </aside>
+
+  <!-- ═══════════════ MAIN CONTENT ═══════════════ -->
+  <main class="main-content" role="main">
+
+    <!-- Breadcrumb -->
+    <nav class="breadcrumb" aria-label="Đường dẫn trang">
+      <a href="../../index.html">Trang chủ</a>
+      <span class="sep" aria-hidden="true"><i data-lucide="chevron-right" style="width:14px;height:14px"></i></span>
+      <a href="#">Quản lý cơ sở dữ liệu</a>
+      <span class="sep" aria-hidden="true"><i data-lucide="chevron-right" style="width:14px;height:14px"></i></span>
+      <span class="current">Nguồn dữ liệu ngoài (Tệp dữ liệu)</span>
+    </nav>
+
+    <!-- Page Header -->
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">Quản lý Tệp dữ liệu</h1>
+        <p class="page-sub">Quản lý nguồn dữ liệu dạng tệp vật lý (file-based). Cho phép tải lên tệp tĩnh thủ công hoặc thiết lập các luồng nạp tự động qua giao thức FTP, SFTP và thư mục giám sát.</p>
+      </div>
+      <div class="page-actions">
+        <button class="btn btn-outline" onclick="exportExcel()" id="btn-export" title="Xuất danh sách quản lý ra Excel">
+          <i data-lucide="download" style="width:15px;height:15px" aria-hidden="true"></i>
+          Xuất Excel
+        </button>
+        <button class="btn btn-outline" onclick="openAutoDialog()" id="btn-auto-config" title="Cấu hình nguồn nạp tự động (FTP/SFTP)">
+          <i data-lucide="settings" style="width:15px;height:15px" aria-hidden="true"></i>
+          Cấu hình tự động
+        </button>
+        <button class="btn btn-primary" onclick="openUploadDialog()" id="btn-upload" title="Nạp tệp dữ liệu mới thủ công (N)">
+          <i data-lucide="upload-cloud" style="width:15px;height:15px" aria-hidden="true"></i>
+          Nạp tệp mới
+        </button>
+      </div>
+    </div>
+
+    <!-- Stat cards -->
+    <div class="stats-grid" role="region" aria-label="Thống kê tổng quan">
+      <div class="stat-card" id="stat-total">
+        <div class="stat-card-top">
+          <div>
+            <div class="stat-label">Tổng số tệp dữ liệu</div>
+            <div class="stat-value" id="val-total">0</div>
+          </div>
+          <div class="stat-icon" style="background:var(--navy-50)">
+            <i data-lucide="files" style="width:18px;height:18px;color:var(--navy-700)" aria-hidden="true"></i>
+          </div>
+        </div>
+        <div class="stat-bottom">
+          <span class="stat-delta green">+4 tệp tuần này</span>
+          <svg width="64" height="22" viewBox="0 0 64 22" fill="none" aria-hidden="true">
+            <polyline points="0,18 10,14 20,16 30,10 40,12 50,6 64,8"
+              stroke="var(--navy-600)" stroke-width="1.5" fill="none" opacity="0.7" stroke-linejoin="round"/>
+          </svg>
+        </div>
+      </div>
+      <div class="stat-card" id="stat-ok">
+        <div class="stat-card-top">
+          <div>
+            <div class="stat-label">Đã xử lý (Thành công)</div>
+            <div class="stat-value" id="val-ok">0</div>
+          </div>
+          <div class="stat-icon" style="background:var(--success-50)">
+            <i data-lucide="check-circle" style="width:18px;height:18px;color:var(--success-700)" aria-hidden="true"></i>
+          </div>
+        </div>
+        <div class="stat-bottom">
+          <span class="stat-delta green" id="val-parse-rows">0 dòng dữ liệu</span>
+          <svg width="64" height="22" viewBox="0 0 64 22" fill="none" aria-hidden="true">
+            <polyline points="0,14 12,10 24,12 36,6 48,8 64,4"
+              stroke="var(--success-500)" stroke-width="1.5" fill="none" opacity="0.7" stroke-linejoin="round"/>
+          </svg>
+        </div>
+      </div>
+      <div class="stat-card" id="stat-warn">
+        <div class="stat-card-top">
+          <div>
+            <div class="stat-label">Chờ &amp; Đang xử lý</div>
+            <div class="stat-value" id="val-warn">0</div>
+          </div>
+          <div class="stat-icon" style="background:var(--warning-50)">
+            <i data-lucide="clock" style="width:18px;height:18px;color:var(--warning-700)" aria-hidden="true"></i>
+          </div>
+        </div>
+        <div class="stat-bottom">
+          <span class="stat-delta amber">Đang trích xuất...</span>
+          <svg width="64" height="22" viewBox="0 0 64 22" fill="none" aria-hidden="true">
+            <polyline points="0,10 16,14 32,8 48,16 64,12"
+              stroke="var(--warning-500)" stroke-width="1.5" fill="none" opacity="0.7" stroke-linejoin="round"/>
+          </svg>
+        </div>
+      </div>
+      <div class="stat-card" id="stat-err">
+        <div class="stat-card-top">
+          <div>
+            <div class="stat-label">Lỗi định dạng</div>
+            <div class="stat-value" id="val-err">0</div>
+          </div>
+          <div class="stat-icon" style="background:var(--danger-50)">
+            <i data-lucide="alert-circle" style="width:18px;height:18px;color:var(--danger-700)" aria-hidden="true"></i>
+          </div>
+        </div>
+        <div class="stat-bottom">
+          <span class="stat-delta red">Cần parse lại</span>
+          <svg width="64" height="22" viewBox="0 0 64 22" fill="none" aria-hidden="true">
+            <polyline points="0,8 16,12 32,6 48,16 64,10"
+              stroke="var(--danger-500)" stroke-width="1.5" fill="none" opacity="0.7" stroke-linejoin="round"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- Table card: Toolbar + Table + Pagination -->
+    <div class="table-card">
+
+      <!-- Toolbar -->
+      <div class="toolbar" role="search">
+        <!-- Search row -->
+        <div class="toolbar-row">
+          <div class="search-wrap">
+            <i data-lucide="search" class="search-icon" style="width:15px;height:15px" aria-hidden="true"></i>
+            <input type="search" class="search-input" id="search-input"
+                   placeholder="Tìm tên tệp, đơn vị cung cấp, người tải lên…"
+                   aria-label="Tìm kiếm tệp dữ liệu"
+                   oninput="onSearchChange(this.value)">
+          </div>
+
+          <!-- Method filter chips -->
+          <div class="chips" role="group" aria-label="Lọc theo phương thức nạp">
+            <span class="chip-label">Phương thức:</span>
+            <button class="chip active" id="chip-method-all" onclick="setMethodFilter('all')">Tất cả</button>
+            <button class="chip" id="chip-method-manual" onclick="setMethodFilter('Upload thủ công')">Thủ công</button>
+            <button class="chip" id="chip-method-ftp" onclick="setMethodFilter('FTP')">FTP</button>
+            <button class="chip" id="chip-method-sftp" onclick="setMethodFilter('SFTP')">SFTP</button>
+            <button class="chip" id="chip-method-watch" onclick="setMethodFilter('Thư mục theo dõi')">Watch folder</button>
+          </div>
+        </div>
+
+        <!-- Filter row 2 -->
+        <div class="toolbar-row">
+          <!-- Status chips -->
+          <div class="chips" role="group" aria-label="Lọc theo trạng thái xử lý">
+            <span class="chip-label">Trạng thái:</span>
+            <button class="chip active" id="chip-status-all" onclick="setStatusFilter('all')" data-status="all">
+              Tất cả
+              <span class="chip-count" id="chip-count-all">0</span>
+            </button>
+            <button class="chip" id="chip-status-ok" onclick="setStatusFilter('da-xu-ly')" data-status="da-xu-ly">
+              <span class="chip-dot" style="background:var(--success-500)"></span>
+              Đã xử lý
+              <span class="chip-count" id="chip-count-ok">0</span>
+            </button>
+            <button class="chip" id="chip-status-pending" onclick="setStatusFilter('pending')" data-status="pending">
+              <span class="chip-dot" style="background:var(--warning-500)"></span>
+              Đang &amp; Chờ
+              <span class="chip-count" id="chip-count-pending">0</span>
+            </button>
+            <button class="chip" id="chip-status-err" onclick="setStatusFilter('loi-dinh-dang')" data-status="loi-dinh-dang">
+              <span class="chip-dot" style="background:var(--danger-500)"></span>
+              Lỗi định dạng
+              <span class="chip-count" id="chip-count-err">0</span>
+            </button>
+          </div>
+
+          <div class="chips-spacer"></div>
+
+          <!-- Format chips -->
+          <div class="chips" role="group" aria-label="Lọc theo định dạng tệp">
+            <span class="chip-label">Định dạng:</span>
+            <button class="chip active" id="chip-format-all" onclick="setFormatFilter('all')">Mọi định dạng</button>
+            <button class="chip" id="chip-format-excel" onclick="setFormatFilter('Excel')">Excel</button>
+            <button class="chip" id="chip-format-csv" onclick="setFormatFilter('CSV')">CSV</button>
+            <button class="chip" id="chip-format-json" onclick="setFormatFilter('JSON')">JSON</button>
+            <button class="chip" id="chip-format-xml" onclick="setFormatFilter('XML')">XML</button>
+            <button class="chip" id="chip-format-txt" onclick="setFormatFilter('TXT')">TXT</button>
+            <button class="chip" id="chip-format-pdf" onclick="setFormatFilter('PDF')">PDF</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Table -->
+      <div class="table-wrap">
+        <table id="main-table" aria-label="Danh sách tệp dữ liệu">
+          <caption class="sr-only">Danh sách tệp dữ liệu</caption>
+          <thead>
+            <tr>
+              <th class="center" style="width:48px" onclick="sortBy('id')" aria-sort="ascending">
+                <span class="th-inner">STT <i data-lucide="chevrons-up-down" class="sort-icon active" style="width:12px;height:12px" id="sort-id" aria-hidden="true"></i></span>
+              </th>
+              <th style="min-width:240px" onclick="sortBy('ten')" aria-sort="none">
+                <span class="th-inner">Tên tệp / Đơn vị cung cấp <i data-lucide="chevrons-up-down" class="sort-icon" style="width:12px;height:12px" id="sort-ten" aria-hidden="true"></i></span>
+              </th>
+              <th onclick="sortBy('dinhDang')" aria-sort="none">
+                <span class="th-inner">Định dạng &amp; Dung lượng <i data-lucide="chevrons-up-down" class="sort-icon" style="width:12px;height:12px" id="sort-dinhDang" aria-hidden="true"></i></span>
+              </th>
+              <th style="max-width:240px" onclick="sortBy('phuongThucNap')" aria-sort="none">
+                <span class="th-inner">Phương thức nạp / Nguồn <i data-lucide="chevrons-up-down" class="sort-icon" style="width:12px;height:12px" id="sort-phuongThucNap" aria-hidden="true"></i></span>
+              </th>
+              <th onclick="sortBy('trangThai')" aria-sort="none">
+                <span class="th-inner">Trạng thái xử lý <i data-lucide="chevrons-up-down" class="sort-icon" style="width:12px;height:12px" id="sort-trangThai" aria-hidden="true"></i></span>
+              </th>
+              <th onclick="sortBy('soDong')" aria-sort="none">
+                <span class="th-inner">Số dòng / Tần suất <i data-lucide="chevrons-up-down" class="sort-icon" style="width:12px;height:12px" id="sort-soDong" aria-hidden="true"></i></span>
+              </th>
+              <th onclick="sortBy('ngayCapNhat')" aria-sort="none">
+                <span class="th-inner">Lần cập nhật cuối <i data-lucide="chevrons-up-down" class="sort-icon" style="width:12px;height:12px" id="sort-ngayCapNhat" aria-hidden="true"></i></span>
+              </th>
+              <th class="right" style="width:160px">Thao tác</th>
+            </tr>
+          </thead>
+          <tbody id="table-body">
+            <!-- Rendered dynamically by JavaScript -->
+          </tbody>
+        </table>
+
+        <!-- Empty state -->
+        <div class="empty-state" id="empty-state" role="status">
+          <i data-lucide="file-x-2" style="width:48px;height:48px;color:var(--border-strong)" aria-hidden="true"></i>
+          <div class="empty-title">Không tìm thấy tệp dữ liệu phù hợp</div>
+          <div class="empty-hint">Hãy thử đổi lại từ khóa tìm kiếm hoặc điều chỉnh các bộ lọc.</div>
+        </div>
+      </div>
+
+      <!-- Pagination -->
+      <div class="pagination" role="navigation" aria-label="Phân trang">
+        <div style="display:flex;align-items:center;gap:12px">
+          <select class="page-size-select" id="page-size-select" onchange="setPageSize(Number(this.value))" aria-label="Số bản ghi mỗi trang">
+            <option value="10">10 bản ghi/trang</option>
+            <option value="20">20 bản ghi/trang</option>
+            <option value="50">50 bản ghi/trang</option>
+          </select>
+          <p class="page-info" id="page-info" aria-live="polite">
+            Hiển thị <strong id="page-from">0</strong>–<strong id="page-to">0</strong> trong tổng <strong id="page-total">0</strong> tệp tin
+          </p>
+        </div>
+        <div class="pager" id="pager" role="group" aria-label="Trang điều hướng"></div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- ═══════════════ UPLOAD DIALOG (MANUAL) ═══════════════ -->
+<div class="dialog-overlay" id="upload-dialog" role="dialog" aria-modal="true" aria-labelledby="upload-dialog-title" onclick="closeDialogOnOverlay(event, 'upload-dialog')">
+  <div class="dialog">
+    <div class="dialog-header">
+      <div class="dialog-title" id="upload-dialog-title">Nạp tệp dữ liệu mới (Upload thủ công)</div>
+      <button class="dialog-close" onclick="closeDialog('upload-dialog')" aria-label="Đóng hộp thoại">
+        <i data-lucide="x" style="width:16px;height:16px" aria-hidden="true"></i>
+      </button>
+    </div>
+    <div class="dialog-body">
+      <!-- Drag and drop zone -->
+      <div class="form-group">
+        <label class="form-label">Chọn tệp nguồn tích hợp <span style="color:var(--danger-500)">*</span></label>
+        <div class="upload-box" onclick="triggerSimulatedFileSelect()">
+          <div class="upload-box-icon">
+            <i data-lucide="upload-cloud" style="width:24px;height:24px"></i>
+          </div>
+          <div class="upload-box-text" id="upload-box-text"><strong>Nhấp để chọn tệp</strong> hoặc kéo thả tệp vào đây</div>
+          <div class="upload-box-sub">Chấp nhận định dạng Excel, CSV, JSON, XML, TXT, PDF (Tối đa 100MB)</div>
+        </div>
+      </div>
+
+      <!-- Upload progress -->
+      <div class="progress-wrap" id="upload-progress-wrap">
+        <div class="progress-info">
+          <span id="upload-file-status">Đang tải lên tệp...</span>
+          <span id="upload-percent">0%</span>
+        </div>
+        <div class="progress-bar-bg">
+          <div class="progress-bar-fill" id="upload-progress-bar"></div>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="u-provider">Đơn vị cung cấp <span style="color:var(--danger-500)">*</span></label>
+          <select id="u-provider" class="form-select" required>
+            <option value="">— Chọn đơn vị cung cấp —</option>
+            <option>Bộ Kế hoạch và Đầu tư</option>
+            <option>Cục Dân số</option>
+            <option>Bộ Y tế</option>
+            <option>Bộ Tài nguyên và Môi trường</option>
+            <option>Bộ Tài chính</option>
+            <option>Bộ Giáo dục và Đào tạo</option>
+            <option>Tổng cục Hải quan</option>
+            <option>BHXH Việt Nam</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="u-frequency">Tần suất cập nhật <span style="color:var(--danger-500)">*</span></label>
+          <select id="u-frequency" class="form-select" required>
+            <option value="Một lần">Một lần (Tĩnh)</option>
+            <option value="Hàng ngày">Hàng ngày</option>
+            <option value="Hàng tuần">Hàng tuần</option>
+            <option value="Hàng tháng">Hàng tháng</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="u-notes">Ghi chú / Mô tả</label>
+        <textarea id="u-notes" class="form-textarea" placeholder="Nhập ghi chú tóm tắt nội dung tệp..."></textarea>
+      </div>
+    </div>
+    <div class="dialog-footer">
+      <button class="btn btn-outline" onclick="closeDialog('upload-dialog')">Huỷ</button>
+      <button class="btn btn-primary" id="btn-save-upload" onclick="saveUpload()" disabled style="opacity: 0.6; cursor: not-allowed;">
+        <i data-lucide="check" style="width:14px;height:14px" aria-hidden="true"></i>
+        Nạp tệp
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ AUTO CONFIG DIALOG ═══════════════ -->
+<div class="dialog-overlay" id="auto-dialog" role="dialog" aria-modal="true" aria-labelledby="auto-dialog-title" onclick="closeDialogOnOverlay(event, 'auto-dialog')">
+  <div class="dialog">
+    <div class="dialog-header">
+      <div class="dialog-title" id="auto-dialog-title">Cấu hình luồng nạp tệp tự động</div>
+      <button class="dialog-close" onclick="closeDialog('auto-dialog')" aria-label="Đóng hộp thoại">
+        <i data-lucide="x" style="width:16px;height:16px" aria-hidden="true"></i>
+      </button>
+    </div>
+    <div class="dialog-body">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="a-protocol">Giao thức nguồn <span style="color:var(--danger-500)">*</span></label>
+          <select id="a-protocol" class="form-select" onchange="onProtocolChange(this.value)" required>
+            <option value="SFTP">SFTP (An toàn)</option>
+            <option value="FTP">FTP (Truyền tệp tiêu chuẩn)</option>
+            <option value="Thư mục theo dõi">Watch Folder (Thư mục mạng chia sẻ)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="a-name">Tên cấu hình tệp <span style="color:var(--danger-500)">*</span></label>
+          <input type="text" id="a-name" class="form-input" placeholder="VD: dan_so_toan_quoc_hang_ngay" required>
+        </div>
+      </div>
+
+      <div class="form-row" id="auto-conn-row">
+        <div class="form-group" style="grid-column: 1 / span 1.5">
+          <label class="form-label" for="a-host" id="lbl-host">Địa chỉ Server (IP / Domain)</label>
+          <input type="text" id="a-host" class="form-input" placeholder="VD: 10.0.1.15">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="a-port" id="lbl-port">Cổng (Port)</label>
+          <input type="number" id="a-port" class="form-input" placeholder="22" value="22" min="1" max="65535">
+        </div>
+      </div>
+
+      <div class="form-row" id="auto-auth-row">
+        <div class="form-group">
+          <label class="form-label" for="a-user">Tên đăng nhập</label>
+          <input type="text" id="a-user" class="form-input" placeholder="VD: ftp_sync_user">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="a-pass">Mật khẩu</label>
+          <input type="password" id="a-pass" class="form-input" placeholder="••••••••">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="a-path" id="lbl-path">Đường dẫn tệp nguồn / Mẫu tên tệp <span style="color:var(--danger-500)">*</span></label>
+        <input type="text" id="a-path" class="form-input" placeholder="VD: /incoming/dan_so/*.csv" required>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="a-provider">Đơn vị cung cấp <span style="color:var(--danger-500)">*</span></label>
+          <select id="a-provider" class="form-select" required>
+            <option value="">— Chọn đơn vị —</option>
+            <option>Bộ Kế hoạch và Đầu tư</option>
+            <option>Cục Dân số</option>
+            <option>Bộ Y tế</option>
+            <option>Bộ Tài nguyên và Môi trường</option>
+            <option>Bộ Tài chính</option>
+            <option>Bộ Giáo dục và Đào tạo</option>
+            <option>Tổng cục Hải quan</option>
+            <option>BHXH Việt Nam</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="a-frequency">Tần suất quét nạp tệp <span style="color:var(--danger-500)">*</span></label>
+          <select id="a-frequency" class="form-select" required>
+            <option value="Hàng ngày">Hàng ngày (Quét lúc 02:00 sáng)</option>
+            <option value="Hàng tuần">Hàng tuần (Quét lúc 00:00 Chủ Nhật)</option>
+            <option value="Hàng tháng">Hàng tháng (Quét lúc 01:00 ngày đầu tháng)</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="dialog-footer">
+      <button class="btn btn-outline" id="btn-test-auto" onclick="testAutoConnection()" style="margin-right:auto">
+        <i data-lucide="zap" style="width:14px;height:14px" aria-hidden="true"></i>
+        Test kết nối
+      </button>
+      <button class="btn btn-outline" onclick="closeDialog('auto-dialog')">Huỷ</button>
+      <button class="btn btn-primary" onclick="saveAutoConfig()">
+        <i data-lucide="save" style="width:14px;height:14px" aria-hidden="true"></i>
+        Lưu cấu hình
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ PREVIEW DIALOG (100 LINES) ═══════════════ -->
+<div class="dialog-overlay" id="preview-dialog" role="dialog" aria-modal="true" aria-labelledby="preview-dialog-title" onclick="closeDialogOnOverlay(event, 'preview-dialog')">
+  <div class="dialog large">
+    <div class="dialog-header">
+      <div class="dialog-title" id="preview-dialog-title">Xem trước nội dung tệp dữ liệu (100 dòng đầu)</div>
+      <button class="dialog-close" onclick="closeDialog('preview-dialog')" aria-label="Đóng hộp thoại">
+        <i data-lucide="x" style="width:16px;height:16px" aria-hidden="true"></i>
+      </button>
+    </div>
+    <div class="dialog-body">
+      <!-- File Metadata display -->
+      <div class="preview-meta">
+        <div class="preview-meta-item">Tên tệp: <strong id="p-filename">-</strong></div>
+        <div class="preview-meta-item">Định dạng: <strong id="p-format">-</strong></div>
+        <div class="preview-meta-item">Dung lượng: <strong id="p-size">-</strong></div>
+        <div class="preview-meta-item">Số dòng đã parse: <strong id="p-rows">-</strong></div>
+        <div class="preview-meta-item">Cập nhật: <strong id="p-date">-</strong></div>
+      </div>
+
+      <!-- Preview parsed table -->
+      <div class="preview-table-wrap">
+        <table aria-label="Nội dung xem trước tệp dữ liệu">
+          <thead>
+            <tr id="preview-thead">
+              <!-- Dynamically rendered -->
+            </tr>
+          </thead>
+          <tbody id="preview-tbody">
+            <!-- Dynamically rendered -->
+          </tbody>
+        </table>
+      </div>
+      <span style="font-size:12px;color:var(--ink-400);font-style:italic">* Bảng dữ liệu giả lập hiển thị cấu trúc của 10 dòng đầu tiên trong tổng số bản ghi của tệp.</span>
+    </div>
+    <div class="dialog-footer">
+      <button class="btn btn-outline" onclick="closeDialog('preview-dialog')">Đóng</button>
+      <button class="btn btn-primary" id="btn-download-preview" onclick="downloadFileFromPreview()">
+        <i data-lucide="download" style="width:14px;height:14px" aria-hidden="true"></i>
+        Tải xuống tệp gốc
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ HISTORY DIALOG ═══════════════ -->
+<div class="dialog-overlay" id="history-dialog" role="dialog" aria-modal="true" aria-labelledby="history-dialog-title" onclick="closeDialogOnOverlay(event, 'history-dialog')">
+  <div class="dialog large">
+    <div class="dialog-header">
+      <div class="dialog-title" id="history-dialog-title">Lịch sử các phiên bản tệp nạp</div>
+      <button class="dialog-close" onclick="closeDialog('history-dialog')" aria-label="Đóng hộp thoại">
+        <i data-lucide="x" style="width:16px;height:16px" aria-hidden="true"></i>
+      </button>
+    </div>
+    <div class="dialog-body" style="gap:16px">
+      <div>
+        <p style="font-size: 13.5px; color: var(--ink-500)">Danh sách các tệp tin đã tải lên/quét nạp tự động trong quá khứ của tệp: <strong style="color:var(--ink-900)" id="h-filename">-</strong></p>
+      </div>
+
+      <div style="border: 1px solid var(--border); border-radius: 12px; overflow: hidden; background: white;">
+        <table class="version-table" aria-label="Danh sách lịch sử phiên bản">
+          <thead>
+            <tr>
+              <th style="width: 100px">Phiên bản</th>
+              <th>Thời gian nạp</th>
+              <th>Người nạp / Nguồn</th>
+              <th>Dung lượng</th>
+              <th>Số dòng</th>
+              <th>Trạng thái xử lý</th>
+              <th class="right" style="width: 180px">Thao tác</th>
+            </tr>
+          </thead>
+          <tbody id="history-tbody">
+            <!-- Dynamically populated by JS -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="dialog-footer">
+      <button class="btn btn-outline" onclick="closeDialog('history-dialog')">Đóng</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast notification container -->
+<div class="toast-container" id="toast-container" aria-live="assertive" aria-atomic="true"></div>
+
+<!-- ═══════════════ SCRIPT LOGIC ═══════════════ -->
+<script>
+// ─── Format details ──────────────────────────────────────────────────────
+const FORMAT_META = {
+  Excel: { bg: '#ecfdf5', text: '#047857', swatch: '#10b981', icon: 'file-spreadsheet', iconBg: '#10b981' },
+  CSV: { bg: '#eff6ff', text: '#1d4ed8', swatch: '#3b82f6', icon: 'file-text', iconBg: '#3b82f6' },
+  JSON: { bg: '#fffbeb', text: '#b45309', swatch: '#f59e0b', icon: 'braces', iconBg: '#f59e0b' },
+  XML: { bg: '#fef3ec', text: '#c2410c', swatch: '#f97316', icon: 'code-2', iconBg: '#f97316' },
+  TXT: { bg: '#f3f4fb', text: '#5b6175', swatch: '#8087a0', icon: 'file', iconBg: '#8087a0' },
+  PDF: { bg: '#fef2f2', text: '#b91c1c', swatch: '#ef4444', icon: 'file-text', iconBg: '#ef4444' }
+};
+
+// Simulated parsed sheet preview data for different formats
+const PREVIEW_DATA_MOCK = {
+  Excel: {
+    headers: ["STT", "Mã Doanh Nghiệp", "Tên Doanh Nghiệp", "Đại Diện Pháp Luật", "Vốn Điều Lệ (VNĐ)", "Địa Chỉ Trụ Sở", "Trạng Thái"],
+    rows: [
+      ["01", "0102030405", "Công ty Cổ phần Công nghệ Bách Khoa", "Nguyễn Văn A", "15.000.000.000", "12 Tạ Quang Bửu, Hai Bà Trưng, Hà Nội", "Đang hoạt động"],
+      ["02", "0304050607", "Tập đoàn Xây dựng và Đầu tư An Phát", "Trần Thị B", "250.000.000.000", "45 Nguyễn Huệ, Quận 1, TP. Hồ Chí Minh", "Đang hoạt động"],
+      ["03", "0405060708", "Công ty TNHH Giải pháp Phần mềm Trí Việt", "Lê Văn C", "5.000.000.000", "78 Duy Tân, Cầu Giấy, Hà Nội", "Đang hoạt động"],
+      ["04", "0506070809", "Công ty Cổ phần XNK Nông sản Việt", "Phạm Văn D", "20.000.000.000", "102 Lê Lợi, Ngô Quyền, Hải Phòng", "Tạm ngừng hoạt động"],
+      ["05", "0607080910", "Tập đoàn Viễn thông và Công nghệ Số", "Hoàng Văn E", "1.200.000.000.000", "Đường Trần Duy Hưng, Cầu Giấy, Hà Nội", "Đang hoạt động"],
+      ["06", "0708091011", "Công ty TNHH Dịch vụ Thương mại Sao Mai", "Nguyễn Thị F", "2.000.000.000", "234 Trần Hưng Đạo, Sơn Trà, Đà Nẵng", "Đang hoạt động"],
+      ["07", "0809101112", "Công ty Cổ phần Năng lượng Tái tạo miền Trung", "Đỗ Văn G", "45.000.000.000", "88 Hùng Vương, TP. Huế, Thừa Thiên Huế", "Đang hoạt động"],
+      ["08", "0910111213", "Công ty TNHH Đầu tư và Phát triển Đô thị Xanh", "Trịnh Văn H", "80.000.000.000", "15 Bình Dương Avenue, Thủ Dầu Một, Bình Dương", "Đang chuẩn bị hoạt động"],
+      ["09", "1011121314", "Hợp tác xã Nông nghiệp Công nghệ cao Đại Việt", "Mai Văn I", "3.500.000.000", "Thôn 3, Xã Dân Tiến, Khoái Châu, Hưng Yên", "Đang hoạt động"],
+      ["10", "1112131415", "Công ty Cổ phần Logistics Hoàn Cầu", "Phùng Thị K", "35.000.000.000", "Lô M2, KCN Cát Lái, Quận 2, TP. Hồ Chí Minh", "Đang hoạt động"]
+    ]
+  },
+  CSV: {
+    headers: ["STT", "Mã Quận Huyện", "Tên Quận Huyện", "Tên Tỉnh Thành", "Dân Số (Người)", "Số Phường Xã", "Diện Tích (km2)"],
+    rows: [
+      ["01", "001", "Quận Ba Đình", "Thành phố Hà Nội", "225.400", "14", "9.21"],
+      ["02", "002", "Quận Hoàn Kiếm", "Thành phố Hà Nội", "147.900", "18", "5.29"],
+      ["03", "024", "Quận Hồng Bàng", "Thành phố Hải Phòng", "112.300", "9", "14.50"],
+      ["04", "250", "Thành phố Hạ Long", "Tỉnh Quảng Ninh", "385.600", "33", "1.119,10"],
+      ["05", "490", "Quận Hải Châu", "Thành phố Đà Nẵng", "201.200", "13", "20.30"],
+      ["06", "760", "Quận 1", "Thành phố Hồ Chí Minh", "194.800", "10", "7.72"],
+      ["07", "769", "Quận Thủ Đức", "Thành phố Hồ Chí Minh", "528.500", "12", "47.70"],
+      ["08", "916", "Quận Ninh Kiều", "Thành phố Cần Thơ", "280.400", "11", "29.22"],
+      ["09", "110", "Thành phố Thái Nguyên", "Tỉnh Thái Nguyên", "340.500", "32", "170.70"],
+      ["10", "282", "Thành phố Vinh", "Tỉnh Nghệ An", "318.200", "25", "104.90"]
+    ]
+  },
+  JSON: {
+    headers: ["Trường Dữ Liệu (Key)", "Kiểu Dữ Liệu", "Giá Trị Mẫu", "Bắt Buộc", "Mô Tả"],
+    rows: [
+      ["ma_ho_so", "String (UUID)", "HSSK-992842-2026", "Có", "Mã định danh hồ sơ sức khoẻ công dân"],
+      ["cccd_chu_the", "String (12)", "001095001234", "Có", "Số định danh căn cước công dân của chủ thể"],
+      ["ho_ten", "String (NVARCHAR)", "Nguyễn Văn An", "Có", "Họ và tên của công dân"],
+      ["ngay_sinh", "String (YYYY-MM-DD)", "1995-08-15", "Có", "Ngày tháng năm sinh"],
+      ["nhom_mau", "String (2)", "O+", "Không", "Nhóm máu"],
+      ["tien_su_benh", "Array", "['Viêm xoang', 'Dị ứng phấn hoa']", "Không", "Danh sách bệnh sử trước đây"],
+      ["kham_lam_sang", "Object", "{huyet_ap: '120/80', nhip_tim: 72}", "Không", "Thông số kết quả khám lâm sàng"],
+      ["ngay_cap_nhat", "String (ISO 8601)", "2026-05-24T10:30:00Z", "Có", "Mốc thời gian cập nhật hồ sơ sức khoẻ"]
+    ]
+  },
+  XML: {
+    headers: ["Tag Name (Xpath)", "Attributes", "Kieu Du Lieu", "Gia Tri Mau", "Mo Ta"],
+    rows: [
+      ["<diachinh>", "phienban='2026'", "Container", "", "Thẻ gốc chứa thông tin địa chính thửa đất"],
+      ["<thua_dat>", "id='TD-9921'", "Container", "", "Thẻ mô tả thửa đất cụ thể"],
+      ["<ma_thua>", "", "String", "9921-HN", "Mã số thửa đất"],
+      ["<so_to>", "", "Integer", "14", "Số tờ bản đồ địa chính"],
+      ["<so_thua>", "", "Integer", "248", "Số hiệu thửa đất trên bản đồ"],
+      ["<dien_tich>", "donvi='m2'", "Decimal", "124.50", "Diện tích thực tế thửa đất"],
+      ["<muc_dich_sd>", "", "String", "ONT (Đất ở nông thôn)", "Mục đích sử dụng đất theo quy hoạch"],
+      ["<chu_su_dung>", "", "String", "Phạm Văn Đông", "Tên chủ sở hữu, người đại diện sử dụng đất"]
+    ]
+  },
+  TXT: {
+    headers: ["Dòng", "Nội Dung Dòng Tệp Tĩnh (Plain Text)"],
+    rows: [
+      ["01", "DANH MỤC HỆ THỐNG SÔNG NGÒI VÀ LƯU VỰC SÔNG QUỐC GIA - PHIÊN BẢN CHUẨN 2026"],
+      ["02", "--------------------------------------------------------------------------------"],
+      ["03", "Mã LV | Tên Lưu Vực Sông     | Chiều Dài (km) | Diện Tích Lưu Vực (km2) | Trực Thuộc"],
+      ["04", "--------------------------------------------------------------------------------"],
+      ["05", "LVS-01| Sông Hồng            | 1,149          | 143,700                 | Tổng cục Khí tượng Thủy văn"],
+      ["06", "LVS-02| Sông Mê Kông         | 4,350          | 795,000                 | Ủy ban Sông Mê Kông Quốc gia"],
+      ["07", "LVS-03| Sông Đồng Nai        | 586            | 38,600                  | Cục Quản lý Tài nguyên Nước"],
+      ["08", "LVS-04| Sông Mã              | 512            | 28,400                  | Sở TN&MT Thanh Hóa"],
+      ["09", "LVS-05| Sông Cả (Lam)        | 513            | 27,200                  | Sở TN&MT Nghệ An"],
+      ["10", "LVS-06| Sông Thu Bồn         | 205            | 10,350                  | Cục Đường thủy Nội địa"]
+    ]
+  },
+  PDF: {
+    headers: ["Mục Báo Cáo", "Nội dung thuyết minh (Thông tin phân tích từ PDF document)"],
+    rows: [
+      ["Tiêu đề tài liệu", "Báo cáo thuyết minh tài chính Quý I năm 2026 - Cơ quan Quản lý Đầu tư phát triển"],
+      ["Căn cứ pháp lý", "Nghị định số 15/2026/NĐ-CP của Chính phủ về phân bổ ngân sách đầu tư công"],
+      ["Số trang văn bản", "45 trang (Tệp dạng scan kỹ thuật số có gắn OCR)"],
+      ["Tổng nguồn vốn", "14.592.000.000.000 VNĐ (Mười bốn nghìn năm trăm chín mươi hai tỷ đồng)"],
+      ["Đã giải ngân Q1", "3.120.000.000.000 VNĐ (Đạt tỷ lệ 21.38% kế hoạch năm)"],
+      ["Khó khăn, vướng mắc", "Giải phóng mặt bằng dự án trọng điểm phía Đông và biến động giá nguyên vật liệu"],
+      ["Kiến nghị đề xuất", "Ủy quyền chủ động điều chuyển vốn giữa các dự án thành phần có tiến độ chậm trễ"]
+    ]
+  }
+};
+
+// ─── App State ──────────────────────────────────────────────────────────
+let state = {
+  q: '',
+  status: 'all',
+  format: 'all',
+  method: 'all',
+  sort: 'id',
+  order: 'asc',
+  page: 1,
+  pageSize: 10
+};
+
+let filesList = [];
+let filteredRows = [];
+
+// Load data initially
+if (window.MOCK_DATA && MOCK_DATA.tepUC042) {
+  filesList = [...MOCK_DATA.tepUC042];
+} else {
+  // Fallback if script didn't load properly - Contains all 22 rich records
+  filesList = [
+    {
+      id: 1,
+      ten: "danh_sach_doanh_nghiep_2026.xlsx",
+      dinhDang: "Excel",
+      dungLuong: 16234588,
+      phuongThucNap: "Upload thủ công",
+      duongDanNguon: "C:/Users/admin/Downloads/danh_sach_doanh_nghiep_2026.xlsx",
+      donViCungCap: "Bộ Kế hoạch và Đầu tư",
+      nguoiNap: "Nguyễn Văn A",
+      trangThai: "da-xu-ly",
+      soDong: 145920,
+      ngayCapNhat: "2026-05-24 10:15:00",
+      tanSuat: "Hàng tuần",
+      ghiChu: "Danh sách doanh nghiệp đăng ký thành lập mới toàn quốc tính đến tháng 5/2026."
+    },
+    {
+      id: 2,
+      ten: "dan_so_quan_huyen_2025.csv",
+      dinhDang: "CSV",
+      dungLuong: 2149580,
+      phuongThucNap: "SFTP",
+      duongDanNguon: "sftp://10.0.1.15:22/incoming/dan_so_2025.csv",
+      donViCungCap: "Cục Dân số",
+      nguoiNap: "Hệ thống tự động",
+      trangThai: "da-xu-ly",
+      soDong: 48500,
+      ngayCapNhat: "2026-05-24 02:00:00",
+      tanSuat: "Hàng ngày",
+      ghiChu: "Đồng bộ dân số chi tiết các quận, huyện, thị xã trên cả nước."
+    },
+    {
+      id: 3,
+      ten: "ho_so_suc_khoe_quang_ninh.json",
+      dinhDang: "JSON",
+      dungLuong: 47290777,
+      phuongThucNap: "FTP",
+      duongDanNguon: "ftp://192.168.10.50/health/hssk_qn.json",
+      donViCungCap: "Bộ Y tế",
+      nguoiNap: "Hệ thống tự động",
+      trangThai: "loi-dinh-dang",
+      soDong: 0,
+      ngayCapNhat: "2026-05-23 18:30:00",
+      tanSuat: "Hàng tháng",
+      ghiChu: "Parser Error: Thiếu ký tự đóng ngoặc vuông ']' ở cuối file JSON."
+    },
+    {
+      id: 4,
+      ten: "thong_ke_dia_chinh_ha_noi.xml",
+      dinhDang: "XML",
+      dungLuong: 13191168,
+      phuongThucNap: "Thư mục theo dõi",
+      duongDanNguon: "//10.0.20.100/shared/diachinh/hn_land_2026.xml",
+      donViCungCap: "Bộ Tài nguyên và Môi trường",
+      nguoiNap: "Hệ thống tự động",
+      trangThai: "dang-xu-ly",
+      soDong: 92400,
+      ngayCapNhat: "2026-05-24 21:05:00",
+      tanSuat: "Hàng ngày",
+      ghiChu: "Đang tiến hành ánh xạ các thẻ địa chính vào bảng tích hợp trung tâm."
+    },
+    {
+      id: 5,
+      ten: "bao_cao_tai_chinh_q1.pdf",
+      dinhDang: "PDF",
+      dungLuong: 8788000,
+      phuongThucNap: "Upload thủ công",
+      duongDanNguon: "C:/Users/admin/Desktop/BCTC_Q1_2026.pdf",
+      donViCungCap: "Bộ Tài chính",
+      nguoiNap: "Trần Thị B",
+      trangThai: "cho-xu-ly",
+      soDong: 0,
+      ngayCapNhat: "2026-05-22 14:00:00",
+      tanSuat: "Một lần",
+      ghiChu: "Báo cáo thuyết minh tài chính Quý I năm 2026."
+    },
+    {
+      id: 6,
+      ten: "danhmuc_quocgia_songngoi.txt",
+      dinhDang: "TXT",
+      dungLuong: 350208,
+      phuongThucNap: "FTP",
+      duongDanNguon: "ftp://ftp.songngoi.gov.vn/files/danhmuc.txt",
+      donViCungCap: "Bộ Tài nguyên và Môi trường",
+      nguoiNap: "Hệ thống tự động",
+      trangThai: "da-xu-ly",
+      soDong: 1240,
+      ngayCapNhat: "2026-05-24 06:00:00",
+      tanSuat: "Hàng tuần",
+      ghiChu: "Danh mục chuẩn hóa hệ thống sông ngòi và lưu vực sông cấp quốc gia."
+    },
+    {
+      id: 7,
+      ten: "danh_sach_benh_vien_2026.xlsx",
+      dinhDang: "Excel",
+      dungLuong: 4320256,
+      phuongThucNap: "Upload thủ công",
+      duongDanNguon: "C:/Users/admin/Downloads/danh_sach_benh_vien_2026.xlsx",
+      donViCungCap: "Bộ Y tế",
+      nguoiNap: "Nguyễn Văn A",
+      trangThai: "da-xu-ly",
+      soDong: 23500,
+      ngayCapNhat: "2026-05-23 09:15:00",
+      tanSuat: "Hàng tháng",
+      ghiChu: "Danh sách và địa chỉ liên lạc các bệnh viện, phòng khám trên toàn quốc."
+    },
+    {
+      id: 8,
+      ten: "giao_dich_hai_quan_may.csv",
+      dinhDang: "CSV",
+      dungLuong: 89547161,
+      phuongThucNap: "SFTP",
+      duongDanNguon: "sftp://10.0.2.80/export/customs_may.csv",
+      donViCungCap: "Tổng cục Hải quan",
+      nguoiNap: "Hệ thống tự động",
+      trangThai: "cho-xu-ly",
+      soDong: 0,
+      ngayCapNhat: "2026-05-24 16:45:00",
+      tanSuat: "Hàng ngày",
+      ghiChu: "Danh sách tờ khai xuất nhập khẩu phát sinh trong tháng 5/2026."
+    },
+    {
+      id: 9,
+      ten: "chi_tieu_ngan_sach_tinh.json",
+      dinhDang: "JSON",
+      dungLuong: 19136512,
+      phuongThucNap: "Upload thủ công",
+      duongDanNguon: "C:/Users/admin/Downloads/budget_details.json",
+      donViCungCap: "Bộ Tài chính",
+      nguoiNap: "Trần Thị B",
+      trangThai: "da-xu-ly",
+      soDong: 54200,
+      ngayCapNhat: "2026-05-21 11:30:00",
+      tanSuat: "Một lần",
+      ghiChu: "Số liệu chi tiết phân bổ và thực hiện chi ngân sách nhà nước cấp tỉnh."
+    },
+    {
+      id: 10,
+      ten: "du_lieu_sinh_vien_2025.xml",
+      dinhDang: "XML",
+      dungLuong: 3984588,
+      phuongThucNap: "Thư mục theo dõi",
+      duongDanNguon: "//10.0.30.22/watch_folder/sinhvien_2025.xml",
+      donViCungCap: "Bộ Giáo dục và Đào tạo",
+      nguoiNap: "Hệ thống tự động",
+      trangThai: "loi-dinh-dang",
+      soDong: 0,
+      ngayCapNhat: "2026-05-22 08:20:00",
+      tanSuat: "Hàng tuần",
+      ghiChu: "Parser Error: Thẻ đóng </sinhvien> không đúng cấu trúc (thiếu thẻ mở tương ứng)."
+    },
+    {
+      id: 11,
+      ten: "danh_sach_truong_hoc_toanquoc.xlsx",
+      dinhDang: "Excel",
+      dungLuong: 15204352,
+      phuongThucNap: "SFTP",
+      duongDanNguon: "sftp://10.0.3.50/edu/truong_hoc.xlsx",
+      donViCungCap: "Bộ Giáo dục và Đào tạo",
+      nguoiNap: "Hệ thống tự động",
+      trangThai: "dang-xu-ly",
+      soDong: 64200,
+      ngayCapNhat: "2026-05-24 20:30:00",
+      tanSuat: "Hàng tháng",
+      ghiChu: "Đồng bộ thông tin các trường mầm non, tiểu học, trung học cơ sở và THPT cả nước."
+    },
+    {
+      id: 12,
+      ten: "ho_so_lao_dong_2026.csv",
+      dinhDang: "CSV",
+      dungLuong: 5452595,
+      phuongThucNap: "Upload thủ công",
+      duongDanNguon: "C:/Users/admin/Downloads/laodong_2026.csv",
+      donViCungCap: "BHXH Việt Nam",
+      nguoiNap: "Nguyễn Văn A",
+      trangThai: "da-xu-ly",
+      soDong: 31200,
+      ngayCapNhat: "2026-05-24 14:10:00",
+      tanSuat: "Hàng tháng",
+      ghiChu: "Danh sách lao động đóng bảo hiểm xã hội bắt buộc tại các khu công nghiệp."
+    },
+    {
+      id: 13,
+      ten: "baocao_moitruong_quy1.pdf",
+      dinhDang: "PDF",
+      dungLuong: 13054156,
+      phuongThucNap: "Upload thủ công",
+      duongDanNguon: "C:/Users/admin/Downloads/baocao_moitruong.pdf",
+      donViCungCap: "Bộ Tài nguyên và Môi trường",
+      nguoiNap: "Trần Thị B",
+      trangThai: "da-xu-ly",
+      soDong: 0,
+      ngayCapNhat: "2026-05-23 15:45:00",
+      tanSuat: "Một lần",
+      ghiChu: "Báo cáo đánh giá tác động môi trường các dự án năng lượng tái tạo Quý I năm 2026."
+    },
+    {
+      id: 14,
+      ten: "danhsach_ho_ngheo_lamdong.csv",
+      dinhDang: "CSV",
+      dungLuong: 8808038,
+      phuongThucNap: "SFTP",
+      duongDanNguon: "sftp://10.0.1.15:22/incoming/lamdong_hongheo.csv",
+      donViCungCap: "BHXH Việt Nam",
+      nguoiNap: "Hệ thống tự động",
+      trangThai: "da-xu-ly",
+      soDong: 15400,
+      ngayCapNhat: "2026-05-24 05:00:00",
+      tanSuat: "Hàng tuần",
+      ghiChu: "Danh sách hộ nghèo và hộ cận nghèo nhận hỗ trợ bảo hiểm y tế tại tỉnh Lâm Đồng."
+    },
+    {
+      id: 15,
+      ten: "hoso_dangky_kinhdoanh.json",
+      dinhDang: "JSON",
+      dungLuong: 5368709,
+      phuongThucNap: "FTP",
+      duongDanNguon: "ftp://ftp.business.gov.vn/incoming/reg_may24.json",
+      donViCungCap: "Bộ Kế hoạch và Đầu tư",
+      nguoiNap: "Hệ thống tự động",
+      trangThai: "cho-xu-ly",
+      soDong: 0,
+      ngayCapNhat: "2026-05-24 18:30:00",
+      tanSuat: "Hàng ngày",
+      ghiChu: "Hồ sơ đăng ký kinh doanh doanh nghiệp FDI mới thành lập trong ngày."
+    },
+    {
+      id: 16,
+      ten: "thongtin_baohiem_tphcm.xml",
+      dinhDang: "XML",
+      dungLuong: 29884416,
+      phuongThucNap: "Thư mục theo dõi",
+      duongDanNguon: "//10.0.40.85/shared/bhyt_hcm_2026.xml",
+      donViCungCap: "BHXH Việt Nam",
+      nguoiNap: "Hệ thống tự động",
+      trangThai: "dang-xu-ly",
+      soDong: 114500,
+      ngayCapNhat: "2026-05-24 20:55:00",
+      tanSuat: "Hàng ngày",
+      ghiChu: "Đồng bộ hồ sơ cấp mới và gia hạn thẻ bảo hiểm y tế tại Thành phố Hồ Chí Minh."
+    },
+    {
+      id: 17,
+      ten: "danhmuc_sanpham_xuatkhau.txt",
+      dinhDang: "TXT",
+      dungLuong: 524288,
+      phuongThucNap: "FTP",
+      duongDanNguon: "ftp://ftp.customs.gov.vn/files/prod_cat.txt",
+      donViCungCap: "Tổng cục Hải quan",
+      nguoiNap: "Hệ thống tự động",
+      trangThai: "da-xu-ly",
+      soDong: 2450,
+      ngayCapNhat: "2026-05-24 07:15:00",
+      tanSuat: "Hàng tuần",
+      ghiChu: "Danh mục hàng hóa xuất khẩu chịu thuế tự vệ bổ sung năm 2026."
+    },
+    {
+      id: 18,
+      ten: "thongke_sanluong_lua.xlsx",
+      dinhDang: "Excel",
+      dungLuong: 7077888,
+      phuongThucNap: "Upload thủ công",
+      duongDanNguon: "C:/Users/admin/Desktop/sanluong_lua_2025.xlsx",
+      donViCungCap: "Bộ Nông nghiệp và Phát triển Nông thôn",
+      nguoiNap: "Nguyễn Văn A",
+      trangThai: "da-xu-ly",
+      soDong: 12800,
+      ngayCapNhat: "2026-05-22 16:30:00",
+      tanSuat: "Một lần",
+      ghiChu: "Báo cáo thống kê sản lượng lúa các tỉnh đồng bằng Sông Cửu Long năm 2025."
+    },
+    {
+      id: 19,
+      ten: "danhsach_benhnhan_bhn.csv",
+      dinhDang: "CSV",
+      dungLuong: 14889779,
+      phuongThucNap: "Upload thủ công",
+      duongDanNguon: "C:/Users/admin/Downloads/benhnhan_covid.csv",
+      donViCungCap: "Bộ Y tế",
+      nguoiNap: "Nguyễn Văn A",
+      trangThai: "da-xu-ly",
+      soDong: 89000,
+      ngayCapNhat: "2026-05-23 10:20:00",
+      tanSuat: "Một lần",
+      ghiChu: "Thống kê danh sách bệnh nhân mắc các bệnh truyền nhiễm tại khu vực phía Bắc."
+    },
+    {
+      id: 20,
+      ten: "dulieu_haican_thang4.xml",
+      dinhDang: "XML",
+      dungLuong: 51275366,
+      phuongThucNap: "SFTP",
+      duongDanNguon: "sftp://10.0.2.80/export/customs_apr26.xml",
+      donViCungCap: "Tổng cục Hải quan",
+      nguoiNap: "Hệ thống tự động",
+      trangThai: "loi-dinh-dang",
+      soDong: 0,
+      ngayCapNhat: "2026-05-22 17:30:00",
+      tanSuat: "Hàng tháng",
+      ghiChu: "Parser Error: Tệp chứa ký tự không hợp lệ ngoài dải mã hóa UTF-8 chuẩn."
+    },
+    {
+      id: 21,
+      ten: "danhsach_sinhvien_truong_dh.xlsx",
+      dinhDang: "Excel",
+      dungLuong: 9856614,
+      phuongThucNap: "Upload thủ công",
+      duongDanNguon: "C:/Users/admin/Downloads/sinhvien_bachkhoa.xlsx",
+      donViCungCap: "Bộ Giáo dục và Đào tạo",
+      nguoiNap: "Trần Thị B",
+      trangThai: "cho-xu-ly",
+      soDong: 0,
+      ngayCapNhat: "2026-05-23 14:15:00",
+      tanSuat: "Một lần",
+      ghiChu: "Danh sách sinh viên tốt nghiệp trường Đại học Bách Khoa năm 2026."
+    },
+    {
+      id: 22,
+      ten: "lichtrinh_tau_bien_2026.json",
+      dinhDang: "JSON",
+      dungLuong: 2936012,
+      phuongThucNap: "Thư mục theo dõi",
+      duongDanNguon: "//10.0.20.12/watch_folder/shipping_schedule.json",
+      donViCungCap: "Bộ Giao thông Vận tải",
+      nguoiNap: "Hệ thống tự động",
+      trangThai: "da-xu-ly",
+      soDong: 9400,
+      ngayCapNhat: "2026-05-24 11:45:00",
+      tanSuat: "Hàng ngày",
+      ghiChu: "Danh sách lịch trình cập cảng của các tàu vận tải biển quốc tế tại cụm cảng Hải Phòng."
+    }
+  ];
+}
+
+// ─── Business logic handlers ─────────────────────────────────────────────
+function applyFilters() {
+  const { q, status, format, method, sort, order } = state;
+  filteredRows = filesList
+    .filter(r => {
+      if (!q) return true;
+      const terms = q.toLowerCase();
+      return r.ten.toLowerCase().includes(terms) || 
+             r.donViCungCap.toLowerCase().includes(terms) || 
+             r.nguoiNap.toLowerCase().includes(terms);
+    })
+    .filter(r => {
+      if (status === 'all') return true;
+      if (status === 'pending') return r.trangThai === 'dang-xu-ly' || r.trangThai === 'cho-xu-ly';
+      return r.trangThai === status;
+    })
+    .filter(r => format === 'all' || r.dinhDang === format)
+    .filter(r => method === 'all' || r.phuongThucNap === method)
+    .sort((a, b) => {
+      const dir = order === 'asc' ? 1 : -1;
+      let va = a[sort];
+      let vb = b[sort];
+      if (typeof va === 'string') va = va.toLowerCase();
+      if (typeof vb === 'string') vb = vb.toLowerCase();
+      return va < vb ? -dir : va > vb ? dir : 0;
+    });
+}
+
+// Format file size
+function formatBytes(bytes) {
+  if (bytes === 0) return '0 Bytes';
+  const k = 1024;
+  const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+}
+
+// Relative time calculation
+function relTime(datetimeStr) {
+  const now = Date.now();
+  const t = new Date(datetimeStr.replace(' ', 'T')).getTime();
+  if (isNaN(t)) return datetimeStr;
+  const min = Math.round((now - t) / 60000);
+  if (min < 1) return 'Vừa xong';
+  if (min < 60) return `${min} phút trước`;
+  if (min < 1440) return `${Math.round(min / 60)} giờ trước`;
+  const d = Math.round(min / 1440);
+  if (d < 30) return `${d} ngày trước`;
+  return datetimeStr.slice(0, 10);
+}
+
+function absTime(datetimeStr) {
+  return datetimeStr.slice(0, 16);
+}
+
+// ─── Render functions ────────────────────────────────────────────────────
+function render() {
+  applyFilters();
+  updateStats();
+  renderTable();
+  renderPagination();
+  updateToolbarUI();
+  if (window.lucide) lucide.createIcons();
+}
+
+function updateStats() {
+  const counts = { total: filesList.length, ok: 0, pending: 0, err: 0, totalRows: 0 };
+  filesList.forEach(r => {
+    if (r.trangThai === 'da-xu-ly') {
+      counts.ok++;
+      counts.totalRows += r.soDong;
+    }
+    else if (r.trangThai === 'dang-xu-ly' || r.trangThai === 'cho-xu-ly') counts.pending++;
+    else if (r.trangThai === 'loi-dinh-dang') counts.err++;
+  });
+
+  document.getElementById('val-total').textContent = counts.total;
+  document.getElementById('val-ok').textContent = counts.ok;
+  document.getElementById('val-warn').textContent = counts.pending;
+  document.getElementById('val-err').textContent = counts.err;
+  document.getElementById('val-parse-rows').textContent = counts.totalRows.toLocaleString('vi-VN') + ' dòng dữ liệu';
+
+  // Update chip numbers based on search/format filters
+  const countsByStatus = { all: 0, ok: 0, pending: 0, err: 0 };
+  filesList.filter(r => {
+    const qMatches = !state.q || [r.ten, r.donViCungCap, r.nguoiNap].some(s => s.toLowerCase().includes(state.q.toLowerCase()));
+    const fMatches = state.format === 'all' || r.dinhDang === state.format;
+    const mMatches = state.method === 'all' || r.phuongThucNap === state.method;
+    return qMatches && fMatches && mMatches;
+  }).forEach(r => {
+    countsByStatus.all++;
+    if (r.trangThai === 'da-xu-ly') countsByStatus.ok++;
+    else if (r.trangThai === 'dang-xu-ly' || r.trangThai === 'cho-xu-ly') countsByStatus.pending++;
+    else if (r.trangThai === 'loi-dinh-dang') countsByStatus.err++;
+  });
+
+  document.getElementById('chip-count-all').textContent = countsByStatus.all;
+  document.getElementById('chip-count-ok').textContent = countsByStatus.ok;
+  document.getElementById('chip-count-pending').textContent = countsByStatus.pending;
+  document.getElementById('chip-count-err').textContent = countsByStatus.err;
+}
+
+function renderTable() {
+  const tbody = document.getElementById('table-body');
+  const empty = document.getElementById('empty-state');
+  const { page, pageSize } = state;
+  const start = (page - 1) * pageSize;
+  const slice = filteredRows.slice(start, start + pageSize);
+
+  if (filteredRows.length === 0) {
+    tbody.innerHTML = '';
+    empty.classList.add('visible');
+    return;
+  }
+  empty.classList.remove('visible');
+
+  tbody.innerHTML = slice.map((r, idx) => {
+    const sttNum = String(start + idx + 1).padStart(2, '0');
+    const f = FORMAT_META[r.dinhDang] || { bg: '#f3f4fb', text: '#5b6175', swatch: '#b3b8c8', icon: 'file', iconBg: '#b3b8c8' };
+    
+    // Path configuration display
+    let pathDisplay = r.duongDanNguon;
+    if (r.phuongThucNap === 'Upload thủ công') {
+      pathDisplay = 'Thủ công';
+    }
+
+    // Status mapping to classes
+    let statusClass = 'warn';
+    let statusLabel = 'Chờ xử lý';
+    if (r.trangThai === 'da-xu-ly') { statusClass = 'ok'; statusLabel = 'Đã xử lý'; }
+    else if (r.trangThai === 'dang-xu-ly') { statusClass = 'info'; statusLabel = 'Đang xử lý'; }
+    else if (r.trangThai === 'loi-dinh-dang') { statusClass = 'err'; statusLabel = 'Lỗi định dạng'; }
+
+    return `
+      <tr tabindex="0" role="row" onclick="viewFilePreview(${r.id})" onkeydown="if(event.key==='Enter')viewFilePreview(${r.id})">
+        <td class="center"><span class="stt">${sttNum}</span></td>
+        <td>
+          <div class="file-cell">
+            <div class="file-icon-wrap" style="background:${f.iconBg}" aria-hidden="true">
+              <i data-lucide="${f.icon}" style="width:16px;height:16px;color:white"></i>
+            </div>
+            <div>
+              <div class="file-name">${r.ten}</div>
+              <div class="file-provider">${r.donViCungCap}</div>
+            </div>
+          </div>
+        </td>
+        <td>
+          <span class="format-tag" style="background:${f.bg};color:${f.text};border:1px solid ${f.text}28">
+            <span class="format-swatch" style="background:${f.swatch}" aria-hidden="true"></span>
+            ${r.dinhDang}
+            <span class="format-size">${formatBytes(r.dungLuong)}</span>
+          </span>
+        </td>
+        <td>
+          <span class="path-pill" title="${r.duongDanNguon}">
+            <span class="path-method">${r.phuongThucNap}</span>
+            <span class="path-sep">:</span>
+            <span class="path-val">${pathDisplay}</span>
+          </span>
+        </td>
+        <td>
+          <span class="status-badge ${statusClass}" role="status" aria-label="${statusLabel}" id="status-badge-${r.id}">
+            <span class="pulse" aria-hidden="true"></span>
+            <span class="status-lbl">${statusLabel}</span>
+          </span>
+        </td>
+        <td>
+          <div class="row-rows">${r.soDong > 0 ? r.soDong.toLocaleString('vi-VN') + ' dòng' : '—'}</div>
+          <div class="row-freq">${r.tanSuat}</div>
+        </td>
+        <td>
+          <div class="updated-rel">${relTime(r.ngayCapNhat)}</div>
+          <div class="updated-abs">${absTime(r.ngayCapNhat)}</div>
+        </td>
+        <td onclick="event.stopPropagation()">
+          <div class="row-actions">
+            <button class="action-btn" onclick="viewFilePreview(${r.id})" aria-label="Xem trước nội dung ${r.ten}" title="Xem trước 100 dòng đầu">
+              <i data-lucide="eye" style="width:15px;height:15px" aria-hidden="true"></i>
+            </button>
+            <button class="action-btn" onclick="downloadFile(${r.id})" aria-label="Tải về ${r.ten}" title="Tải về tệp gốc">
+              <i data-lucide="download" style="width:15px;height:15px" aria-hidden="true"></i>
+            </button>
+            <button class="action-btn" onclick="reparseFile(event, ${r.id})" aria-label="Xử lý lại ${r.ten}" title="Xử lý lại (Re-parse)" id="btn-reparse-${r.id}">
+              <i data-lucide="rotate-cw" style="width:15px;height:15px" aria-hidden="true"></i>
+            </button>
+            <button class="action-btn" onclick="viewHistory(${r.id})" aria-label="Lịch sử phiên bản ${r.ten}" title="Lịch sử phiên bản">
+              <i data-lucide="history" style="width:15px;height:15px" aria-hidden="true"></i>
+            </button>
+            <button class="action-btn danger" onclick="deleteFile(${r.id})" aria-label="Xoá tệp ${r.ten}" title="Xoá tệp">
+              <i data-lucide="trash-2" style="width:15px;height:15px" aria-hidden="true"></i>
+            </button>
+          </div>
+        </td>
+      </tr>`;
+  }).join('');
+}
+
+function renderPagination() {
+  const { page, pageSize } = state;
+  const total = filteredRows.length;
+  const totalPages = Math.max(1, Math.ceil(total / pageSize));
+  const from = total === 0 ? 0 : (page - 1) * pageSize + 1;
+  const to   = Math.min(page * pageSize, total);
+
+  document.getElementById('page-from').textContent = from;
+  document.getElementById('page-to').textContent = to;
+  document.getElementById('page-total').textContent = total;
+
+  const pager = document.getElementById('pager');
+  let html = `<button class="page-btn" onclick="goPage(${page-1})" ${page<=1?'disabled':''} aria-label="Trang trước">
+    <i data-lucide="chevron-left" style="width:14px;height:14px"></i>
+  </button>`;
+  const maxVisible = 5;
+  let startP = Math.max(1, page - 2), endP = Math.min(totalPages, startP + maxVisible - 1);
+  if (endP - startP < maxVisible - 1) startP = Math.max(1, endP - maxVisible + 1);
+  for (let p = startP; p <= endP; p++) {
+    html += `<button class="page-btn${p===page?' active':''}" onclick="goPage(${p})" aria-label="Trang ${p}" ${p===page?'aria-current="page"':''}>${p}</button>`;
+  }
+  html += `<button class="page-btn" onclick="goPage(${page+1})" ${page>=totalPages?'disabled':''} aria-label="Trang sau">
+    <i data-lucide="chevron-right" style="width:14px;height:14px"></i>
+  </button>`;
+  pager.innerHTML = html;
+}
+
+function updateToolbarUI() {
+  const statuses = ['all', 'da-xu-ly', 'pending', 'loi-dinh-dang'];
+  statuses.forEach(s => {
+    const el = document.getElementById(`chip-status-${s}`);
+    if (el) el.classList.toggle('active', state.status === s);
+  });
+
+  const formats = ['all', 'excel', 'csv', 'json', 'xml', 'txt', 'pdf'];
+  formats.forEach(f => {
+    const el = document.getElementById(`chip-format-${f}`);
+    if (el) {
+      const matchLabel = f === 'all' ? 'all' : (f === 'excel' ? 'Excel' : f.toUpperCase());
+      el.classList.toggle('active', state.format === matchLabel);
+    }
+  });
+
+  const methods = ['all', 'manual', 'ftp', 'sftp', 'watch'];
+  methods.forEach(m => {
+    const el = document.getElementById(`chip-method-${m}`);
+    if (el) {
+      const matchLabel = m === 'all' ? 'all' : 
+                         (m === 'manual' ? 'Upload thủ công' : 
+                         (m === 'ftp' ? 'FTP' : 
+                         (m === 'sftp' ? 'SFTP' : 'Thư mục theo dõi')));
+      el.classList.toggle('active', state.method === matchLabel);
+    }
+  });
+
+  // Sort columns active state
+  const sortCols = ['id', 'ten', 'dinhDang', 'phuongThucNap', 'trangThai', 'soDong', 'ngayCapNhat'];
+  sortCols.forEach(col => {
+    const el = document.getElementById(`sort-${col}`);
+    if (el) el.classList.toggle('active', state.sort === col);
+  });
+
+  // aria-sort inside headers
+  const thMap = { id:0, ten:1, dinhDang:2, phuongThucNap:3, trangThai:4, soDong:5, ngayCapNhat:6 };
+  const ths = document.querySelectorAll('#main-table thead th');
+  sortCols.forEach((col, i) => {
+    const th = ths[i];
+    if (!th) return;
+    if (state.sort === col) {
+      th.setAttribute('aria-sort', state.order === 'asc' ? 'ascending' : 'descending');
+    } else {
+      th.setAttribute('aria-sort', 'none');
+    }
+  });
+}
+
+// ─── Filter & Search events ──────────────────────────────────────────────
+function onSearchChange(val) {
+  state.q = val; state.page = 1; render();
+}
+function setStatusFilter(s) {
+  state.status = s; state.page = 1; render();
+}
+function setFormatFilter(f) {
+  state.format = f; state.page = 1; render();
+}
+function setMethodFilter(m) {
+  state.method = m; state.page = 1; render();
+}
+function sortBy(col) {
+  if (state.sort === col) {
+    state.order = state.order === 'asc' ? 'desc' : 'asc';
+  } else {
+    state.sort = col; state.order = 'asc';
+  }
+  state.page = 1; render();
+}
+function goPage(p) {
+  const total = filteredRows.length;
+  const maxP = Math.max(1, Math.ceil(total / state.pageSize));
+  if (p < 1 || p > maxP) return;
+  state.page = p; render();
+}
+function setPageSize(n) {
+  state.pageSize = n; state.page = 1; render();
+}
+
+// ─── Dialog management ───────────────────────────────────────────────────
+function openUploadDialog() {
+  document.getElementById('upload-dialog').classList.add('open');
+  // Reset values
+  document.getElementById('upload-box-text').innerHTML = '<strong>Nhấp để chọn tệp</strong> hoặc kéo thả tệp vào đây';
+  document.getElementById('upload-progress-wrap').style.display = 'none';
+  document.getElementById('u-provider').value = '';
+  document.getElementById('u-frequency').value = 'Một lần';
+  document.getElementById('u-notes').value = '';
+  const saveBtn = document.getElementById('btn-save-upload');
+  saveBtn.disabled = true;
+  saveBtn.style.opacity = '0.6';
+  saveBtn.style.cursor = 'not-allowed';
+  simulatedUploadedFile = null;
+}
+
+function openAutoDialog() {
+  document.getElementById('auto-dialog').classList.add('open');
+  // Reset values
+  document.getElementById('a-protocol').value = 'SFTP';
+  onProtocolChange('SFTP');
+  document.getElementById('a-name').value = '';
+  document.getElementById('a-host').value = '';
+  document.getElementById('a-port').value = '22';
+  document.getElementById('a-user').value = '';
+  document.getElementById('a-pass').value = '';
+  document.getElementById('a-path').value = '';
+  document.getElementById('a-provider').value = '';
+  document.getElementById('a-frequency').value = 'Hàng ngày';
+}
+
+function closeDialog(id) {
+  document.getElementById(id).classList.remove('open');
+}
+
+function closeDialogOnOverlay(e, id) {
+  if (e.target === document.getElementById(id)) closeDialog(id);
+}
+
+// Protocol change logic in automatic configuration
+function onProtocolChange(val) {
+  const portInput = document.getElementById('a-port');
+  const hostRow = document.getElementById('auto-conn-row');
+  const authRow = document.getElementById('auto-auth-row');
+  const pathLabel = document.getElementById('lbl-path');
+  const hostLabel = document.getElementById('lbl-host');
+
+  if (val === 'SFTP') {
+    hostRow.style.display = 'grid';
+    authRow.style.display = 'grid';
+    portInput.value = '22';
+    hostLabel.textContent = 'Địa chỉ Server SFTP (IP / Domain)';
+    pathLabel.textContent = 'Đường dẫn tệp trên SFTP / Mẫu tên tệp *';
+    document.getElementById('a-path').placeholder = 'VD: /incoming/dan_so/*.csv';
+  } else if (val === 'FTP') {
+    hostRow.style.display = 'grid';
+    authRow.style.display = 'grid';
+    portInput.value = '21';
+    hostLabel.textContent = 'Địa chỉ Server FTP (IP / Domain)';
+    pathLabel.textContent = 'Đường dẫn tệp trên FTP / Mẫu tên tệp *';
+    document.getElementById('a-path').placeholder = 'VD: /var/ftp/public/budget/*.json';
+  } else if (val === 'Thư mục theo dõi') {
+    hostRow.style.display = 'none';
+    authRow.style.display = 'none';
+    pathLabel.textContent = 'Đường dẫn thư mục giám sát mạng (Local / Shared UNC) *';
+    document.getElementById('a-path').placeholder = 'VD: //10.0.30.22/watch_folder/sinhvien_*.xml';
+  }
+}
+
+// ─── Actions & Simulations ───────────────────────────────────────────────
+let simulatedUploadedFile = null;
+
+function triggerSimulatedFileSelect() {
+  const fileNames = [
+    { name: "danh_sach_giao_vien_2026.xlsx", format: "Excel", size: 4500000 },
+    { name: "dan_so_phuong_xa_hcm.csv", format: "CSV", size: 1850000 },
+    { name: "ho_so_y_te_dan_nang.json", format: "JSON", size: 28400000 },
+    { name: "thong_tin_dat_dai_hai_phong.xml", format: "XML", size: 8900000 },
+    { name: "danh_muc_don_vi_hanh_chinh.txt", format: "TXT", size: 120000 },
+    { name: "nghi_quyet_phat_trien_tich_hop.pdf", format: "PDF", size: 3400000 }
+  ];
+  
+  // Pick one randomly for simulation
+  const randomFile = fileNames[Math.floor(Math.random() * fileNames.length)];
+  
+  const uploadText = document.getElementById('upload-box-text');
+  uploadText.innerHTML = `Đã chọn tệp: <strong>${randomFile.name}</strong> (${formatBytes(randomFile.size)})`;
+  
+  const progressWrap = document.getElementById('upload-progress-wrap');
+  const progressBar = document.getElementById('upload-progress-bar');
+  const percentText = document.getElementById('upload-percent');
+  const statusText = document.getElementById('upload-file-status');
+  
+  progressWrap.style.display = 'flex';
+  progressBar.style.width = '0%';
+  percentText.textContent = '0%';
+  statusText.textContent = 'Đang tải lên tệp...';
+  
+  let percentage = 0;
+  const interval = setInterval(() => {
+    percentage += 10;
+    progressBar.style.width = `${percentage}%`;
+    percentText.textContent = `${percentage}%`;
+    if (percentage >= 100) {
+      clearInterval(interval);
+      statusText.textContent = 'Tải lên hoàn tất! Sẵn sàng nạp.';
+      
+      // Save details for submission
+      simulatedUploadedFile = {
+        ten: randomFile.name,
+        dinhDang: randomFile.format,
+        dungLuong: randomFile.size
+      };
+      
+      const saveBtn = document.getElementById('btn-save-upload');
+      saveBtn.disabled = false;
+      saveBtn.style.opacity = '1';
+      saveBtn.style.cursor = 'pointer';
+    }
+  }, 100);
+}
+
+function saveUpload() {
+  if (!simulatedUploadedFile) return;
+  const provider = document.getElementById('u-provider').value;
+  const freq = document.getElementById('u-frequency').value;
+  const notes = document.getElementById('u-notes').value.trim();
+
+  if (!provider) {
+    showToast('Vui lòng chọn đơn vị cung cấp tệp', 'error');
+    return;
+  }
+
+  const newId = Math.max(...filesList.map(r => r.id)) + 1;
+  const newFile = {
+    id: newId,
+    ten: simulatedUploadedFile.ten,
+    dinhDang: simulatedUploadedFile.dinhDang,
+    dungLuong: simulatedUploadedFile.dungLuong,
+    phuongThucNap: "Upload thủ công",
+    duongDanNguon: `C:/Users/admin/AppData/Local/Temp/${simulatedUploadedFile.ten}`,
+    donViCungCap: provider,
+    nguoiNap: "Quản trị viên",
+    trangThai: "cho-xu-ly",
+    soDong: 0,
+    ngayCapNhat: new Date().toISOString().replace('T', ' ').slice(0, 19),
+    tanSuat: freq,
+    ghiChu: notes || "Tệp tải lên thủ công."
+  };
+
+  filesList.unshift(newFile); // Add at the beginning
+  closeDialog('upload-dialog');
+  render();
+  showToast(`Đã tải lên và tạo tệp tin "${newFile.ten}" thành công!`, 'success');
+  
+  // Simulate processing in the background after 3 seconds
+  setTimeout(() => {
+    const file = filesList.find(f => f.id === newId);
+    if (file && file.trangThai === 'cho-xu-ly') {
+      file.trangThai = 'dang-xu-ly';
+      render();
+      showToast(`Tệp tin "${file.ten}" bắt đầu được hệ thống tự động phân tích...`);
+      
+      setTimeout(() => {
+        const fileFinal = filesList.find(f => f.id === newId);
+        if (fileFinal) {
+          fileFinal.trangThai = 'da-xu-ly';
+          fileFinal.soDong = Math.floor(Math.random() * 85000) + 1200;
+          render();
+          showToast(`Phân tích tệp tin "${fileFinal.ten}" hoàn tất! Đã ánh xạ ${fileFinal.soDong.toLocaleString('vi-VN')} dòng dữ liệu.`, 'success');
+        }
+      }, 4000);
+    }
+  }, 3000);
+}
+
+function testAutoConnection() {
+  const protocol = document.getElementById('a-protocol').value;
+  const path = document.getElementById('a-path').value.trim();
+  
+  if (protocol !== 'Thư mục theo dõi') {
+    const host = document.getElementById('a-host').value.trim();
+    if (!host || !path) {
+      showToast('Vui lòng điền địa chỉ server và đường dẫn tệp', 'error');
+      return;
+    }
+  } else {
+    if (!path) {
+      showToast('Vui lòng nhập đường dẫn thư mục giám sát', 'error');
+      return;
+    }
+  }
+
+  const btn = document.getElementById('btn-test-auto');
+  btn.disabled = true;
+  btn.textContent = 'Đang test kết nối…';
+  
+  setTimeout(() => {
+    btn.disabled = false;
+    btn.innerHTML = '<i data-lucide="zap" style="width:14px;height:14px"></i> Test kết nối';
+    if (window.lucide) lucide.createIcons();
+    showToast('Kết nối nguồn tệp tự động thành công! Đường dẫn hợp lệ và có quyền truy cập.', 'success');
+  }, 1500);
+}
+
+function saveAutoConfig() {
+  const protocol = document.getElementById('a-protocol').value;
+  const name = document.getElementById('a-name').value.trim();
+  const path = document.getElementById('a-path').value.trim();
+  const provider = document.getElementById('a-provider').value;
+  const freq = document.getElementById('a-frequency').value;
+
+  if (!name || !path || !provider) {
+    showToast('Vui lòng điền đầy đủ các thông tin bắt buộc', 'error');
+    return;
+  }
+
+  // Deduce formatting from file path
+  let format = 'CSV';
+  if (path.toLowerCase().endsWith('.xlsx') || path.toLowerCase().endsWith('.xls')) format = 'Excel';
+  else if (path.toLowerCase().endsWith('.json')) format = 'JSON';
+  else if (path.toLowerCase().endsWith('.xml')) format = 'XML';
+  else if (path.toLowerCase().endsWith('.txt')) format = 'TXT';
+  else if (path.toLowerCase().endsWith('.pdf')) format = 'PDF';
+
+  const newId = Math.max(...filesList.map(r => r.id)) + 1;
+  const newFile = {
+    id: newId,
+    ten: name.includes('.') ? name : `${name}_output.${format.toLowerCase()}`,
+    dinhDang: format,
+    dungLuong: Math.floor(Math.random() * 20000000) + 500000,
+    phuongThucNap: protocol,
+    duongDanNguon: path,
+    donViCungCap: provider,
+    nguoiNap: "Hệ thống tự động",
+    trangThai: "cho-xu-ly",
+    soDong: 0,
+    ngayCapNhat: new Date().toISOString().replace('T', ' ').slice(0, 19),
+    tanSuat: freq,
+    ghiChu: `Luồng quét nạp tệp tự động định kỳ ${freq.toLowerCase()} từ ${protocol}.`
+  };
+
+  filesList.unshift(newFile);
+  closeDialog('auto-dialog');
+  render();
+  showToast(`Đã thiết lập cấu hình quét tệp tự động "${newFile.ten}" thành công!`, 'success');
+}
+
+function viewFilePreview(id) {
+  const file = filesList.find(f => f.id === id);
+  if (!file) return;
+
+  document.getElementById('p-filename').textContent = file.ten;
+  document.getElementById('p-format').textContent = file.dinhDang;
+  document.getElementById('p-size').textContent = formatBytes(file.dungLuong);
+  document.getElementById('p-rows').textContent = file.soDong > 0 ? file.soDong.toLocaleString('vi-VN') + ' dòng' : '—';
+  document.getElementById('p-date').textContent = file.ngayCapNhat;
+
+  const mockPreview = PREVIEW_DATA_MOCK[file.dinhDang] || PREVIEW_DATA_MOCK.TXT;
+
+  // Render headers
+  const thead = document.getElementById('preview-thead');
+  thead.innerHTML = mockPreview.headers.map(h => `<th>${h}</th>`).join('');
+
+  // Render rows
+  const tbody = document.getElementById('preview-tbody');
+  tbody.innerHTML = mockPreview.rows.map(row => {
+    return `<tr>${row.map(cell => `<td>${cell}</td>`).join('')}</tr>`;
+  }).join('');
+
+  document.getElementById('preview-dialog').classList.add('open');
+}
+
+function downloadFileFromPreview() {
+  const filename = document.getElementById('p-filename').textContent;
+  showToast(`Đang chuẩn bị tải xuống tệp gốc "${filename}"...`);
+  setTimeout(() => {
+    showToast(`Đã tải xuống thành công tệp gốc "${filename}"!`, 'success');
+  }, 1200);
+}
+
+function downloadFile(id) {
+  const file = filesList.find(f => f.id === id);
+  if (!file) return;
+  showToast(`Đang tải về tệp gốc "${file.ten}"...`);
+  setTimeout(() => {
+    showToast(`Tải xuống thành công tệp gốc "${file.ten}" (${formatBytes(file.dungLuong)})`, 'success');
+  }, 1000);
+}
+
+function reparseFile(event, id) {
+  if (event) event.stopPropagation();
+  const file = filesList.find(f => f.id === id);
+  if (!file) return;
+
+  showToast(`Đang xử lý lại và phân tích cú pháp tệp "${file.ten}"...`);
+  
+  // Visual spinner animation in the table row
+  const badge = document.getElementById(`status-badge-${id}`);
+  const btn = document.getElementById(`btn-reparse-${id}`);
+  if (btn) btn.classList.add('spin');
+  if (badge) {
+    badge.className = 'status-badge info';
+    badge.querySelector('.status-lbl').textContent = 'Đang xử lý';
+  }
+
+  setTimeout(() => {
+    if (btn) btn.classList.remove('spin');
+    file.trangThai = 'da-xu-ly';
+    if (file.soDong === 0) {
+      file.soDong = Math.floor(Math.random() * 60000) + 8500;
+    }
+    file.ngayCapNhat = new Date().toISOString().replace('T', ' ').slice(0, 19);
+    render();
+    showToast(`Xử lý thành công tệp "${file.ten}"! Đã ánh xạ ${file.soDong.toLocaleString('vi-VN')} dòng dữ liệu sạch vào kho tích hợp.`, 'success');
+  }, 2000);
+}
+
+function viewHistory(id) {
+  const file = filesList.find(f => f.id === id);
+  if (!file) return;
+
+  document.getElementById('h-filename').textContent = file.ten;
+
+  const versions = [
+    { ver: "v3 (Hiện tại)", time: file.ngayCapNhat, size: file.dungLuong, rows: file.soDong, status: file.trangThai, user: file.nguoiNap },
+    { ver: "v2", time: "2026-05-17 11:20:00", size: Math.floor(file.dungLuong * 0.95), rows: file.soDong > 0 ? Math.floor(file.soDong * 0.95) : 0, status: "da-xu-ly", user: "Nguyễn Văn A" },
+    { ver: "v1", time: "2026-05-10 09:40:00", size: Math.floor(file.dungLuong * 0.90), rows: file.soDong > 0 ? Math.floor(file.soDong * 0.90) : 0, status: "da-xu-ly", user: "Hệ thống tự động" }
+  ];
+
+  const tbody = document.getElementById('history-tbody');
+  tbody.innerHTML = versions.map((v, i) => {
+    let statusClass = 'warn';
+    let statusLabel = 'Chờ xử lý';
+    if (v.status === 'da-xu-ly') { statusClass = 'ok'; statusLabel = 'Đã xử lý'; }
+    else if (v.status === 'dang-xu-ly') { statusClass = 'info'; statusLabel = 'Đang xử lý'; }
+    else if (v.status === 'loi-dinh-dang') { statusClass = 'err'; statusLabel = 'Lỗi định dạng'; }
+
+    return `
+      <tr>
+        <td><span class="ver-badge">${v.ver}</span></td>
+        <td style="font-family: 'JetBrains Mono', monospace">${v.time}</td>
+        <td>${v.user}</td>
+        <td style="font-family: 'JetBrains Mono', monospace">${formatBytes(v.size)}</td>
+        <td style="font-family: 'JetBrains Mono', monospace; font-weight:600">${v.rows > 0 ? v.rows.toLocaleString('vi-VN') + ' dòng' : '—'}</td>
+        <td>
+          <span class="status-badge ${statusClass}" role="status">
+            <span class="pulse"></span>
+            <span>${statusLabel}</span>
+          </span>
+        </td>
+        <td class="right">
+          <button class="btn btn-outline" style="padding: 5px 10px; font-size:11px" onclick="downloadVersion('${file.ten}', '${v.ver}')">
+            Tải về
+          </button>
+          ${i > 0 ? `
+          <button class="btn btn-primary" style="padding: 5px 10px; font-size:11px" onclick="rollbackVersion('${file.ten}', '${v.ver}', ${id})">
+            Khôi phục
+          </button>` : ''}
+        </td>
+      </tr>
+    `;
+  }).join('');
+
+  document.getElementById('history-dialog').classList.add('open');
+}
+
+function downloadVersion(filename, ver) {
+  showToast(`Đang tải về tệp "${filename}" phiên bản ${ver}...`);
+  setTimeout(() => {
+    showToast(`Đã tải xuống thành công tệp "${filename}" phiên bản ${ver}!`, 'success');
+  }, 1000);
+}
+
+function rollbackVersion(filename, ver, id) {
+  if (confirm(`Bạn có chắc chắn muốn khôi phục tệp "${filename}" về phiên bản ${ver}? Dữ liệu hiện tại sẽ bị thay thế.`)) {
+    const file = filesList.find(f => f.id === id);
+    if (file) {
+      showToast(`Đang tiến hành rollback tệp "${filename}" về ${ver}...`);
+      setTimeout(() => {
+        file.ngayCapNhat = new Date().toISOString().replace('T', ' ').slice(0, 19);
+        if (ver === 'v2') {
+          file.dungLuong = Math.floor(file.dungLuong * 0.95);
+          file.soDong = Math.floor(file.soDong * 0.95);
+        } else {
+          file.dungLuong = Math.floor(file.dungLuong * 0.90);
+          file.soDong = Math.floor(file.soDong * 0.90);
+        }
+        file.trangThai = 'da-xu-ly';
+        closeDialog('history-dialog');
+        render();
+        showToast(`Đã khôi phục thành công tệp "${filename}" về phiên bản ${ver}!`, 'success');
+      }, 1500);
+    }
+  }
+}
+
+function deleteFile(id) {
+  const file = filesList.find(f => f.id === id);
+  if (!file) return;
+
+  if (confirm(`Bạn có chắc chắn muốn xóa tệp dữ liệu "${file.ten}" khỏi hệ thống? Luồng tích hợp liên quan có thể bị gián đoạn.`)) {
+    filesList = filesList.filter(f => f.id !== id);
+    render();
+    showToast(`Đã xóa tệp dữ liệu "${file.ten}" thành công.`, 'success');
+  }
+}
+
+function exportExcel() {
+  showToast('Đang xuất danh sách quản lý tệp dữ liệu ra Excel…');
+  setTimeout(() => {
+    showToast(`Đã xuất Excel thành công! Tải xuống tệp "quan_ly_tep_du_lieu_2026.xlsx" (${filesList.length} bản ghi).`, 'success');
+  }, 1200);
+}
+
+// Toast rendering
+function showToast(msg, type = '') {
+  const container = document.getElementById('toast-container');
+  if (!container) return;
+
+  const toast = document.createElement('div');
+  toast.className = `toast${type ? ' ' + type : ''}`;
+
+  let iconName = 'info';
+  if (type === 'success') iconName = 'check-circle';
+  if (type === 'error') iconName = 'alert-triangle';
+
+  toast.innerHTML = `
+    <i data-lucide="${iconName}" style="width:16px;height:16px" aria-hidden="true"></i>
+    <span>${msg}</span>
+  `;
+
+  container.appendChild(toast);
+  lucide.createIcons({ attrs: { class: 'flex-shrink-0' } });
+
+  setTimeout(() => {
+    toast.style.opacity = '0';
+    toast.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+    toast.style.transform = 'translateY(-10px)';
+    setTimeout(() => toast.remove(), 300);
+  }, 3500);
+}
+
+// ─── Sidebar group toggle ────────────────────────────────────────────────
+function toggleNavGroup(btn) {
+  const childId = btn.getAttribute('aria-controls');
+  const children = childId ? document.getElementById(childId) : btn.nextElementSibling;
+  if (!children) return;
+  const isOpen = children.classList.contains('open');
+  children.classList.toggle('open');
+  btn.classList.toggle('open', !isOpen);
+  btn.setAttribute('aria-expanded', String(!isOpen));
+}
+
+// ─── Keyboard shortcuts ──────────────────────────────────────────────────
+document.addEventListener('keydown', e => {
+  if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+    e.preventDefault();
+    document.getElementById('search-input').focus();
+  }
+  if (e.key === '/' && document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') {
+    e.preventDefault();
+    document.getElementById('search-input').focus();
+  }
+  if (e.key === 'n' && document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') {
+    openUploadDialog();
+  }
+  if (e.key === 'Escape') {
+    closeDialog('upload-dialog');
+    closeDialog('auto-dialog');
+    closeDialog('preview-dialog');
+    closeDialog('history-dialog');
+    const si = document.getElementById('search-input');
+    if (document.activeElement === si && si.value) {
+      si.value = '';
+      onSearchChange('');
+    }
+  }
+});
+
+// ─── Init ────────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  render();
+  if (window.lucide) lucide.createIcons();
+});
+</script>
+
+</body>
+</html>
