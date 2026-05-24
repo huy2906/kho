@@ -123,8 +123,7 @@ Padding: 0 28px
 | **Phải** | User chip (glassmorphism, avatar gradient cam-đỏ) |
 
 **Brand title spec:**
-- `HỆ THỐNG `**`QUẢN TRỊ`**` TÍCH HỢP DỮ LIỆU`
-- "QUẢN TRỊ" dùng màu vàng accent `#ffd84a` + `text-shadow: 0 0 18px rgba(255,216,74,0.35)`
+- `HỆ THỐNG QUẢN TRỊ TÍCH HỢP DỮ LIỆU` (Chữ "QUẢN TRỊ" hiển thị màu trắng đồng nhất, không bôi vàng/accent theo yêu cầu)
 - Font: 19px / 800 / uppercase / tracking 0.04em
 
 **User chip:**

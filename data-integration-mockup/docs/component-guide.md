@@ -43,7 +43,7 @@ Cấu trúc: `[Emblem] [Brand title + subtitle]` → `[spacer]` → `[User chip]
 Key points:
 - Background: `var(--header-grad)` — `linear-gradient(95deg, #0a1442 0%, #14215c 35%, #1e2d80 70%, #2a4cdf 100%)`
 - Emblem: circle 56×56, radial gradient đỏ, ngôi sao SVG vàng `#f5c324`
-- Brand accent "QUẢN TRỊ": color `#ffd84a`, text-shadow nhẹ
+- Brand title: `HỆ THỐNG QUẢN TRỊ TÍCH HỢP DỮ LIỆU` (chữ màu trắng đồng nhất, không bôi vàng/accent)
 - User chip: glassmorphism `rgba(255,255,255,0.08)`, border `rgba(255,255,255,0.14)`
 
 ---
